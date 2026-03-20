@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { useUserStore } from '@/stores/user'
-import TextInput from '../components/inputs/TextInput.vue'
-import { useRouter } from 'vue-router'
+import { useUserStore } from "@/stores/user";
+import TextInput from "../components/inputs/TextInput.vue";
+import { useRouter } from "vue-router";
 
-const userStore = useUserStore()
-const router = useRouter()
+const userStore = useUserStore();
+const router = useRouter();
 
 function login() {
-  userStore.login({ name: 'Lily', admin: true })
-  router.push(userStore.redirectPath)
+  userStore.login({ name: "Lily", admin: true });
+  let path = userStore.redirectPath;
+  if (path === '') {
+    path = userStore.isAdmin ? "/admin" : "/user";
+  }
+  router.push(path);
 }
 </script>
 
@@ -23,9 +27,7 @@ function login() {
       <button class="btn" type="button" @click="login()">登入</button>
 
       <div class="linkBox">
-        <RouterLink to="/">
-          回首頁
-        </RouterLink>
+        <RouterLink to="/"> 回首頁 </RouterLink>
       </div>
     </div>
   </div>

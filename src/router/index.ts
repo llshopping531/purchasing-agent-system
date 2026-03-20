@@ -34,6 +34,25 @@ const router = createRouter({
       name: 'admin',
       meta: { requiresAuth: true, requiresAdmin: true },
       component: () => import('../views/AdminView.vue'),
+      children: [
+        {
+          path: '/offline',
+          name: 'offline',
+          component: () => import('../views/admin/offlineView.vue'),
+          children: [
+            {
+              path: ':id',
+              name: 'EventView',
+              component: () => import('../views/admin/offline/EventView.vue'),
+            },
+          ],
+        },
+        {
+          path: '/online',
+          name: 'online',
+          component: () => import('../views/admin/onlineView.vue'),
+        },
+      ],
     },
   ],
 })

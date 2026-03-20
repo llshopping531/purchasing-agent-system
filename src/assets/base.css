@@ -23,7 +23,7 @@
 
 /* semantic color variables for this project */
 :root {
-  --color-background: var(--vt-c-white);
+  --color-background: #e9f1ef;
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
 
@@ -71,9 +71,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 1rem;
-}
-#app {
-  background: #e9f1ef;
 }
 a{
   cursor: pointer;
