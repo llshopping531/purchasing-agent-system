@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import SelectComponent from "@/components/inputs/selectComponent.vue";
-import { Option } from "../../interfaces/common";
+import SelectComponent from "@/components/inputs/SelectComponent.vue";
+import type { Option } from "../../interfaces/common";
 
 const eventList: Option[] = [
   { value: "0", name: "12月" },

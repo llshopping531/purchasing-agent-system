@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { Option } from "../../interfaces/common";
+import type { Option } from "../../interfaces/common";
 const pop = defineProps<{
   label: string;
   defaultValue: Option | null;
