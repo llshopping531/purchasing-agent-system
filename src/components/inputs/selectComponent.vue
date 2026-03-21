@@ -76,9 +76,8 @@ function fittler() {
     }
   }
   .optionList {
-    border: 1px solid #8cbfa5;
+    border: 1px solid #353636;
     display: inline-block;
-
     background: #fff;
     position: absolute;
     bottom: 0px;
