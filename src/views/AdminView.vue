@@ -1,16 +1,22 @@
 <script setup lang="ts">
 import HeaderComponent from "@/components/HeaderComponent.vue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const buttonList = [{ name: "前往使用者前台系統", link: "/user" }];
 enum Channel {
   online = "online",
   offline = "offline",
 }
-const currentChannelTab = ref(Channel.offline);
+let currentChannelTab = ref(Channel.offline).value;
+
+onMounted(() => {
+  router.push(`/admin/${currentChannelTab}`);
+});
 
 function clickChannel(channelName: Channel) {
-  currentChannelTab.value = channelName;
+  currentChannelTab = channelName;
 }
 </script>
 
@@ -55,7 +61,7 @@ function clickChannel(channelName: Channel) {
     }
   }
 }
-.channelContent{
+.channelContent {
   padding: 1rem;
 }
 </style>

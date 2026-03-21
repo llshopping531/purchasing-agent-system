@@ -36,7 +36,7 @@ const router = createRouter({
       component: () => import('../views/AdminView.vue'),
       children: [
         {
-          path: '/offline',
+          path: 'offline',
           name: 'offline',
           component: () => import('../views/admin/offlineView.vue'),
           children: [
@@ -48,7 +48,7 @@ const router = createRouter({
           ],
         },
         {
-          path: '/online',
+          path: 'online',
           name: 'online',
           component: () => import('../views/admin/onlineView.vue'),
         },
