@@ -45,7 +45,6 @@ function logout() {
   </header>
 </template>
 <style>
-@media (min-width: 1024px) {
   header {
     display: flex;
     align-items: center;
@@ -63,5 +62,4 @@ function logout() {
       padding: 0.25rem 0.75rem;
     }
   }
-}
 </style>

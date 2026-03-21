@@ -37,7 +37,6 @@ function login() {
 </template>
 
 <style>
-@media (min-width: 1024px) {
   .btn {
     border: none;
     background: #00bd7e;
@@ -80,5 +79,4 @@ function login() {
       }
     }
   }
-}
 </style>

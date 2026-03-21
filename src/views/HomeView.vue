@@ -21,7 +21,6 @@ import AppGreetings from '../components/AppGreetings.vue'
 </template>
 
 <style>
-@media (min-width: 1024px) {
    .home{
     min-height: 100vh;
     display: flex;
@@ -41,6 +40,5 @@ import AppGreetings from '../components/AppGreetings.vue'
       padding: 0.25rem 0.75rem;
     }
   }
-}
 </style>
 

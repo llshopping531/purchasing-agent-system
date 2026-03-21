@@ -13,7 +13,6 @@ defineProps<{
 </template>
 
 <style scoped>
-@media (min-width: 1024px) {
   .label {
     margin-top: 1rem;
     display: block;
@@ -33,5 +32,4 @@ defineProps<{
       }
     }
   }
-}
 </style>
