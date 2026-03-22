@@ -102,6 +102,8 @@ function fittler() {
     left: 0;
     right: 0;
     transform: translateY(calc(100% - 1px));
+    max-height: 300px;
+    overflow-y: scroll;
     .optionItem {
       padding: 0.5rem;
       min-width: 100px;
