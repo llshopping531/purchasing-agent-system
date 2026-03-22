@@ -6,7 +6,6 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 
 onMounted(() => {
-  console.log(PATH.offlineOrder)
   router.push(PATH.offlineOrder);
 });
 </script>

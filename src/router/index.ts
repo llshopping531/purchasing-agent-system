@@ -69,15 +69,13 @@ const router = createRouter({
 // 全域路由守衛
 router.beforeEach((to) => {
   const userStore = useUserStore()
-
-  // 可以直接 return 路徑或 undefined
+  // 未登入進入登入頁
   if (to.meta.requiresAuth && !userStore.isLogin) {
     userStore.setRedirect(to.fullPath)
     return '/login'
   }
+  // 無管理者權限
   if (to.meta.requiresAdmin && !userStore.isAdmin) return '/'
-
-  // 如果沒有問題，就 return undefined 或不寫
 })
 
 export default router
