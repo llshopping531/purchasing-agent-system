@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import SelectComponent from "@/components/inputs/SelectComponent.vue";
 import type { Option } from "@/interfaces/common";
 import TableComponent from "@/components/TableComponent.vue";
+import { eventApi } from "@/services/event-api";
 
 const route = useRoute();
 let currentEventInfo: { id: string; name: string };
@@ -14,10 +15,7 @@ interface TableData {
   col4: string;
 }
 
-const eventList: Option[] = [
-  { value: "0", name: "12月" },
-  { value: "1", name: "3月" },
-];
+let eventList: Option[] = [];
 
 const shopList: Option[] = [];
 const headerRow = [
@@ -40,7 +38,7 @@ function editData(data: TableData) {
 }
 
 onMounted(() => {
-  getEventInfo();
+  getEventList();
 });
 
 watch(
@@ -49,7 +47,13 @@ watch(
     getEventInfo();
   }
 );
-
+async function getEventList() {
+  console.log('getEventList')
+  eventList = (await eventApi.getEventsAll()).map((res) => ({
+    name: res.name,
+    value: res.value,
+  }));
+}
 function getEventInfo() {
   const info = { id: (route.params as { id: string }).id, name: "3月" };
   currentEventInfo = info;
@@ -86,7 +90,7 @@ function getEventInfo() {
 </template>
 
 <style>
-.order{
+.order {
   margin-top: 1rem;
 }
 .shopList {

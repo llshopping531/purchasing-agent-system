@@ -15,4 +15,15 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  server: {
+    port: 5173,
+    proxy: {
+      // 當請求 /api 開頭的路徑時，轉發到後端
+      '/api': {
+        target: 'http://203.161.58.130:3000', // 後端 API
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''), // 可去掉 /api 前綴
+      },
+    },
+  },
 })
