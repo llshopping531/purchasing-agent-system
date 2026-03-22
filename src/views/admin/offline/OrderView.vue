@@ -5,6 +5,7 @@ import type { Option } from '@/interfaces/common'
 import TableComponent from '@/components/TableComponent.vue'
 import { eventApi } from '@/services/event-api'
 import { channelApi } from '@/services/channel-api'
+import { orderApi, type OrderAllReq, type OrderAllContent } from '@/services/order-api'
 
 interface TableData {
   col1: string
@@ -12,7 +13,8 @@ interface TableData {
   col3: string
   col4: string
 }
-
+const currentEventId = ref<string>('')
+const currentShopId = ref<string>('')
 const eventList = ref<Option[]>([])
 const shopList = ref<Option[]>([])
 const headerRow = [
@@ -21,11 +23,7 @@ const headerRow = [
   { name: '欄位3', value: 'col3', sort: 2 },
   { name: '欄位4', value: 'col4', sort: 1 },
 ]
-const tableData = [
-  { col1: 'col1Value', col2: 'col2Value', col3: 'col3Value', col4: 'col4Value' },
-  { col1: 'col1Value2', col2: 'col2Value2', col3: 'col3Value2', col4: 'col4Value2' },
-  { col1: 'col1Value3', col2: 'col2Value3', col3: 'col3Value3', col4: 'col4Value3' },
-]
+const tableData = ref<OrderAllContent[]>([])
 
 function deleteData(data: TableData) {
   console.log(`delete${JSON.stringify(data)}`)
@@ -54,11 +52,22 @@ async function getChannelList(eventId: string) {
       name: res.name,
       value: res.id.toString(),
     }))
-    console.log(shopList.value)
   }
 }
+async function getOrderList(data: OrderAllReq) {
+  tableData.value = await (await orderApi.getOrdersAll(data)).content
+}
 function selectEvent(data: Option) {
+  currentEventId.value = data.value
   getChannelList(data.value)
+}
+function selectShop(data: Option) {
+  currentShopId.value = data.value
+  const req = {
+    eventId: Number(currentEventId.value),
+    channelId: Number(currentShopId.value)
+  }
+  getOrderList(req)
 }
 </script>
 
@@ -77,6 +86,7 @@ function selectEvent(data: Option) {
         label="通路"
         :defaultValue="shopList[0]"
         :optionList="shopList"
+        @selectOption="selectShop"
       ></SelectComponent>
     </div>
     <TableComponent
