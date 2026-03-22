@@ -1,26 +1,30 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
-import { computed } from "vue";
-
+import { computed } from 'vue'
+export interface HeaderRow {
+  name: string
+  value: string
+  sort: number
+}
 const pop = defineProps<{
-  tableData: T[];
-  headerRow: { name: string; value: string; sort: number }[];
+  tableData: T[]
+  headerRow: HeaderRow[]
   operate: {
-    isDelete: boolean;
-    isEdit: boolean;
-  };
-}>();
+    isDelete: boolean
+    isEdit: boolean
+  }
+}>()
 const emit = defineEmits<{
-  (e: "edit", data: T): void;
-  (e: "delete", data: T): void;
-}>();
-const sortedHeaderRow = computed(() => [...pop.headerRow].sort((a,b) => a.sort - b.sort));
+  (e: 'edit', data: T): void
+  (e: 'delete', data: T): void
+}>()
+const sortedHeaderRow = computed(() => [...pop.headerRow].sort((a, b) => a.sort - b.sort))
 
 function editData(data: T) {
-  emit("edit", data);
+  emit('edit', data)
 }
 
 function deleteData(data: T) {
-  emit("delete", data);
+  emit('delete', data)
 }
 </script>
 
@@ -38,12 +42,8 @@ function deleteData(data: T) {
           {{ dataRow[header.value] }}
         </div>
         <div class="item-col operate">
-          <div class="btn edit" v-if="operate.isEdit" @click="editData(dataRow)">
-            編輯
-          </div>
-          <div class="btn delete" v-if="operate.isDelete" @click="deleteData(dataRow)">
-            刪除
-          </div>
+          <div class="btn edit" v-if="operate.isEdit" @click="editData(dataRow)">編輯</div>
+          <div class="btn delete" v-if="operate.isDelete" @click="deleteData(dataRow)">刪除</div>
         </div>
       </div>
     </div>
@@ -76,6 +76,7 @@ function deleteData(data: T) {
   .operate {
     display: flex;
     gap: 0.25rem;
+    align-items: center;
     .btn {
       margin: 0;
       &.delete {

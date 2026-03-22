@@ -49,7 +49,10 @@ export interface OrderAllContent {
 
 
 export const orderApi = {
-  getOrdersAll: async (data: OrderAllReq): Promise<OrderAllRes> => {
+  getOrders: async (data: OrderAllReq): Promise<OrderAllRes> => {
+    return await getApi('/orders', data)
+  },
+  patchOrders: async (data: OrderAllReq): Promise<OrderAllRes> => {
     return await getApi('/orders', data)
   },
 }

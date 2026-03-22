@@ -2,33 +2,23 @@
 import { onMounted, ref } from 'vue'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import type { Option } from '@/interfaces/common'
-import TableComponent from '@/components/TableComponent.vue'
+import TableComponent, { type HeaderRow } from '@/components/TableComponent.vue'
 import { eventApi } from '@/services/event-api'
 import { channelApi } from '@/services/channel-api'
-import { orderApi, type OrderAllReq, type OrderAllContent } from '@/services/order-api'
+import { orderApi, type OrderAllContent } from '@/services/order-api'
+import { fieldDefsApi } from '@/services/sys/field-defs-api'
 
-interface TableData {
-  col1: string
-  col2: string
-  col3: string
-  col4: string
-}
 const currentEventId = ref<string>('')
 const currentShopId = ref<string>('')
 const eventList = ref<Option[]>([])
 const shopList = ref<Option[]>([])
-const headerRow = [
-  { name: '欄位一', value: 'col1', sort: 0 },
-  { name: '欄位2', value: 'col2', sort: 3 },
-  { name: '欄位3', value: 'col3', sort: 2 },
-  { name: '欄位4', value: 'col4', sort: 1 },
-]
+const headerRow = ref<HeaderRow[]>([])
 const tableData = ref<OrderAllContent[]>([])
 
-function deleteData(data: TableData) {
+function deleteData(data: OrderAllContent) {
   console.log(`delete${JSON.stringify(data)}`)
 }
-function editData(data: TableData) {
+function editData(data: OrderAllContent) {
   console.log(`edit${JSON.stringify(data)}`)
 }
 
@@ -45,8 +35,8 @@ async function getEventList() {
     }))
   }
 }
-async function getChannelList(eventId: string) {
-  const channelAllRes = await channelApi.getChannelsAll(Number(eventId))
+async function getChannelList() {
+  const channelAllRes = await channelApi.getChannelsAll(Number(currentEventId.value))
   if (channelAllRes.length !== 0) {
     shopList.value = channelAllRes.map((res) => ({
       name: res.name,
@@ -54,20 +44,29 @@ async function getChannelList(eventId: string) {
     }))
   }
 }
-async function getOrderList(data: OrderAllReq) {
-  tableData.value = await (await orderApi.getOrdersAll(data)).content
+async function getFieldDefsApi() {
+  const req = {
+    entityType: 'ORDER',
+  }
+  headerRow.value = await (
+    await fieldDefsApi.getfieldDefs(req)
+  ).content.map((item) => ({ name: item.fieldLabel, value: item.fieldKey, sort: item.sort }))
+}
+async function getOrderList() {
+  const req = {
+    eventId: Number(currentEventId.value),
+    channelId: Number(currentShopId.value),
+  }
+  tableData.value = await (await orderApi.getOrders(req)).content
 }
 function selectEvent(data: Option) {
   currentEventId.value = data.value
-  getChannelList(data.value)
+  getChannelList()
 }
 function selectShop(data: Option) {
   currentShopId.value = data.value
-  const req = {
-    eventId: Number(currentEventId.value),
-    channelId: Number(currentShopId.value)
-  }
-  getOrderList(req)
+  getFieldDefsApi()
+  getOrderList()
 }
 </script>
 
@@ -78,13 +77,13 @@ function selectShop(data: Option) {
     <div class="shopList">
       <SelectComponent
         label="場次"
-        :defaultValue="eventList[0]"
+        :defaultValue="{ name: '', value: '' }"
         :optionList="eventList"
         @selectOption="selectEvent"
       ></SelectComponent>
       <SelectComponent
         label="通路"
-        :defaultValue="shopList[0]"
+        :defaultValue="{ name: '', value: '' }"
         :optionList="shopList"
         @selectOption="selectShop"
       ></SelectComponent>
