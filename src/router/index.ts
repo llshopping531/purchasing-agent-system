@@ -41,6 +41,15 @@ const router = createRouter({
           component: () => import('../views/admin/offlineView.vue'),
           children: [
             {
+              path: '',
+              redirect: '/admin/offline/order',
+            },
+            {
+              path: 'order',
+              name: 'OrderView',
+              component: () => import('../views/admin/offline/OrderView.vue'),
+            },
+            {
               path: ':id',
               name: 'EventView',
               component: () => import('../views/admin/offline/EventView.vue'),
