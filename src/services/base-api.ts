@@ -1,7 +1,11 @@
 import { useUserStore } from '@/stores/user'
 import type { AxiosInstance, AxiosResponse } from 'axios'
 import axios from 'axios'
-
+interface BaseApiRes<T> {
+  code: number
+  message: string
+  data: T
+}
 // 建立 axios instance
 const api: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -9,8 +13,8 @@ const api: AxiosInstance = axios.create({
 })
 
 export const getApi = async <T>(url: string): Promise<T> => {
-  const res = await api.get<T>(url)
-  return res.data
+  const res = await api.get<BaseApiRes<T>>(url)
+  return res.data.data
 }
 
 // 請求攔截器 (加 token)

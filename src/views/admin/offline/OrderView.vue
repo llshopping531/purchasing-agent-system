@@ -1,63 +1,52 @@
 <script setup lang="ts">
-import { onMounted, watch } from "vue";
-import { useRoute } from "vue-router";
-import SelectComponent from "@/components/inputs/SelectComponent.vue";
-import type { Option } from "@/interfaces/common";
-import TableComponent from "@/components/TableComponent.vue";
-import { eventApi } from "@/services/event-api";
+import { onMounted, ref,  } from 'vue'
+import SelectComponent from '@/components/inputs/SelectComponent.vue'
+import type { Option } from '@/interfaces/common'
+import TableComponent from '@/components/TableComponent.vue'
+import { eventApi } from '@/services/event-api'
 
-const route = useRoute();
-let currentEventInfo: { id: string; name: string };
+
 interface TableData {
-  col1: string;
-  col2: string;
-  col3: string;
-  col4: string;
+  col1: string
+  col2: string
+  col3: string
+  col4: string
 }
 
-let eventList: Option[] = [];
-
-const shopList: Option[] = [];
+const eventList = ref<Option[]>([])
+const shopList= ref<Option[]>([])
 const headerRow = [
-  { name: "欄位一", value: "col1", sort: 0 },
-  { name: "欄位2", value: "col2", sort: 3 },
-  { name: "欄位3", value: "col3", sort: 2 },
-  { name: "欄位4", value: "col4", sort: 1 },
-];
+  { name: '欄位一', value: 'col1', sort: 0 },
+  { name: '欄位2', value: 'col2', sort: 3 },
+  { name: '欄位3', value: 'col3', sort: 2 },
+  { name: '欄位4', value: 'col4', sort: 1 },
+]
 const tableData = [
-  { col1: "col1Value", col2: "col2Value", col3: "col3Value", col4: "col4Value" },
-  { col1: "col1Value2", col2: "col2Value2", col3: "col3Value2", col4: "col4Value2" },
-  { col1: "col1Value3", col2: "col2Value3", col3: "col3Value3", col4: "col4Value3" },
-];
+  { col1: 'col1Value', col2: 'col2Value', col3: 'col3Value', col4: 'col4Value' },
+  { col1: 'col1Value2', col2: 'col2Value2', col3: 'col3Value2', col4: 'col4Value2' },
+  { col1: 'col1Value3', col2: 'col2Value3', col3: 'col3Value3', col4: 'col4Value3' },
+]
 
 function deleteData(data: TableData) {
-  console.log(`delete${JSON.stringify(data)}`);
+  console.log(`delete${JSON.stringify(data)}`)
 }
 function editData(data: TableData) {
-  console.log(`edit${JSON.stringify(data)}`);
+  console.log(`edit${JSON.stringify(data)}`)
 }
 
 onMounted(() => {
-  getEventList();
-});
+  getEventList()
+})
 
-watch(
-  () => route.path,
-  () => {
-    getEventInfo();
-  }
-);
 async function getEventList() {
-  console.log('getEventList')
-  eventList = (await eventApi.getEventsAll()).map((res) => ({
-    name: res.name,
-    value: res.value,
-  }));
-}
-function getEventInfo() {
-  const info = { id: (route.params as { id: string }).id, name: "3月" };
-  currentEventInfo = info;
-  console.log(currentEventInfo);
+  const eventsAllRes = await eventApi.getEventsAll()
+  if (eventsAllRes.length !== 0) {
+    eventList.value = eventsAllRes.map((res) => ({
+      name: res.name,
+      value: res.id.toString(),
+    }))
+    console.log(eventList.value)
+  }
 }
 </script>
 
@@ -65,16 +54,15 @@ function getEventInfo() {
   <div class="order">
     <h3>訂單管理</h3>
     <p>請選擇場販場次、通路</p>
-
     <div class="shopList">
       <SelectComponent
         label="場次"
-        :defaultValue="{ value: '0', name: '12月' }"
+        :defaultValue="eventList[0]"
         :optionList="eventList"
       ></SelectComponent>
       <SelectComponent
         label="通路"
-        :defaultValue="null"
+        :defaultValue="shopList[0]"
         :optionList="shopList"
       ></SelectComponent>
     </div>

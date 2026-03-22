@@ -1,14 +1,28 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import type { Option } from "../../interfaces/common";
 const pop = defineProps<{
   label: string;
-  defaultValue: Option | null;
+  defaultValue: Option | undefined;
   optionList: Option[];
 }>();
 const currentOptionList = ref([...pop.optionList]);
 const isOpenOption = ref(false);
 const inputValue = ref(pop.defaultValue?.name);
+
+watch(
+  () => pop.optionList,
+  (newList) => {
+    currentOptionList.value = [...newList];
+  }
+);
+
+watch(
+  () => pop.defaultValue,
+  (newDefault) => {
+    inputValue.value = newDefault?.name ?? "";
+  }
+);
 
 function openOptinoList() {
   isOpenOption.value = true;
