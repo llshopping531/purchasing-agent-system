@@ -1,6 +1,6 @@
-import { getApi } from './base-api'
+import { getApi, postApi } from './base-api'
 
-export interface Event {
+export interface EventData {
   id: 1
   name: string
   startDate: string
@@ -16,8 +16,19 @@ export interface ExtraData {
   additionalProp3: string
 }
 
+export interface PostEventsReq {
+  name: string
+  startDate?: Date
+  endDate?: Date
+  isHidden?: boolean
+  extraData?: ExtraData
+}
+
 export const eventApi = {
-  getEventsAll: async (): Promise<Event[]> => {
+  getEventsAll: async (): Promise<EventData[]> => {
     return await getApi('/events/all')
+  },
+  postEvents: async (req:PostEventsReq): Promise<EventData[]> => {
+    return await postApi('/events', req)
   },
 }

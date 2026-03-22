@@ -4,6 +4,7 @@ export const PATH = {
   admin:'/admin',
 
   offline: '/admin/offline',
+  offlineEvent: '/admin/offline/event',
   offlineOrder: '/admin/offline/order',
 
   online: '/admin/online',

@@ -4,6 +4,7 @@ import { onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+const functionList = [{ name: "訂單管理", path: PATH.offlineOrder },{ name: "活動管理", path: PATH.offlineEvent }];
 
 onMounted(() => {
   router.push(PATH.offlineOrder);
@@ -13,8 +14,13 @@ onMounted(() => {
   <div class="offline">
     <!-- <h3 class="title">快速功能</h3> -->
     <div class="functionList">
-      <router-link :to="PATH.offlineOrder" class="functionItem">訂單管理</router-link>
-      <router-link :to="PATH.offlineOrder" class="functionItem">訂單管理</router-link>
+      <router-link
+        :to="item.path"
+        class="functionItem"
+        v-for="item in functionList"
+        :key="item.name"
+        >{{ item.name }}</router-link
+      >
     </div>
     <router-view></router-view>
   </div>

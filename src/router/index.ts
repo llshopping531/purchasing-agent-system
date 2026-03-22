@@ -50,7 +50,7 @@ const router = createRouter({
               component: () => import('../views/admin/offline/OrderView.vue'),
             },
             {
-              path: ':id',
+              path: 'event',
               name: 'EventView',
               component: () => import('../views/admin/offline/EventView.vue'),
             },
