@@ -4,6 +4,7 @@ export interface HeaderRow {
   name: string
   value: string
   sort: number
+  width?: string
 }
 const pop = defineProps<{
   tableData: T[]
@@ -31,14 +32,26 @@ function deleteData(data: T) {
 <template>
   <div class="table" :style="{ '--row-count': pop.headerRow.length + 1 }">
     <div class="header">
-      <div class="header-item" v-for="header in sortedHeaderRow" :key="header.sort">
+      <div
+        class="header-item"
+        :style="{ width: header.width }"
+        v-for="header in sortedHeaderRow"
+        :key="header.sort"
+        :class="header.value"
+      >
         {{ header.name }}
       </div>
-      <div class="header-item">操作</div>
+      <div class="header-item operate">操作</div>
     </div>
     <div class="body">
       <div class="body-item" v-for="(dataRow, index) in pop.tableData" :key="index">
-        <div class="item-col" v-for="header in sortedHeaderRow" :key="header.value">
+        <div
+          class="item-col"
+          v-for="header in sortedHeaderRow"
+          :key="header.value"
+          :style="{ width: header.width }"
+          :class="header.value"
+        >
           {{ dataRow[header.value] }}
         </div>
         <div class="item-col operate">
@@ -65,6 +78,10 @@ function deleteData(data: T) {
     background-color: #8cbfa4;
     padding: 0.5rem;
     color: #fff;
+    text-align: center;
+    &.operate {
+      width: 120px;
+    }
   }
   .item-col {
     background-color: #fff;
@@ -73,16 +90,32 @@ function deleteData(data: T) {
   .body-item {
     margin-top: 0.25rem;
   }
-  .operate {
+  .item-col.operate {
     display: flex;
     gap: 0.25rem;
     align-items: center;
+    width: 120px;
     .btn {
-      margin: 0;
+      padding: 0 0.5rem;
       &.delete {
         background-color: #ef6e6e;
       }
     }
+  }
+
+  .item-col.orderStatusName,
+  .header-item.orderStatusName {
+
+    text-align: center;
+  }
+  .item-col.orderStatusName,
+  .header-item.orderStatusName {
+    text-align: center;
+  }
+  .item-col.productName,
+  .header-item.productName {
+    width: 300px;
+    font-size: 14px;
   }
 }
 </style>
