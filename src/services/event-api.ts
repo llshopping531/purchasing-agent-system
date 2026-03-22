@@ -1,5 +1,4 @@
-import { getApi } from "./base-api"
-
+import { getApi } from './base-api'
 
 export interface Event {
   id: 1
@@ -7,12 +6,14 @@ export interface Event {
   startDate: string
   endDate: string
   isHidden: boolean
-  extraData: {
-    additionalProp1: string
-    additionalProp2: string
-    additionalProp3: string
-  }
+  extraData: ExtraData
   extraDataJson: string
+}
+
+export interface ExtraData {
+  additionalProp1: string
+  additionalProp2: string
+  additionalProp3: string
 }
 
 export const eventApi = {

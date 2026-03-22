@@ -6,6 +6,10 @@ const pop = defineProps<{
   defaultValue: Option | undefined;
   optionList: Option[];
 }>();
+const emit = defineEmits<{
+  (e: "selectOption", data: Option): void;
+}>();
+
 const currentOptionList = ref([...pop.optionList]);
 const isOpenOption = ref(false);
 const inputValue = ref(pop.defaultValue?.name);
@@ -34,6 +38,7 @@ function selectOption(selectedOption: Option) {
   isOpenOption.value = false;
   inputValue.value = selectedOption.name;
   currentOptionList.value = pop.optionList;
+  emit("selectOption", selectedOption);
 }
 function fittler() {
   currentOptionList.value = pop.optionList.filter((option) =>

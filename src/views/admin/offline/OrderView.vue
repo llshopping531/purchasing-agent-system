@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref,  } from 'vue'
+import { onMounted, ref } from 'vue'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import type { Option } from '@/interfaces/common'
 import TableComponent from '@/components/TableComponent.vue'
 import { eventApi } from '@/services/event-api'
-
+import { channelApi } from '@/services/channel-api'
 
 interface TableData {
   col1: string
@@ -14,7 +14,7 @@ interface TableData {
 }
 
 const eventList = ref<Option[]>([])
-const shopList= ref<Option[]>([])
+const shopList = ref<Option[]>([])
 const headerRow = [
   { name: '欄位一', value: 'col1', sort: 0 },
   { name: '欄位2', value: 'col2', sort: 3 },
@@ -45,8 +45,20 @@ async function getEventList() {
       name: res.name,
       value: res.id.toString(),
     }))
-    console.log(eventList.value)
   }
+}
+async function getChannelList(eventId: string) {
+  const channelAllRes = await channelApi.getChannelsAll(Number(eventId))
+  if (channelAllRes.length !== 0) {
+    shopList.value = channelAllRes.map((res) => ({
+      name: res.name,
+      value: res.id.toString(),
+    }))
+    console.log(shopList.value)
+  }
+}
+function selectEvent(data: Option) {
+  getChannelList(data.value)
 }
 </script>
 
@@ -59,6 +71,7 @@ async function getEventList() {
         label="場次"
         :defaultValue="eventList[0]"
         :optionList="eventList"
+        @selectOption="selectEvent"
       ></SelectComponent>
       <SelectComponent
         label="通路"

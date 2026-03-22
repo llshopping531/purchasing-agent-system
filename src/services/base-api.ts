@@ -12,8 +12,8 @@ const api: AxiosInstance = axios.create({
   timeout: 10000,
 })
 
-export const getApi = async <T>(url: string): Promise<T> => {
-  const res = await api.get<BaseApiRes<T>>(url)
+export const getApi = async <resT, reqT>(url: string, req?: reqT): Promise<resT> => {
+  const res = await api.get<BaseApiRes<resT>>(url, { params: req })
   return res.data.data
 }
 
