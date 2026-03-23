@@ -1,4 +1,4 @@
-<script setup lang="ts" generic="T extends Record<string, any>">
+<script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import TableComponent, { type HeaderRow } from './TableComponent.vue'
 import { fieldDefsApi } from '@/services/sys/field-defs-api'
@@ -20,28 +20,12 @@ const headerRow = ref<HeaderRow[]>([
   // { name: '後台備註', value: 'adminNote', sort: 0 },
 ])
 const tableData = ref<OrderAllContent[]>([])
-const tableEventId = ref<string>('')
-const tableShopId = ref<string>('')
 
 onMounted(() => {
   getFieldDefsApi()
 })
 
-watch(
-  () => pop.currentEventId,
-  (newId) => {
-    tableEventId.value = newId
-    getOrderList()
-  },
-)
-
-watch(
-  () => pop.currentShopId,
-  (newId) => {
-    tableShopId.value = newId
-    getOrderList()
-  },
-)
+watch(() => [pop.currentEventId, pop.currentShopId], getOrderList)
 
 function deleteData(data: OrderAllContent) {
   console.log(`delete${JSON.stringify(data)}`)
@@ -49,6 +33,7 @@ function deleteData(data: OrderAllContent) {
 function editData(data: OrderAllContent) {
   console.log(`edit${JSON.stringify(data)}`)
 }
+
 async function getFieldDefsApi() {
   const req = {
     entityType: 'ORDER',
@@ -59,10 +44,10 @@ async function getFieldDefsApi() {
   headerRow.value.concat(otherRow)
 }
 async function getOrderList() {
-  if (tableEventId.value !== '' && tableShopId.value !== '') {
+  if (pop.currentEventId !== '' && pop.currentShopId !== '') {
     const req = {
-      eventId: Number(tableEventId.value),
-      channelId: Number(tableShopId.value),
+      eventId: Number(pop.currentEventId),
+      channelId: Number(pop.currentShopId),
     }
     tableData.value = await (await orderApi.getOrders(req)).content
   }
