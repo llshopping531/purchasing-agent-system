@@ -70,13 +70,14 @@ function deleteData(data: T) {
   gap: 0.25rem;
 }
 .table {
+
   .header-item,
   .item-col {
     width: calc(100% / var(--row-count));
   }
   .header-item {
     background-color: #8cbfa4;
-    padding: 0.5rem;
+    padding: 0.25rem 0.5rem;
     color: #fff;
     text-align: center;
     &.operate {
@@ -85,37 +86,26 @@ function deleteData(data: T) {
   }
   .item-col {
     background-color: #fff;
-    padding: 0.5rem;
+    padding: 0.25rem 0.5rem;
   }
   .body-item {
     margin-top: 0.25rem;
+    font-size: 14px;
   }
   .item-col.operate {
     display: flex;
     gap: 0.25rem;
     align-items: center;
     width: 120px;
+    flex-wrap: wrap;
+    justify-content: center;
     .btn {
       padding: 0 0.5rem;
+      font-size: 14px;
       &.delete {
         background-color: #ef6e6e;
       }
     }
-  }
-
-  .item-col.orderStatusName,
-  .header-item.orderStatusName {
-
-    text-align: center;
-  }
-  .item-col.orderStatusName,
-  .header-item.orderStatusName {
-    text-align: center;
-  }
-  .item-col.productName,
-  .header-item.productName {
-    width: 300px;
-    font-size: 14px;
   }
 }
 </style>
