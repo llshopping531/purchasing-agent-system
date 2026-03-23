@@ -70,7 +70,6 @@ function deleteData(data: T) {
   gap: 0.25rem;
 }
 .table {
-
   .header-item,
   .item-col {
     width: calc(100% / var(--row-count));

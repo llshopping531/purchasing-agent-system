@@ -7,10 +7,10 @@ import { onMounted, ref } from 'vue'
 
 const eventList = ref<EventData[]>([])
 const headerRow = ref<HeaderRow[]>([
-  { name: '活動名稱', value: 'name', sort: 0 },
-  { name: '開始日期', value: 'startDate', sort: 0 },
-  { name: '結束日期', value: 'endDate', sort: 0 },
-  { name: '是否顯示', value: 'isHidden', sort: 0 },
+  { name: '活動名稱', value: 'name', sort: 0, width: '200px' },
+  { name: '開始日期', value: 'startDate', sort: 0, width: '100px' },
+  { name: '結束日期', value: 'endDate', sort: 0, width: '100px' },
+  { name: '是否顯示', value: 'isHidden', sort: 0, width: '100px' },
 ])
 const isShowCreateEventModal = ref<boolean>(false)
 const isShowConfirmMadol = ref<boolean>(false)
@@ -132,7 +132,7 @@ function closeModal() {
 
 <style scoped>
 .event {
-  margin-top: 1rem;
+  margin-top: 2rem;
   .row {
     display: flex;
     gap: 1rem;
