@@ -13,30 +13,61 @@ const headerRow = ref<HeaderRow[]>([
   { name: '是否顯示', value: 'isHidden', sort: 0 },
 ])
 const isShowCreateEventModal = ref<boolean>(false)
+const currentEventId = ref<number>(0)
+const currentEventName = ref<string>('')
+const currentStartDate = ref<string>('')
+const currentEndDate = ref<string>('')
+const currentIsHidden = ref<boolean>(false)
+// 1新增 2修改
+const modalMode = ref<1 | 2>(1)
 
 onMounted(() => {
   getEventsAll()
 })
 
-function openCreateEventModal() {
+function createEvent() {
+  modalMode.value = 1
   isShowCreateEventModal.value = true
 }
 
-function colseCreateEventModal() {
-  isShowCreateEventModal.value = false
+function editEvent(currentData: EventData) {
+  modalMode.value = 2
+  currentEventId.value = currentData.id
+  currentEventName.value = currentData.name
+  currentStartDate.value = currentData.startDate
+  currentEndDate.value = currentData.endDate
+  currentIsHidden.value = currentData.isHidden
+  isShowCreateEventModal.value = true
 }
 
-function createEvent() {
-  postEvents('')
-  colseCreateEventModal()
+async function deleteEvent(currentData: EventData) {
+  await eventApi.deleteEvents({ id: currentData.id })
+  getEventsAll()
 }
 
 async function getEventsAll() {
   eventList.value = await eventApi.getEventsAll()
 }
+async function comfirmEventModal() {
+  const eventData = {
+    name: currentEventName.value,
+    startDate: currentStartDate.value,
+    endDate: currentEndDate.value,
+    isHidden: currentIsHidden.value,
+  }
+  if (modalMode.value === 1) await eventApi.postEvents(eventData)
+  if (modalMode.value === 2) await eventApi.patchEvents(eventData, { id: currentEventId.value })
+  closeModal()
+  getEventsAll()
+}
 
-async function postEvents(name: string) {
-  eventList.value = await eventApi.postEvents({ name: name })
+function closeModal() {
+  currentEventId.value = 0
+  currentEventName.value = ''
+  currentStartDate.value = ''
+  currentEndDate.value = ''
+  currentIsHidden.value = false
+  isShowCreateEventModal.value = false
 }
 </script>
 
@@ -45,29 +76,31 @@ async function postEvents(name: string) {
     <div class="eventHeader">
       <h3>活動管理</h3>
       <div class="operateBox">
-        <div class="btn" @click="openCreateEventModal">新增</div>
+        <div class="btn" @click="createEvent">新增</div>
       </div>
     </div>
     <TableComponent
       :headerRow="headerRow"
       :tableData="eventList"
       :operate="{ isDelete: true, isEdit: true }"
+      @edit="editEvent"
+      @delete="deleteEvent"
     ></TableComponent>
     <ModalComponent
-      name="新增活動"
-      width = '500px'
-      @confirm="createEvent"
-      @cancel="colseCreateEventModal"
+      :name="modalMode === 1 ? '新增活動' : '編輯活動'"
+      width="500px"
+      @confirm="comfirmEventModal"
+      @cancel="closeModal"
       v-if="isShowCreateEventModal"
     >
       <template #content>
         <div class="row">
-          <TextInput label="活動名稱"></TextInput>
-          <TextInput label="是否顯示"></TextInput>
+          <TextInput label="活動名稱" v-model:value="currentEventName"></TextInput>
+          <TextInput label="是否顯示" v-model:value="currentIsHidden"></TextInput>
         </div>
         <div class="row">
-          <TextInput label="開始日期"></TextInput>
-          <TextInput label="結束日期"></TextInput>
+          <TextInput label="開始日期" v-model:value="currentStartDate"></TextInput>
+          <TextInput label="結束日期" v-model:value="currentEndDate"></TextInput>
         </div>
       </template>
     </ModalComponent>

@@ -17,13 +17,18 @@ export const getApi = async <resT, reqT>(url: string, req?: reqT): Promise<resT>
   return res.data.data
 }
 
-export const postApi = async <resT, reqT>(url: string, req?: reqT): Promise<resT> => {
-  const res = await api.post<BaseApiRes<resT>>(url, { params: req })
+export const postApi = async <resT, reqT>(url: string, req: reqT): Promise<resT> => {
+  const res = await api.post<BaseApiRes<resT>>(url, req)
   return res.data.data
 }
 
-export const patchApi = async <resT, reqT>(url: string, req?: reqT): Promise<resT> => {
-  const res = await api.patch<BaseApiRes<resT>>(url, { params: req })
+export const patchApi = async <resT, reqT, paramsT>(url: string, req?: reqT, params?: paramsT): Promise<resT> => {
+  const res = await api.patch<BaseApiRes<resT>>(url, req, { params: params })
+  return res.data.data
+}
+
+export const deleteApi = async <resT, paramsT>(url: string, params?: paramsT): Promise<resT> => {
+  const res = await api.delete<BaseApiRes<resT>>(url, { params: params })
   return res.data.data
 }
 
