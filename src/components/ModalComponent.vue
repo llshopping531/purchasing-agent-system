@@ -16,6 +16,7 @@ function cancel() {
 }
 </script>
 <template>
+  <div class="mask"></div>
   <div class="modal" :style="{ width: width }">
     <div class="title">{{ name }}</div>
     <slot name="content"></slot>
@@ -26,13 +27,22 @@ function cancel() {
   </div>
 </template>
 <style>
+.mask{
+      position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #33333345;
+    overflow: hidden;
+}
 .modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: #fff;
-  box-shadow: 1rem 1rem 0.5rem #8cbfa44a;
+  box-shadow: 1rem 1rem 0.5rem #8887874a;
   width: 700px;
   max-width: 80%;
   max-height: 80%;
