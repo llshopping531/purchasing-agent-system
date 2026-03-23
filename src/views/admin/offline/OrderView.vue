@@ -20,9 +20,12 @@ function selectShop(data: Option) {
   <div class="order">
     <h3>訂單管理</h3>
     <p>請選擇場販場次、通路</p>
-    <div class="shopList">
+    <div class="selectBox">
       <EventSelectComponent @selectOption="selectEvent"></EventSelectComponent>
-      <ShopSelectComponent :eventId="currentEventId" @selectOption="selectShop"></ShopSelectComponent>
+      <ShopSelectComponent
+        :eventId="currentEventId"
+        @selectOption="selectShop"
+      ></ShopSelectComponent>
     </div>
     <OrderTableComponent
       :currentEventId="currentEventId"
@@ -35,14 +38,14 @@ function selectShop(data: Option) {
 <style>
 .order {
   margin-top: 1rem;
-}
-.shopList {
-  display: flex;
-  gap: 1rem;
-  .shopSelect {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    border: 1px solid #8cbfa4;
+  .selectBox {
+    display: flex;
+    gap: 1rem;
+    .shopSelect {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #8cbfa4;
+    }
   }
 }
 </style>
