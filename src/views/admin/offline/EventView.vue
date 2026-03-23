@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TextInput from '@/components/inputs/TextInput.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import { eventApi, type EventData } from '@/services/event-api'
@@ -6,7 +7,7 @@ import { onMounted, ref } from 'vue'
 
 const eventList = ref<EventData[]>([])
 const headerRow = ref<HeaderRow[]>([
-  { name: '購買者', value: 'name', sort: 0 },
+  { name: '活動名稱', value: 'name', sort: 0 },
   { name: '開始日期', value: 'startDate', sort: 0 },
   { name: '結束日期', value: 'endDate', sort: 0 },
   { name: '是否顯示', value: 'isHidden', sort: 0 },
@@ -25,7 +26,10 @@ function colseCreateEventModal() {
   isShowCreateEventModal.value = false
 }
 
-function createEvent() {}
+function createEvent() {
+  postEvents('')
+  colseCreateEventModal()
+}
 
 async function getEventsAll() {
   eventList.value = await eventApi.getEventsAll()
@@ -49,16 +53,38 @@ async function postEvents(name: string) {
       :tableData="eventList"
       :operate="{ isDelete: true, isEdit: true }"
     ></TableComponent>
+    <ModalComponent
+      name="新增活動"
+      width = '500px'
+      @confirm="createEvent"
+      @cancel="colseCreateEventModal"
+      v-if="isShowCreateEventModal"
+    >
+      <template #content>
+        <div class="row">
+          <TextInput label="活動名稱"></TextInput>
+          <TextInput label="是否顯示"></TextInput>
+        </div>
+        <div class="row">
+          <TextInput label="開始日期"></TextInput>
+          <TextInput label="結束日期"></TextInput>
+        </div>
+      </template>
+    </ModalComponent>
   </div>
-  <ModalComponent name="新增活動"></ModalComponent>
 </template>
 
 <style scoped>
 .event {
   margin-top: 1rem;
+  .row {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
   .eventHeader {
     display: flex;
-    justify-content: space-between;
+    gap: 1rem;
     margin-bottom: 1rem;
   }
   .operateBox {
