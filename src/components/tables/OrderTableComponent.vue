@@ -58,7 +58,7 @@ async function getOrderList() {
     <TableComponent
       :headerRow="headerRow"
       :tableData="tableData"
-      :operate="{ isDelete: true, isEdit: true }"
+      :operate="{ isDelete: true, isEdit: true, isOperate: true }"
       @delete="deleteData"
       @edit="editData"
     ></TableComponent>

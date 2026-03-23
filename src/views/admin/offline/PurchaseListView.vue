@@ -16,16 +16,24 @@ const headerRow = ref<HeaderRow[]>([
   { name: '未買數量', value: 'remaining', sort: 0, width: '100px' },
 ])
 const purchaseList = ref<PurchaseList[]>([])
+const isOpenList = ref<boolean[]>([])
 
 async function selectEvent(option: Option) {
   console.log('selectEvent')
   const res = await purchaseListApi.getPurchaseListsAll({ eventId: Number(option.value) })
   const keys = Object.keys(res)
   const list: PurchaseList[] = []
+  const isOpen: boolean[] = []
   keys.forEach((key) => {
     list.push({ channelName: key, data: res[key] ?? [] })
+    isOpen.push(false)
   })
+  isOpenList.value = isOpen
   purchaseList.value = list
+}
+
+function toggleTable(index: number) {
+  isOpenList.value[index] = !isOpenList.value[index]
 }
 </script>
 <template>
@@ -33,23 +41,54 @@ async function selectEvent(option: Option) {
     <div class="selectBox">
       <EventSelectComponent @select-option="selectEvent"></EventSelectComponent>
     </div>
-    <template v-for="purchase in purchaseList" :key="purchase.channelName">
-      <h3>{{ purchase.channelName }}</h3>
-      <TableComponent
-        :headerRow="headerRow"
-        :tableData="purchase.data"
-        :operate="{ isDelete: false, isEdit: false }"
-      ></TableComponent>
+    <template v-for="(purchase, index) in purchaseList" :key="purchase.channelName">
+      <div class="titleBox" @click="toggleTable(index)">
+        <h3>{{ purchase.channelName }}</h3>
+        <div class="toggleBtn">
+          <span class="icon" :class="{ active: isOpenList[index] }"></span>
+        </div>
+      </div>
+      <div v-if="isOpenList[index]">
+        <TableComponent
+          :headerRow="headerRow"
+          :tableData="purchase.data"
+          :operate="{ isDelete: false, isEdit: false ,isOperate:false }"
+        ></TableComponent>
+      </div>
     </template>
   </div>
 </template>
 <style scoped>
 .purchase {
-  .selectBox {
-    margin-top: 2rem;
+  width: fit-content;
+  .titleBox {
+    display: flex;
+    cursor: pointer;
   }
-  h3 {
-    margin-top: 1rem;
+  .toggleBtn {
+    position: relative;
+    font-size: 2rem;
+    width: 50px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .icon {
+      position: absolute;
+      display: block;
+      border-left: 3px solid #354a5e;
+      border-bottom: 3px solid #354a5e;
+      top: 50%;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      transform: translate(-50%, -50%) rotate(135deg);
+      transition: all 0.3s;
+      z-index: -1;
+      &.active {
+        transform: translate(-50%, -65%) rotate(315deg);
+      }
+    }
   }
 }
 </style>

@@ -12,6 +12,7 @@ const pop = defineProps<{
   operate: {
     isDelete: boolean
     isEdit: boolean
+    isOperate: boolean
   }
 }>()
 const emit = defineEmits<{
@@ -41,7 +42,7 @@ function deleteData(data: T) {
       >
         {{ header.name }}
       </div>
-      <div class="header-item operate">操作</div>
+      <div class="header-item operate" v-if="operate.isOperate">操作</div>
     </div>
     <div class="body">
       <div class="body-item" v-for="(dataRow, index) in pop.tableData" :key="index">
@@ -54,7 +55,7 @@ function deleteData(data: T) {
         >
           {{ dataRow[header.value] }}
         </div>
-        <div class="item-col operate">
+        <div class="item-col operate" v-if="operate.isOperate">
           <div class="btn edit" v-if="operate.isEdit" @click="editData(dataRow)">編輯</div>
           <div class="btn delete" v-if="operate.isDelete" @click="deleteData(dataRow)">刪除</div>
         </div>

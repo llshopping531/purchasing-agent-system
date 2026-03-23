@@ -1,19 +1,12 @@
 <script setup lang="ts">
 import { PATH } from '@/router/route-constant'
-import path from 'path'
-import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
 const functionList = [
   { name: '訂單管理', path: PATH.offlineOrder },
   { name: '活動管理', path: PATH.offlineEvent },
   { name: '採購清單', path: PATH.offlinePurchaseList },
 ]
 
-onMounted(() => {
-  router.push(PATH.offlineOrder)
-})
 </script>
 <template>
   <div class="offline">

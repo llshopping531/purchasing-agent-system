@@ -88,7 +88,7 @@ function closeModal() {
     <TableComponent
       :headerRow="headerRow"
       :tableData="eventList"
-      :operate="{ isDelete: true, isEdit: true }"
+      :operate="{ isDelete: true, isEdit: true, isOperate: true }"
       @edit="editEvent"
       @delete="deleteEvent"
     ></TableComponent>
