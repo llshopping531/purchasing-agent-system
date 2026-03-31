@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import ConfirmModalCompontent from '@/components/ConfirmModalCompontent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
-import ModalComponent from '@/components/ModalComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import { eventApi, type EventData } from '@/services/api/event-api'
 import { onMounted, ref } from 'vue'
@@ -12,8 +12,7 @@ const headerRow = ref<HeaderRow[]>([
   { name: '結束日期', value: 'endDate', sort: 0, width: '100px' },
   { name: '是否顯示', value: 'isHidden', sort: 0, width: '100px' },
 ])
-const isShowCreateEventModal = ref<boolean>(false)
-const isShowConfirmMadol = ref<boolean>(false)
+const isShowEventFormModal = ref<boolean>(false)
 const currentEventId = ref<number>(0)
 const currentEventName = ref<string>('')
 const currentStartDate = ref<string>('')
@@ -28,7 +27,7 @@ onMounted(() => {
 
 function createEvent() {
   modalMode.value = 1
-  isShowCreateEventModal.value = true
+  isShowEventFormModal.value = true
 }
 
 function editEvent(currentData: EventData) {
@@ -38,14 +37,14 @@ function editEvent(currentData: EventData) {
   currentStartDate.value = currentData.startDate
   currentEndDate.value = currentData.endDate
   currentIsHidden.value = currentData.isHidden
-  isShowCreateEventModal.value = true
+  isShowEventFormModal.value = true
 }
 
 async function deleteEvent(currentData: EventData) {
   modalMode.value = 3
   currentEventId.value = currentData.id
   currentEventName.value = currentData.name
-  isShowConfirmMadol.value = true
+  isShowEventFormModal.value = true
 }
 
 async function getEventsAll() {
@@ -72,8 +71,7 @@ function closeModal() {
   currentStartDate.value = ''
   currentEndDate.value = ''
   currentIsHidden.value = false
-  isShowCreateEventModal.value = false
-  isShowConfirmMadol.value = false
+  isShowEventFormModal.value = false
 }
 </script>
 
@@ -92,13 +90,20 @@ function closeModal() {
       @edit="editEvent"
       @delete="deleteEvent"
     ></TableComponent>
-    <ModalComponent
+    <ConfirmModalCompontent
+      v-if="isShowEventFormModal"
       :name="modalMode === 1 ? '新增活動' : '編輯活動'"
+      :confromText="
+        modalMode === 3
+          ? `您確定要刪除 ${currentEventName} 嗎？`
+          : modalMode === 1
+            ? '您確定要新增此活動嗎？'
+            : '您確定要編輯此活動嗎？'
+      "
+      :isDelete="modalMode === 3"
       width="500px"
-      @confirm="isShowConfirmMadol = true"
       @cancel="closeModal"
-      v-if="isShowCreateEventModal"
-      :isShowCancelBtn="true"
+      @confirm="confirm"
     >
       <template #content>
         <div class="row">
@@ -110,24 +115,7 @@ function closeModal() {
           <TextInput label="結束日期" v-model:value="currentEndDate"></TextInput>
         </div>
       </template>
-    </ModalComponent>
-    <ModalComponent
-      :name="'提示'"
-      width="350px"
-      v-if="isShowConfirmMadol"
-      @confirm="confirm"
-      @cancel="isShowConfirmMadol = false"
-    >
-      <template #content>
-        <div class="textBox">
-          <p v-if="modalMode !== 3">
-            {{ modalMode === 1 ? `您確定要新增此活動嗎？` : `您確定要編輯此活動嗎？` }}
-          </p>
-          <p v-else>您確定要刪除 {{ currentEventName }} 嗎？</p>
-          <span>！提醒: 此操作可能無法復原</span>
-        </div>
-      </template>
-    </ModalComponent>
+    </ConfirmModalCompontent>
   </div>
 </template>
 
@@ -152,14 +140,6 @@ function closeModal() {
     gap: 0.5rem;
     .btn {
       margin: 0;
-    }
-  }
-  .textBox {
-    margin-top: 3rem;
-    text-align: center;
-    span {
-      font-size: 12px;
-      color: #f53f3f;
     }
   }
 }

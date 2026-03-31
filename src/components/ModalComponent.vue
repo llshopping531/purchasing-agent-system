@@ -13,12 +13,10 @@ const emit = defineEmits<{
 }>()
 
 onMounted(() => {
-  console.log('mounted')
   document.body.classList.add('no-scroll')
 })
 
 onUnmounted(() => {
-  console.log('已銷毀')
   document.body.classList.remove('no-scroll')
 })
 

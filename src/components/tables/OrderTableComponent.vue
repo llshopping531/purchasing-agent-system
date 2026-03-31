@@ -8,8 +8,10 @@ const pop = defineProps<{
   currentShopId: string
 }>()
 const emit = defineEmits<{
-  (e: "tableData", data: OrderAllContent[]): void;
-}>();
+  (e: 'tableData', data: OrderAllContent[]): void
+  (e: 'delete', data: OrderAllContent): void
+  (e: 'edit', data: OrderAllContent): void
+}>()
 
 const headerRow = ref<HeaderRow[]>([
   { name: '購買者', value: 'customerName', sort: 0, width: '150px' },
@@ -31,10 +33,10 @@ onMounted(() => {
 watch(() => [pop.currentEventId, pop.currentShopId], getOrderList)
 
 function deleteData(data: OrderAllContent) {
-  console.log(`delete${JSON.stringify(data)}`)
+  emit('delete', data)
 }
 function editData(data: OrderAllContent) {
-  console.log(`edit${JSON.stringify(data)}`)
+  emit('edit', data)
 }
 
 async function getFieldDefsApi() {
@@ -53,7 +55,7 @@ async function getOrderList() {
       channelId: Number(pop.currentShopId),
     }
     tableData.value = await (await orderApi.getOrders(req)).content
-    emit("tableData",tableData.value)
+    emit('tableData', tableData.value)
   }
 }
 </script>
