@@ -2,7 +2,7 @@
 import EventSelectComponent from '@/components/inputs/EventSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import type { Option } from '@/interfaces/common'
-import { purchaseListApi, type AdditionalProp } from '@/services/purchase-api'
+import { purchaseListApi, type AdditionalProp } from '@/services/api/purchase-api'
 import { ref } from 'vue'
 interface PurchaseList {
   channelName: string

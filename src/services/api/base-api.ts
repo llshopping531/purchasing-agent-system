@@ -1,3 +1,4 @@
+import { useLoadingStore } from '@/stores/loading'
 import { useUserStore } from '@/stores/user'
 import type { AxiosInstance, AxiosResponse } from 'axios'
 import axios from 'axios'
@@ -6,6 +7,8 @@ interface BaseApiRes<T> {
   message: string
   data: T
 }
+
+const loadingStore = useLoadingStore()
 // 建立 axios instance
 const api: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -13,22 +16,34 @@ const api: AxiosInstance = axios.create({
 })
 
 export const getApi = async <resT, reqT>(url: string, req?: reqT): Promise<resT> => {
+  loadingStore.open()
   const res = await api.get<BaseApiRes<resT>>(url, { params: req })
+  loadingStore.close()
   return res.data.data
 }
 
 export const postApi = async <resT, reqT>(url: string, req: reqT): Promise<resT> => {
+  loadingStore.open()
   const res = await api.post<BaseApiRes<resT>>(url, req)
+  loadingStore.close()
   return res.data.data
 }
 
-export const patchApi = async <resT, reqT, paramsT>(url: string, req?: reqT, params?: paramsT): Promise<resT> => {
+export const patchApi = async <resT, reqT, paramsT>(
+  url: string,
+  req?: reqT,
+  params?: paramsT,
+): Promise<resT> => {
+  loadingStore.open()
   const res = await api.patch<BaseApiRes<resT>>(url, req, { params: params })
+  loadingStore.close()
   return res.data.data
 }
 
 export const deleteApi = async <resT, paramsT>(url: string, params?: paramsT): Promise<resT> => {
+  loadingStore.open()
   const res = await api.delete<BaseApiRes<resT>>(url, { params: params })
+  loadingStore.close()
   return res.data.data
 }
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import TableComponent, { type HeaderRow } from './TableComponent.vue'
-import { fieldDefsApi } from '@/services/sys/field-defs-api'
-import { orderApi, type OrderAllContent } from '@/services/order-api'
+import { fieldDefsApi } from '@/services/api/sys/field-defs-api'
+import { orderApi, type OrderAllContent } from '@/services/api/order-api'
 const pop = defineProps<{
   currentEventId: string
   currentShopId: string

@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 import type { Option } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
-import { channelApi } from '@/services/channel-api'
+import { channelApi } from '@/services/api/channel-api'
 const pop = defineProps<{
   eventId: string
 }>()

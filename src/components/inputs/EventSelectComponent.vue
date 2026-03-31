@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { eventApi } from '@/services/event-api'
+import { eventApi } from '@/services/api/event-api'
 import { onMounted, ref } from 'vue'
 import type { Option } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'

@@ -2,7 +2,7 @@
 import TextInput from '@/components/inputs/TextInput.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
-import { eventApi, type EventData } from '@/services/event-api'
+import { eventApi, type EventData } from '@/services/api/event-api'
 import { onMounted, ref } from 'vue'
 
 const eventList = ref<EventData[]>([])
