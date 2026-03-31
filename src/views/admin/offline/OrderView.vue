@@ -41,7 +41,8 @@ function getTableData(data: OrderAllContent[]) {
         if (!acc[cur.name]) {
           acc[cur.name] = { name: cur.name, value: 0 }
         }
-        acc[cur.name].value += cur.value
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (acc[cur.name] as any).value += cur.value
         return acc
       },
       {} as Record<string, { name: string; value: number }>,
