@@ -98,3 +98,6 @@ a {
   display: block;
   cursor: pointer;
 }
+.no-scroll {
+  overflow: hidden;
+}

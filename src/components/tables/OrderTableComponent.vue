@@ -7,6 +7,9 @@ const pop = defineProps<{
   currentEventId: string
   currentShopId: string
 }>()
+const emit = defineEmits<{
+  (e: "tableData", data: OrderAllContent[]): void;
+}>();
 
 const headerRow = ref<HeaderRow[]>([
   { name: '購買者', value: 'customerName', sort: 0, width: '150px' },
@@ -50,6 +53,7 @@ async function getOrderList() {
       channelId: Number(pop.currentShopId),
     }
     tableData.value = await (await orderApi.getOrders(req)).content
+    emit("tableData",tableData.value)
   }
 }
 </script>

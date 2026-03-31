@@ -98,6 +98,7 @@ function closeModal() {
       @confirm="isShowConfirmMadol = true"
       @cancel="closeModal"
       v-if="isShowCreateEventModal"
+      :isShowCancelBtn="true"
     >
       <template #content>
         <div class="row">

@@ -1,12 +1,26 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
+import MaskCompontent from './MaskCompontent.vue'
+
 defineProps<{
   name: string
   width?: string
+  isShowCancelBtn?: boolean
 }>()
 const emit = defineEmits<{
   (e: 'confirm'): void
   (e: 'cancel'): void
 }>()
+
+onMounted(() => {
+  console.log('mounted')
+  document.body.classList.add('no-scroll')
+})
+
+onUnmounted(() => {
+  console.log('已銷毀')
+  document.body.classList.remove('no-scroll')
+})
 
 function confirm() {
   emit('confirm')
@@ -16,13 +30,13 @@ function cancel() {
 }
 </script>
 <template>
-  <MaskCompontent></MaskCompontent>
+  <maskCompontent></maskCompontent>
   <div class="modal" :style="{ width: width }">
     <div class="title">{{ name }}</div>
     <slot name="content"></slot>
     <div class="btnBox">
       <div class="btn" @click="confirm">確定</div>
-      <div class="btn" @click="cancel">取消</div>
+      <div class="btn" @click="cancel" v-if="isShowCancelBtn">取消</div>
     </div>
   </div>
 </template>
@@ -38,6 +52,7 @@ function cancel() {
   max-width: 80%;
   max-height: 80%;
   padding: 1rem;
+  overflow: auto;
   .title {
     text-align: center;
     font-size: 2rem;

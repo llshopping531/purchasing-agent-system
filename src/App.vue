@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {RouterView } from 'vue-router'
-import LoadingCompontent from '@/components/LoadingCompontent.vue';
+import { RouterView } from 'vue-router'
+import LoadingCompontent from '@/components/LoadingCompontent.vue'
 </script>
 
 <template>
@@ -8,5 +8,4 @@ import LoadingCompontent from '@/components/LoadingCompontent.vue';
   <LoadingCompontent></LoadingCompontent>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
