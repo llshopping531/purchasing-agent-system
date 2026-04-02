@@ -53,7 +53,9 @@ function deleteData(data: T) {
           :style="{ width: header.width }"
           :class="header.value"
         >
-          {{ dataRow[header.value] }}
+          <slot :name="`col-${header.value}`" :row="dataRow">
+            {{ dataRow[header.value] }}
+          </slot>
         </div>
         <div class="item-col operate" v-if="operate.isOperate">
           <div class="btn edit" v-if="operate.isEdit" @click="editData(dataRow)">編輯</div>
