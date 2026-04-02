@@ -18,17 +18,13 @@ const headerRow = ref<HeaderRow[]>([
   { name: '購買者', value: 'customerName', sort: 0, width: '150px' },
   { name: '品項', value: 'productName', sort: 0, width: '300px' },
   { name: '數量', value: 'quantity', sort: 0, width: '70px' },
-  // { name: '日幣單價', value: 'productPriceJpy', sort: 0, width: '100px' },
-  // { name: '匯率', value: 'exchangeRate', sort: 0, width: '70px' },
-  // { name: '台幣單價', value: 'unitTwd', sort: 0, width: '100px' },
   { name: '訂單狀態', value: 'orderStatusName', sort: 0, width: '100px' },
-  { name: '更多資訊', value: 'more', sort: 0, width: '100px' },
-  // { name: '特典對象', value: 'nonBonusTarget', sort: 0, width: '100px' },
-  // { name: '採購確認', value: 'purchaseConfirm', sort: 0, width: '100px' }
+  { name: '更多資訊', value: 'more', sort: 0, width: '100px' }
 ])
 const tableData = ref<OrderAllContent[]>([])
 const selectedOrder = ref<OrderAllContent | null>(null)
 const isShowDetailModal = ref(false)
+const extraFields = ref<{ name: string; value: string }[]>([])
 
 function openDetail(data: OrderAllContent) {
   selectedOrder.value = data
@@ -38,6 +34,8 @@ function openDetail(data: OrderAllContent) {
 onMounted(() => {
   getFieldDefsApi()
 })
+
+defineExpose({ refresh: getOrderList })
 
 watch(() => [pop.currentEventId, pop.currentShopId], getOrderList)
 
@@ -52,10 +50,8 @@ async function getFieldDefsApi() {
   const req = {
     entityType: 'ORDER',
   }
-  const otherRow = await (
-    await fieldDefsApi.getfieldDefs(req)
-  ).content.map((item) => ({ name: item.fieldLabel, value: item.fieldKey, sort: item.sort }))
-  // headerRow.value = headerRow.value.concat(otherRow)
+  const res = await fieldDefsApi.getfieldDefs(req)
+  extraFields.value = res.content.map((item) => ({ name: item.fieldLabel, value: item.fieldKey }))
 }
 async function getOrderList() {
   if (pop.currentEventId !== '' && pop.currentShopId !== '') {
@@ -63,7 +59,8 @@ async function getOrderList() {
       eventId: Number(pop.currentEventId),
       channelId: Number(pop.currentShopId),
     }
-    tableData.value = await (await orderApi.getOrders(req)).content
+    const res = await orderApi.getOrders(req)
+    tableData.value = res.content
     emit('tableData', tableData.value)
   }
 }
@@ -77,6 +74,11 @@ async function getOrderList() {
       @delete="deleteData"
       @edit="editData"
     >
+      <template #col-orderStatusName="{ row }">
+        <span :class="{ cancelled: row.orderStatusName === '已取消' }">
+          {{ row.orderStatusName }}
+        </span>
+      </template>
       <template #col-more="{ row }">
         <div class="detail-btn" @click="openDetail(row)">
           <span class="detail-icon"></span>
@@ -184,6 +186,14 @@ async function getOrderList() {
             <span class="detail-value">{{ selectedOrder.purchaseConfirm ? '是' : '否' }}</span>
           </div>
         </div>
+        <template v-for="(_, i) in Math.ceil(extraFields.length / 2)" :key="i">
+          <div class="detail-line">
+            <div class="detail-row" v-for="field in extraFields.slice(i * 2, i * 2 + 2)" :key="field.value">
+              <span class="detail-label">{{ field.name }}</span>
+              <span class="detail-value">{{ (selectedOrder as any)[field.value] }}</span>
+            </div>
+          </div>
+        </template>
       </div>
     </template>
   </modal-component>

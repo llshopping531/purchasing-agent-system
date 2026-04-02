@@ -1,4 +1,4 @@
-import { getApi, patchApi } from './base-api'
+import { deleteApi, getApi, patchApi, postApi } from './base-api'
 
 export interface OrderAllReq {
   eventId: number
@@ -7,6 +7,31 @@ export interface OrderAllReq {
   size?: number
   sort?: string
   direction?: string
+}
+
+export interface OrderCreateReq {
+  eventId: number
+  channelId: number
+  customerId: number
+  quantity: number
+  exchangeRate?: number
+  subtotalJpy?: number
+  subtotalTwd?: number
+  orderStatus?: string
+  nonBonusTarget?: boolean
+  isFixedRate?: boolean
+  nonCutTarget?: boolean
+  purchaseConfirm?: boolean
+  note?: string
+  extraData?: {
+    additionalProp1?: string
+    additionalProp2?: string
+    additionalProp3?: string
+  }
+}
+
+export interface OrderUpdateReq extends Partial<OrderCreateReq> {
+  productId?: number
 }
 
 export interface OrderAllRes {
@@ -49,10 +74,16 @@ export interface OrderAllContent {
 
 
 export const orderApi = {
-  getOrders: async (data: OrderAllReq): Promise<OrderAllRes> => {
-    return await getApi('/orders', data)
+  getOrders: async (req: OrderAllReq): Promise<OrderAllRes> => {
+    return await getApi('/orders', req)
   },
-  patchOrders: async (data: OrderAllReq): Promise<OrderAllRes> => {
-    return await patchApi('/orders', data)
+  postOrders: async (req: OrderCreateReq): Promise<OrderAllContent> => {
+    return await postApi('/orders', req)
+  },
+  patchOrders: async (id: number, req: OrderUpdateReq): Promise<OrderAllContent> => {
+    return await patchApi(`/orders/${id}`, req)
+  },
+  deleteOrders: async (id: number): Promise<void> => {
+    return await deleteApi(`/orders/${id}`)
   },
 }
