@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import IconLoading from '@/components/icons/IconLoading.vue'
-import MaskCompontent from '@/components/MaskCompontent.vue'
+import MaskComponent from '@/components/MaskComponent.vue'
 import { useLoadingStore } from '@/stores/loading';
 
 const loadingStore = useLoadingStore()
 </script>
 <template>
   <div class="loading" v-if="loadingStore.isLoading">
-    <MaskCompontent></MaskCompontent>
+    <mask-component></mask-component>
     <div class="icon">
-      <IconLoading></IconLoading>
+      <icon-loading></icon-loading>
     </div>
   </div>
 </template>

@@ -9,22 +9,22 @@ enum Channel {
   online = "online",
   offline = "offline",
 }
-let currentChannelTab = ref(Channel.offline).value;
+const currentChannelTab = ref(Channel.offline);
 
 onMounted(() => {
-  router.push(`/admin/${currentChannelTab}`);
+  router.push(`/admin/${currentChannelTab.value}`);
 });
 
 function clickChannel(channelName: Channel) {
-  currentChannelTab = channelName;
+  currentChannelTab.value = channelName;
 }
 </script>
 
 <template>
-  <HeaderComponent
+  <header-component
     title="ㄌㄌ代購 管理者後台系統"
     :buttonList="buttonList"
-  ></HeaderComponent>
+  ></header-component>
   <div class="channelList">
     <router-link
       :to="Channel.online"

@@ -46,7 +46,7 @@ async function getFieldDefsApi() {
   const otherRow = await (
     await fieldDefsApi.getfieldDefs(req)
   ).content.map((item) => ({ name: item.fieldLabel, value: item.fieldKey, sort: item.sort }))
-  headerRow.value.concat(otherRow)
+  headerRow.value = headerRow.value.concat(otherRow)
 }
 async function getOrderList() {
   if (pop.currentEventId !== '' && pop.currentShopId !== '') {
@@ -61,13 +61,13 @@ async function getOrderList() {
 </script>
 <template>
   <div class="orderTable">
-    <TableComponent
+    <table-component
       :headerRow="headerRow"
       :tableData="tableData"
       :operate="{ isDelete: true, isEdit: true, isOperate: true }"
       @delete="deleteData"
       @edit="editData"
-    ></TableComponent>
+    ></table-component>
   </div>
 </template>
 <style scoped></style>

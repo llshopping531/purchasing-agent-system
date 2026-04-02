@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import LoadingCompontent from '@/components/LoadingCompontent.vue'
+import LoadingComponent from '@/components/LoadingComponent.vue'
 </script>
 
 <template>
-  <RouterView />
-  <LoadingCompontent></LoadingCompontent>
+  <router-view />
+  <loading-component></loading-component>
 </template>
 
 <style scoped></style>

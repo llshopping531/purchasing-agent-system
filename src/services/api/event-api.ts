@@ -1,7 +1,7 @@
 import { deleteApi, getApi, patchApi, postApi } from './base-api'
 
 export interface EventData {
-  id: 1
+  id: number
   name: string
   startDate: string
   endDate: string

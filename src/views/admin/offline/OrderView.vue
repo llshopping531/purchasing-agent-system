@@ -7,7 +7,7 @@ import OrderTableComponent from '@/components/tables/OrderTableComponent.vue'
 import type { OrderAllContent } from '@/services/api/order-api'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
-import ConfirmModalCompontent from '@/components/ConfirmModalCompontent.vue'
+import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 
 const currentEventId = ref<string>('')
 const currentShopId = ref<string>('')
@@ -94,36 +94,36 @@ function closeModal() {
     <p>請選擇場販場次、通路</p>
     <div class="orderHeader">
       <div class="selectBox">
-        <EventSelectComponent @selectOption="selectEvent"></EventSelectComponent>
-        <ShopSelectComponent
+        <event-select-component @selectOption="selectEvent"></event-select-component>
+        <shop-select-component
           :eventId="currentEventId"
           @selectOption="selectShop"
-        ></ShopSelectComponent>
+        ></shop-select-component>
       </div>
       <div class="btn" v-if="isShowTotalBtn" @click="isShowTotalModal = true">顯示統計</div>
       <div class="btn create" @click="createOrder">新增</div>
     </div>
-    <OrderTableComponent
+    <order-table-component
       :currentEventId="currentEventId"
       :currentShopId="currentShopId"
       @tableData="getTableData"
       @delete="deleteOrder"
       @edit="editOrder"
-    ></OrderTableComponent>
+    ></order-table-component>
     <router-view></router-view>
-    <ModalComponent name="統計" @confirm="isShowTotalModal = false" v-if="isShowTotalModal">
+    <modal-component name="統計" @confirm="isShowTotalModal = false" v-if="isShowTotalModal">
       <template #content>
         <div class="totalTable">
-          <TableComponent
+          <table-component
             :headerRow="headerRow"
             :tableData="tableData"
             :operate="{ isDelete: false, isEdit: false, isOperate: false }"
           >
-          </TableComponent>
+          </table-component>
         </div>
       </template>
-    </ModalComponent>
-    <ConfirmModalCompontent
+    </modal-component>
+    <confirm-modal-component
       v-if="isShowOrderFormModal"
       :name="modalMode === 1 ? '新增訂單' : '編輯訂單'"
       :confromText="
@@ -137,7 +137,7 @@ function closeModal() {
       width="500px"
       @cancel="closeModal"
       @confirm="confirm"
-    ></ConfirmModalCompontent>
+    ></confirm-modal-component>
   </div>
 </template>
 

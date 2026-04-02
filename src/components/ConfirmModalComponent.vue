@@ -12,7 +12,7 @@ const emit = defineEmits<{
   (e: 'confirm'): void
   (e: 'cancel'): void
 }>()
-const isShowConfirmMadol = ref<boolean>(false)
+const isShowConfirmModal = ref<boolean>(false)
 
 function cancel() {
   emit('cancel')
@@ -23,23 +23,23 @@ function confirm() {
 </script>
 
 <template>
-  <ModalComponent
+  <modal-component
     v-if="!isDelete"
     :name="name"
     width="500px"
-    @confirm="isShowConfirmMadol = true"
+    @confirm="isShowConfirmModal = true"
     @cancel="cancel"
     :isShowCancelBtn="true"
   >
     <template #content>
       <slot name="content"></slot>
     </template>
-  </ModalComponent>
-  <ModalComponent
+  </modal-component>
+  <modal-component
     :name="'提示'"
     :isShowCancelBtn="true"
     width="350px"
-    v-if="isShowConfirmMadol || isDelete"
+    v-if="isShowConfirmModal || isDelete"
     @confirm="confirm"
     @cancel="cancel"
   >
@@ -51,7 +51,7 @@ function confirm() {
         <span>！提醒: 此操作可能無法復原</span>
       </div>
     </template>
-  </ModalComponent>
+  </modal-component>
 </template>
 
 <style>

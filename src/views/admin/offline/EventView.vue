@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ConfirmModalCompontent from '@/components/ConfirmModalCompontent.vue'
+import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import { eventApi, type EventData } from '@/services/api/event-api'
@@ -83,14 +83,14 @@ function closeModal() {
         <div class="btn" @click="createEvent">新增</div>
       </div>
     </div>
-    <TableComponent
+    <table-component
       :headerRow="headerRow"
       :tableData="eventList"
       :operate="{ isDelete: true, isEdit: true, isOperate: true }"
       @edit="editEvent"
       @delete="deleteEvent"
-    ></TableComponent>
-    <ConfirmModalCompontent
+    ></table-component>
+    <confirm-modal-component
       v-if="isShowEventFormModal"
       :name="modalMode === 1 ? '新增活動' : '編輯活動'"
       :confromText="
@@ -107,15 +107,15 @@ function closeModal() {
     >
       <template #content>
         <div class="row">
-          <TextInput label="活動名稱" v-model:value="currentEventName"></TextInput>
-          <TextInput label="是否顯示" v-model:value="currentIsHidden"></TextInput>
+          <text-input label="活動名稱" v-model:value="currentEventName"></text-input>
+          <text-input label="是否顯示" v-model:value="currentIsHidden"></text-input>
         </div>
         <div class="row">
-          <TextInput label="開始日期" v-model:value="currentStartDate"></TextInput>
-          <TextInput label="結束日期" v-model:value="currentEndDate"></TextInput>
+          <text-input label="開始日期" v-model:value="currentStartDate"></text-input>
+          <text-input label="結束日期" v-model:value="currentEndDate"></text-input>
         </div>
       </template>
-    </ConfirmModalCompontent>
+    </confirm-modal-component>
   </div>
 </template>
 

@@ -39,7 +39,7 @@ function toggleTable(index: number) {
 <template>
   <div class="purchase">
     <div class="selectBox">
-      <EventSelectComponent @select-option="selectEvent"></EventSelectComponent>
+      <event-select-component @select-option="selectEvent"></event-select-component>
     </div>
     <template v-for="(purchase, index) in purchaseList" :key="purchase.channelName">
       <div class="titleBox" @click="toggleTable(index)">
@@ -49,11 +49,11 @@ function toggleTable(index: number) {
         </div>
       </div>
       <div v-if="isOpenList[index]">
-        <TableComponent
+        <table-component
           :headerRow="headerRow"
           :tableData="purchase.data"
           :operate="{ isDelete: false, isEdit: false ,isOperate:false }"
-        ></TableComponent>
+        ></table-component>
       </div>
     </template>
   </div>

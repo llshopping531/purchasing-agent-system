@@ -29,10 +29,10 @@ async function getEventList() {
 </script>
 
 <template>
-  <SelectComponent
+  <select-component
     label="場次"
     :defaultValue="{ name: '', value: '' }"
     :optionList="eventList"
     @selectOption="selectEvent"
-  ></SelectComponent>
+  ></select-component>
 </template>

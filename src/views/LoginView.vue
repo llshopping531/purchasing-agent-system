@@ -21,18 +21,18 @@ function login() {
     <div class="wrapper">
       <h1>會員登入</h1>
 
-      <TextInput label="帳號" placeholder="請輸入帳號" />
-      <TextInput label="密碼" placeholder="請輸入密碼" />
+      <text-input label="帳號" placeholder="請輸入帳號" />
+      <text-input label="密碼" placeholder="請輸入密碼" />
 
       <button class="btn" type="button" @click="login()">登入</button>
 
       <div class="linkBox">
-        <RouterLink to="/"> 回首頁 </RouterLink>
+        <router-link to="/"> 回首頁 </router-link>
       </div>
     </div>
   </div>
   <main>
-    <RouterView />
+    <router-view />
   </main>
 </template>
 

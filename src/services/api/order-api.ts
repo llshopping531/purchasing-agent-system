@@ -1,4 +1,4 @@
-import { getApi } from './base-api'
+import { getApi, patchApi } from './base-api'
 
 export interface OrderAllReq {
   eventId: number
@@ -53,6 +53,6 @@ export const orderApi = {
     return await getApi('/orders', data)
   },
   patchOrders: async (data: OrderAllReq): Promise<OrderAllRes> => {
-    return await getApi('/orders', data)
+    return await patchApi('/orders', data)
   },
 }

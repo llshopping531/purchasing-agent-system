@@ -28,10 +28,10 @@ watch(
   }
 );
 
-function openOptinoList() {
+function openOptionList() {
   isOpenOption.value = true;
 }
-function closeOptinoList() {
+function closeOptionList() {
   isOpenOption.value = false;
 }
 function selectOption(selectedOption: Option) {
@@ -40,7 +40,7 @@ function selectOption(selectedOption: Option) {
   currentOptionList.value = pop.optionList;
   emit("selectOption", selectedOption);
 }
-function fittler() {
+function filter() {
   currentOptionList.value = pop.optionList.filter((option) =>
     option.name.includes(inputValue.value ?? "")
   );
@@ -53,9 +53,9 @@ function fittler() {
     <input
       class="currentVule"
       type="text"
-      @focus="openOptinoList()"
-      @blur="closeOptinoList()"
-      @input="fittler()"
+      @focus="openOptionList()"
+      @blur="closeOptionList()"
+      @input="filter()"
       v-model="inputValue"
     />
 
@@ -81,7 +81,7 @@ function fittler() {
     margin-bottom: 1rem;
     position: relative;
     .label {
-      margin-bottom: 0.25rme;
+      margin-bottom: 0.25rem;
     }
   }
   .currentVule {

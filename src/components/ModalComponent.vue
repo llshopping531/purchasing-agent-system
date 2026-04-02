@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
-import MaskCompontent from './MaskCompontent.vue'
+import MaskComponent from './MaskComponent.vue'
 
 defineProps<{
   name: string
@@ -28,7 +28,7 @@ function cancel() {
 }
 </script>
 <template>
-  <maskCompontent></maskCompontent>
+  <mask-component></mask-component>
   <div class="modal" :style="{ width: width }">
     <div class="title">{{ name }}</div>
     <slot name="content"></slot>

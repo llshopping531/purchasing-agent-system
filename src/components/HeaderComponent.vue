@@ -35,9 +35,9 @@ function logout() {
       <a @click="toLogin()" v-if="!isLogin">
         登入
       </a>
-      <RouterLink v-for="(btn, index) in buttonList" :to="btn.link" :key="index">
+      <router-link v-for="(btn, index) in buttonList" :to="btn.link" :key="index">
         {{ btn.name }}
-      </RouterLink>
+      </router-link>
       <a @click="logout()" v-if="isLogin">
         登出
       </a>

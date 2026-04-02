@@ -8,16 +8,16 @@ import AppGreetings from "../components/AppGreetings.vue";
     <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
-      <AppGreetings name="ㄌㄌ代購" />
+      <app-greetings name="ㄌㄌ代購" />
 
       <nav>
-        <RouterLink :to="PATH.user">使用者前台系統</RouterLink>
-        <RouterLink :to="PATH.admin">管理者後台系統</RouterLink>
+        <router-link :to="PATH.user">使用者前台系統</router-link>
+        <router-link :to="PATH.admin">管理者後台系統</router-link>
       </nav>
     </div>
   </div>
   <main>
-    <RouterView />
+    <router-view />
   </main>
 </template>
 

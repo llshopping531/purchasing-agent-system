@@ -17,9 +17,9 @@ const headerBtn = computed(() => {
 })
 </script>
 <template>
-  <HeaderComponent title="ㄌㄌ代購 使用者前台系統" :buttonList="headerBtn"></HeaderComponent>
+  <header-component title="ㄌㄌ代購 使用者前台系統" :buttonList="headerBtn"></header-component>
   <main>
-    <RouterView />
+    <router-view />
   </main>
 </template>
 

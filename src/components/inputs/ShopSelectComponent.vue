@@ -34,10 +34,10 @@ async function getChannelList(eventId: string) {
 </script>
 
 <template>
-  <SelectComponent
+  <select-component
     label="通路"
     :defaultValue="{ name: '', value: '' }"
     :optionList="shopList"
     @selectOption="selectShop"
-  ></SelectComponent>
+  ></select-component>
 </template>
