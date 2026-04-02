@@ -28,7 +28,7 @@ function cancel() {
 }
 </script>
 <template>
-  <mask-component></mask-component>
+  <mask-component @click="cancel"></mask-component>
   <div class="modal" :style="{ width: width }">
     <div class="title">{{ name }}</div>
     <slot name="content"></slot>
