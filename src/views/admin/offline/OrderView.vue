@@ -10,6 +10,7 @@ import type { OrderQueryContent } from '@/services/api/order/order-api-interface
 import { productsApi } from '@/services/api/products/products-api'
 import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
 import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
+import PriceRateInputComponent from '@/components/inputs/PriceRateInputComponent.vue'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
@@ -57,6 +58,12 @@ const headerRow = ref<HeaderRow[]>([
   { name: '數量', value: 'value', sort: 0, width: '70px' },
 ])
 
+function calcPriceTwd(priceJpy: number, rate: number): number {
+  const price = priceJpy * rate
+  const floored = Math.floor(price)
+  return floored % 5 === 0 ? floored : Math.ceil(price / 5) * 5
+}
+
 function selectEvent(data: Option) {
   currentEventId.value = data.value
 }
@@ -92,13 +99,46 @@ function onSelectProduct(product: ProductsResBase) {
   isAdjustRate.value = false
 }
 
-watch([() => formQuantity.value, () => formExchangeRate.value], () => {
-  if (!selectedProduct.value || !formQuantity.value) return
-  const qty = formQuantity.value
-  const rate = formExchangeRate.value ?? selectedProduct.value.exchangeRate
-  formSubtotalJpy.value = qty * selectedProduct.value.priceJpy
-  formSubtotalTwd.value = qty * Math.ceil((selectedProduct.value.priceJpy * rate) / 5) * 5
-})
+watch(
+  [
+    () => formQuantity.value,
+    () => formExchangeRate.value,
+    () => formNewProductPriceJpy.value,
+    () => formNewProductExchangeRate.value,
+    () => formNewProductPriceTwd.value,
+  ],
+  () => {
+    const qty = formQuantity.value
+    if (!qty) return
+
+    if (isNewProduct.value) {
+      if (!isAdjustRate.value) {
+        formExchangeRate.value = formNewProductExchangeRate.value ?? 0
+        formSubtotalJpy.value = qty * (formNewProductPriceJpy.value ?? 0)
+        formSubtotalTwd.value = qty * (formNewProductPriceTwd.value ?? 0)
+      }
+    } else if (selectedProduct.value && !syncingOrder) {
+      syncingOrder = true
+      const rate = formExchangeRate.value ?? selectedProduct.value.exchangeRate
+      formSubtotalJpy.value = qty * selectedProduct.value.priceJpy
+      formSubtotalTwd.value = qty * calcPriceTwd(selectedProduct.value.priceJpy, rate)
+      syncingOrder = false
+    }
+  },
+)
+
+let syncingOrder = false
+
+watch(
+  () => formSubtotalTwd.value,
+  (twd) => {
+    if (syncingOrder || !twd || !isAdjustRate.value || !formSubtotalJpy.value) return
+    syncingOrder = true
+    formExchangeRate.value = parseFloat((twd / formSubtotalJpy.value).toFixed(4))
+    syncingOrder = false
+  },
+  { flush: 'sync' },
+)
 
 function createOrder() {
   modalMode.value = 1
@@ -294,9 +334,11 @@ function closeModal() {
 
           <template v-if="isNewProduct">
             <text-input label="商品名稱" v-model:value="formNewProductName" />
-            <text-input label="日幣定價" v-model:value="formNewProductPriceJpy" />
-            <text-input label="匯率" v-model:value="formNewProductExchangeRate" />
-            <text-input label="台幣定價" v-model:value="formNewProductPriceTwd" />
+            <price-rate-input-component
+              v-model:priceJpy="formNewProductPriceJpy"
+              v-model:exchangeRate="formNewProductExchangeRate"
+              v-model:priceTwd="formNewProductPriceTwd"
+            />
             <text-input label="商品圖片" v-model:value="formNewProductImage" />
             <div class="addProductLink" @click="isNewProduct = false">返回選擇商品</div>
           </template>
