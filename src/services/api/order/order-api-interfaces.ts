@@ -1,3 +1,5 @@
+import type { ExtraData } from "../common-api-interface"
+
 /**
  *  依活動 ID + 通路 ID 查詢訂單清單 request
  */
@@ -135,9 +137,4 @@ export interface OrderResBase {
   purchaserName: string
   /** 通路名稱 */
   channelName: string
-}
-
-/** 自定義欄位 */
-export interface ExtraData {
-  [key: string]: string
 }

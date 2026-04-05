@@ -3,6 +3,7 @@
 defineProps<{
   label: string
   placeholder?: string
+  disabled?: boolean
 }>()
 const value = defineModel('value')
 
@@ -11,7 +12,7 @@ const value = defineModel('value')
 <template>
   <label class="label">
     <span>{{ label }}</span>
-    <input type="text" :placeholder="placeholder" v-model="value" />
+    <input type="text" :placeholder="placeholder" v-model="value" :disabled="disabled" />
   </label>
 </template>
 
@@ -32,6 +33,11 @@ const value = defineModel('value')
     border: 1px solid #00bd7e;
     &:focus-visible {
       outline-color: #00bd7e;
+    }
+    &:disabled {
+      background-color: #f5f5f5;
+      color: #aaa;
+      cursor: not-allowed;
     }
   }
 }

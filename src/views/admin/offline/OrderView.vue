@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
@@ -7,7 +7,10 @@ import type { Option } from '@/interfaces/common'
 import OrderTableComponent from '@/components/tables/OrderTableComponent.vue'
 import { orderApi } from '@/services/api/order/order-api'
 import type { OrderQueryContent } from '@/services/api/order/order-api-interfaces'
+import { productsApi } from '@/services/api/products/products-api'
 import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
+import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
+import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
@@ -25,7 +28,19 @@ const isShowOrderFormModal = ref<boolean>(false)
 const modalMode = ref<1 | 2 | 3>(1)
 
 const formCustomerId = ref<number | null>(null)
-const formProductId = ref<number | null>(null)
+const formProductOption = ref<Option | undefined>(undefined)
+const selectedProduct = ref<ProductsResBase | undefined>(undefined)
+const editProductInfo = ref<
+  { name: string; priceJpy: number; priceTwd: number; exchangeRate: number } | undefined
+>(undefined)
+const editCustomerName = ref<string>('')
+const isAdjustRate = ref<boolean>(false)
+const isNewProduct = ref<boolean>(false)
+const formNewProductName = ref<string>('')
+const formNewProductPriceJpy = ref<number | null>(null)
+const formNewProductExchangeRate = ref<number | null>(null)
+const formNewProductPriceTwd = ref<number | null>(null)
+const formNewProductImage = ref<string>('')
 const formQuantity = ref<number | null>(null)
 const formExchangeRate = ref<number | null>(null)
 const formSubtotalJpy = ref<number | null>(null)
@@ -62,7 +77,7 @@ function getTableData(data: OrderQueryContent[]) {
           acc[cur.name] = { name: cur.name, value: 0 }
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (acc[cur.name] as any).value += cur.value
+        ;(acc[cur.name] as any).value += cur.value
         return acc
       },
       {} as Record<string, { name: string; value: number }>,
@@ -71,8 +86,24 @@ function getTableData(data: OrderQueryContent[]) {
   result.push({ name: '總計', value: total })
   tableData.value = result
 }
+function onSelectProduct(product: ProductsResBase) {
+  selectedProduct.value = product
+  formExchangeRate.value = product.exchangeRate
+  isAdjustRate.value = false
+}
+
+watch([() => formQuantity.value, () => formExchangeRate.value], () => {
+  if (!selectedProduct.value || !formQuantity.value) return
+  const qty = formQuantity.value
+  const rate = formExchangeRate.value ?? selectedProduct.value.exchangeRate
+  formSubtotalJpy.value = qty * selectedProduct.value.priceJpy
+  formSubtotalTwd.value = qty * Math.ceil((selectedProduct.value.priceJpy * rate) / 5) * 5
+})
+
 function createOrder() {
   modalMode.value = 1
+  formQuantity.value = 1
+  formOrderStatusOption.value = { value: '1', name: '已喊單' }
   isShowOrderFormModal.value = true
 }
 
@@ -80,12 +111,25 @@ function editOrder(currentData: OrderQueryContent) {
   modalMode.value = 2
   currentOrderId.value = currentData.id
   formCustomerId.value = currentData.customerId
-  formProductId.value = currentData.productId
+  editCustomerName.value = currentData.customerName
+  formProductOption.value = {
+    value: currentData.productId.toString(),
+    name: currentData.productName,
+  }
+  editProductInfo.value = {
+    name: currentData.productName,
+    priceJpy: currentData.quantity > 0 ? currentData.subtotalJpy / currentData.quantity : 0,
+    priceTwd: currentData.unitTwd,
+    exchangeRate: currentData.exchangeRate,
+  }
   formQuantity.value = currentData.quantity
   formExchangeRate.value = currentData.exchangeRate
   formSubtotalJpy.value = currentData.subtotalJpy
   formSubtotalTwd.value = currentData.subtotalTwd
-  formOrderStatusOption.value = { value: currentData.orderStatus, name: currentData.orderStatusName }
+  formOrderStatusOption.value = {
+    value: currentData.orderStatus,
+    name: currentData.orderStatusName,
+  }
   formNote.value = currentData.note
   formNonBonusTarget.value = currentData.nonBonusTarget
   formIsFixedRate.value = currentData.isFixedRate
@@ -101,11 +145,26 @@ function deleteOrder(currentData: OrderQueryContent) {
 }
 
 async function confirm() {
+  let productId = Number(formProductOption.value?.value ?? 0)
+
+  if (isNewProduct.value) {
+    const newProduct = await productsApi.postProducts({
+      eventId: Number(currentEventId.value),
+      channelId: Number(currentShopId.value),
+      name: formNewProductName.value,
+      priceJpy: formNewProductPriceJpy.value ?? 0,
+      exchangeRate: formNewProductExchangeRate.value ?? 0,
+      priceTwd: formNewProductPriceTwd.value ?? 0,
+      image: formNewProductImage.value,
+    })
+    productId = newProduct.id
+  }
+
   const req = {
     eventId: Number(currentEventId.value),
     channelId: Number(currentShopId.value),
     customerId: formCustomerId.value ?? 0,
-    productId: formProductId.value ?? 0,
+    productId,
     quantity: formQuantity.value ?? 0,
     exchangeRate: formExchangeRate.value ?? undefined,
     subtotalJpy: formSubtotalJpy.value ?? undefined,
@@ -127,7 +186,17 @@ async function confirm() {
 function closeModal() {
   currentOrderId.value = 0
   formCustomerId.value = null
-  formProductId.value = null
+  formProductOption.value = undefined
+  selectedProduct.value = undefined
+  editProductInfo.value = undefined
+  editCustomerName.value = ''
+  isAdjustRate.value = false
+  isNewProduct.value = false
+  formNewProductName.value = ''
+  formNewProductPriceJpy.value = null
+  formNewProductExchangeRate.value = null
+  formNewProductPriceTwd.value = null
+  formNewProductImage.value = ''
   formQuantity.value = null
   formExchangeRate.value = null
   formSubtotalJpy.value = null
@@ -183,10 +252,12 @@ function closeModal() {
       :name="modalMode === 1 ? '新增訂單' : '編輯訂單'"
       :confromText="
         modalMode === 3
-          ? `您確定要刪除此訂單嗎？`
-          : modalMode === 1
-            ? '您確定要新增此訂單嗎？'
-            : '您確定要編輯此訂單嗎？'
+          ? '您確定要刪除此訂單嗎？'
+          : isNewProduct
+            ? `您確定要新增此商品，並${modalMode === 1 ? '新增' : '修改'}此訂單嗎？`
+            : modalMode === 1
+              ? '您確定要新增此訂單嗎？'
+              : '您確定要修改此訂單嗎？'
       "
       :isDelete="modalMode === 3"
       width="600px"
@@ -194,13 +265,58 @@ function closeModal() {
       @confirm="confirm"
     >
       <template #content>
+        <div v-if="modalMode === 2 && editCustomerName && editProductInfo" style="margin-top: 1rem">
+          {{ editCustomerName }} - {{ editProductInfo.name }}
+          <span class="productInfo" style="margin-top: 0.25rem">
+            <span>日幣定價：¥{{ editProductInfo.priceJpy }}</span>
+            <span>台幣單價：NT${{ editProductInfo.priceTwd }}</span>
+            <span>匯率：{{ editProductInfo.exchangeRate }}</span>
+          </span>
+        </div>
         <div class="formGrid">
           <text-input v-if="modalMode === 1" label="顧客 ID" v-model:value="formCustomerId" />
-          <text-input v-if="modalMode === 1" label="商品 ID" v-model:value="formProductId" />
+          <div v-if="!isNewProduct && modalMode === 1">
+            <product-select-component
+              :eventId="currentEventId"
+              :channelId="currentShopId"
+              :defaultValue="formProductOption"
+              @selectOption="formProductOption = $event"
+              @selectProduct="onSelectProduct"
+              style="margin-bottom: 0;"
+            />
+            <div class="addProductLink" @click="isNewProduct = true">找不到商品？新增商品</div>
+          </div>
+          <div v-if="selectedProduct && !isNewProduct && modalMode === 1" class="productInfo">
+            <span>日幣定價：¥{{ selectedProduct.priceJpy }}</span>
+            <span>台幣定價：NT${{ selectedProduct.priceTwd }}</span>
+            <span>匯率：{{ selectedProduct.exchangeRate }}</span>
+          </div>
+
+          <template v-if="isNewProduct">
+            <text-input label="商品名稱" v-model:value="formNewProductName" />
+            <text-input label="日幣定價" v-model:value="formNewProductPriceJpy" />
+            <text-input label="匯率" v-model:value="formNewProductExchangeRate" />
+            <text-input label="台幣定價" v-model:value="formNewProductPriceTwd" />
+            <text-input label="商品圖片" v-model:value="formNewProductImage" />
+            <div class="addProductLink" @click="isNewProduct = false">返回選擇商品</div>
+          </template>
           <text-input label="數量" v-model:value="formQuantity" />
-          <text-input label="匯率" v-model:value="formExchangeRate" />
-          <text-input label="小計 (日幣)" v-model:value="formSubtotalJpy" />
-          <text-input label="小計 (台幣)" v-model:value="formSubtotalTwd" />
+          <div>
+            <text-input label="匯率" v-model:value="formExchangeRate" :disabled="!isAdjustRate" />
+            <label class="adjustRateCheckbox">
+              <input type="checkbox" v-model="isAdjustRate" /> 調整數值
+            </label>
+          </div>
+          <text-input
+            label="小計 (日幣)"
+            v-model:value="formSubtotalJpy"
+            :disabled="!isAdjustRate"
+          />
+          <text-input
+            label="小計 (台幣)"
+            v-model:value="formSubtotalTwd"
+            :disabled="!isAdjustRate"
+          />
           <order-status-select-component
             :defaultValue="formOrderStatusOption"
             @selectOption="formOrderStatusOption = $event"
@@ -243,6 +359,43 @@ function closeModal() {
     margin: auto;
     background: #eeee;
     padding: 0.25rem;
+  }
+}
+.infoBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  .infoLabel {
+    font-weight: bold;
+    font-size: 1rem;
+  }
+}
+.productInfo {
+  grid-column: span 2;
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 0;
+}
+.adjustRateCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  align-self: flex-end;
+}
+.addProductLink {
+  grid-column: span 2;
+  font-size: 0.85rem;
+  color: #8cbfa4;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  &:hover {
+    text-decoration: underline;
   }
 }
 .formGrid {
