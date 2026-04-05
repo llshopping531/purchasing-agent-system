@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import EventSelectComponent from '@/components/inputs/EventSelectComponent.vue'
+import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import type { Option } from '@/interfaces/common'
 import { purchaseListApi, type AdditionalProp } from '@/services/api/purchase-api'
