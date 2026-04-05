@@ -3,7 +3,7 @@ import { onMounted, ref, watch } from 'vue'
 import TableComponent, { type HeaderRow } from './TableComponent.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
 import { fieldDefsApi } from '@/services/api/sys/field-defs-api'
-import { orderApi, type OrderAllContent } from '@/services/api/order-api'
+import { orderApi, type OrderAllContent } from '@/services/api/order/order-api'
 const pop = defineProps<{
   currentEventId: string
   currentShopId: string

@@ -5,7 +5,9 @@ import ShopSelectComponent from '@/components/inputs/ShopSelectComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import type { Option } from '@/interfaces/common'
 import OrderTableComponent from '@/components/tables/OrderTableComponent.vue'
-import { orderApi, type OrderAllContent, type OrderCreateReq } from '@/services/api/order-api'
+import { orderApi } from '@/services/api/order/order-api'
+import type { OrderQueryContent } from '@/services/api/order/order-api-interfaces'
+import OrderStatusSelectComponent from '@/components/inputs/OrderStatusSelectComponent.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
@@ -28,7 +30,7 @@ const formQuantity = ref<number | null>(null)
 const formExchangeRate = ref<number | null>(null)
 const formSubtotalJpy = ref<number | null>(null)
 const formSubtotalTwd = ref<number | null>(null)
-const formOrderStatus = ref<string>('')
+const formOrderStatusOption = ref<Option | undefined>(undefined)
 const formNote = ref<string>('')
 const formNonBonusTarget = ref<boolean>(false)
 const formIsFixedRate = ref<boolean>(false)
@@ -46,7 +48,7 @@ function selectEvent(data: Option) {
 function selectShop(data: Option) {
   currentShopId.value = data.value
 }
-function getTableData(data: OrderAllContent[]) {
+function getTableData(data: OrderQueryContent[]) {
   isTableQueried.value = true
   if (data.length !== 0) isShowTotalBtn.value = true
 
@@ -74,7 +76,7 @@ function createOrder() {
   isShowOrderFormModal.value = true
 }
 
-function editOrder(currentData: OrderAllContent) {
+function editOrder(currentData: OrderQueryContent) {
   modalMode.value = 2
   currentOrderId.value = currentData.id
   formCustomerId.value = currentData.customerId
@@ -83,8 +85,8 @@ function editOrder(currentData: OrderAllContent) {
   formExchangeRate.value = currentData.exchangeRate
   formSubtotalJpy.value = currentData.subtotalJpy
   formSubtotalTwd.value = currentData.subtotalTwd
-  formOrderStatus.value = currentData.orderStatus
-  formNote.value = currentData.publicNote
+  formOrderStatusOption.value = { value: currentData.orderStatus, name: currentData.orderStatusName }
+  formNote.value = currentData.note
   formNonBonusTarget.value = currentData.nonBonusTarget
   formIsFixedRate.value = currentData.isFixedRate
   formNonCutTarget.value = currentData.nonCutTarget
@@ -92,22 +94,23 @@ function editOrder(currentData: OrderAllContent) {
   isShowOrderFormModal.value = true
 }
 
-function deleteOrder(currentData: OrderAllContent) {
+function deleteOrder(currentData: OrderQueryContent) {
   modalMode.value = 3
   currentOrderId.value = currentData.id
   isShowOrderFormModal.value = true
 }
 
 async function confirm() {
-  const req: OrderCreateReq = {
+  const req = {
     eventId: Number(currentEventId.value),
     channelId: Number(currentShopId.value),
     customerId: formCustomerId.value ?? 0,
+    productId: formProductId.value ?? 0,
     quantity: formQuantity.value ?? 0,
     exchangeRate: formExchangeRate.value ?? undefined,
     subtotalJpy: formSubtotalJpy.value ?? undefined,
     subtotalTwd: formSubtotalTwd.value ?? undefined,
-    orderStatus: formOrderStatus.value,
+    orderStatus: formOrderStatusOption.value?.value ?? '',
     note: formNote.value,
     nonBonusTarget: formNonBonusTarget.value,
     isFixedRate: formIsFixedRate.value,
@@ -115,7 +118,7 @@ async function confirm() {
     purchaseConfirm: formPurchaseConfirm.value,
   }
   if (modalMode.value === 1) await orderApi.postOrders(req)
-  if (modalMode.value === 2) await orderApi.patchOrders(currentOrderId.value, { ...req, productId: formProductId.value ?? undefined })
+  if (modalMode.value === 2) await orderApi.patchOrders(currentOrderId.value, req)
   if (modalMode.value === 3) await orderApi.deleteOrders(currentOrderId.value)
   closeModal()
   orderTableRef.value?.refresh()
@@ -129,7 +132,7 @@ function closeModal() {
   formExchangeRate.value = null
   formSubtotalJpy.value = null
   formSubtotalTwd.value = null
-  formOrderStatus.value = ''
+  formOrderStatusOption.value = undefined
   formNote.value = ''
   formNonBonusTarget.value = false
   formIsFixedRate.value = false
@@ -192,13 +195,16 @@ function closeModal() {
     >
       <template #content>
         <div class="formGrid">
-          <text-input label="顧客 ID" v-model:value="formCustomerId" />
-          <text-input v-if="modalMode === 2" label="商品 ID" v-model:value="formProductId" />
+          <text-input v-if="modalMode === 1" label="顧客 ID" v-model:value="formCustomerId" />
+          <text-input v-if="modalMode === 1" label="商品 ID" v-model:value="formProductId" />
           <text-input label="數量" v-model:value="formQuantity" />
           <text-input label="匯率" v-model:value="formExchangeRate" />
           <text-input label="小計 (日幣)" v-model:value="formSubtotalJpy" />
           <text-input label="小計 (台幣)" v-model:value="formSubtotalTwd" />
-          <text-input label="訂單狀態" v-model:value="formOrderStatus" />
+          <order-status-select-component
+            :defaultValue="formOrderStatusOption"
+            @selectOption="formOrderStatusOption = $event"
+          />
           <text-input label="備註" v-model:value="formNote" />
           <div class="checkboxGroup">
             <label><input type="checkbox" v-model="formNonBonusTarget" /> 非特典對象</label>
