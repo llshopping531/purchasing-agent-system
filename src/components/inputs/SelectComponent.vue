@@ -78,7 +78,6 @@ function filter() {
     display: flex;
     flex-direction: column;
     width: fit-content;
-    margin-bottom: 1rem;
     position: relative;
     margin-top: 1rem;
     .label {

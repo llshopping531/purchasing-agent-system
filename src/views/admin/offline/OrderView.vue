@@ -8,6 +8,7 @@ import OrderTableComponent from '@/components/tables/OrderTableComponent.vue'
 import { orderApi } from '@/services/api/order/order-api'
 import type { OrderQueryContent } from '@/services/api/order/order-api-interfaces'
 import { productsApi } from '@/services/api/products/products-api'
+import { customersApi } from '@/services/api/customers/customers-api'
 import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
 import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
 import PriceRateInputComponent from '@/components/inputs/PriceRateInputComponent.vue'
@@ -38,7 +39,14 @@ const editProductInfo = ref<
 const editCustomerName = ref<string>('')
 const isAdjustRate = ref<boolean>(false)
 const isNewProduct = ref<boolean>(false)
+const isNewCustomer = ref<boolean>(false)
 const formNewProductName = ref<string>('')
+const formNewCustomerName = ref<string>('')
+const formNewCustomerSource = ref<string>('')
+const formHasMessagedOfficial = ref<boolean>(false)
+const formIsDiscount = ref<boolean>(false)
+const formIsBoss = ref<boolean>(false)
+const formNewCustomerNote = ref<string>('')
 const formNewProductPriceJpy = ref<number | null>(null)
 const formNewProductExchangeRate = ref<number | null>(null)
 const formNewProductPriceTwd = ref<number | null>(null)
@@ -189,6 +197,20 @@ function deleteOrder(currentData: OrderQueryContent) {
 }
 
 async function confirm() {
+  let customerId = Number(formCustomerOption.value?.value ?? 0)
+
+  if (isNewCustomer.value) {
+    const newCustomer = await customersApi.postCustomers({
+      name: formNewCustomerName.value,
+      source: formNewCustomerSource.value,
+      hasMessagedOfficial: formHasMessagedOfficial.value,
+      isDiscount: formIsDiscount.value,
+      isBoss: formIsBoss.value,
+      note: formNewCustomerNote.value,
+    })
+    customerId = newCustomer.id
+  }
+
   let productId = Number(formProductOption.value?.value ?? 0)
 
   if (isNewProduct.value) {
@@ -207,7 +229,7 @@ async function confirm() {
   const req = {
     eventId: Number(currentEventId.value),
     channelId: Number(currentShopId.value),
-    customerId: Number(formCustomerOption.value?.value) ?? 0,
+    customerId,
     productId,
     quantity: formQuantity.value ?? 0,
     exchangeRate: formExchangeRate.value ?? undefined,
@@ -236,6 +258,13 @@ function closeModal() {
   editCustomerName.value = ''
   isAdjustRate.value = false
   isNewProduct.value = false
+  isNewCustomer.value = false
+  formNewCustomerName.value = ''
+  formNewCustomerSource.value = ''
+  formHasMessagedOfficial.value = false
+  formIsDiscount.value = false
+  formIsBoss.value = false
+  formNewCustomerNote.value = ''
   formNewProductName.value = ''
   formNewProductPriceJpy.value = null
   formNewProductExchangeRate.value = null
@@ -254,8 +283,8 @@ function closeModal() {
   isShowOrderFormModal.value = false
 }
 
-function clickAddProduct(){
-  isNewProduct.value = true;
+function clickAddProduct() {
+  isNewProduct.value = true
   formProductOption.value = undefined
   formExchangeRate.value = null
   formSubtotalJpy.value = null
@@ -326,7 +355,21 @@ function clickAddProduct(){
           </span>
         </div>
         <div class="formGrid">
-          <customer-select-component v-if="modalMode === 1" @selectOption ="formCustomerOption = $event"></customer-select-component>
+          <div v-if="modalMode === 1 && !isNewCustomer">
+            <customer-select-component
+              @selectOption="formCustomerOption = $event"
+            ></customer-select-component>
+            <div class="addProductLink" @click="isNewCustomer = true">新增顧客</div>
+          </div>
+          <template v-if="isNewCustomer">
+            <text-input label="顧客名稱" v-model:value="formNewCustomerName" />
+            <text-input label="來源" v-model:value="formNewCustomerSource" />
+            <label><input type="checkbox" v-model="formHasMessagedOfficial" /> 已私訊官方</label>
+            <label><input type="checkbox" v-model="formIsDiscount" /> 優惠對象</label>
+            <label><input type="checkbox" v-model="formIsBoss" /> 老闆</label>
+            <text-input label="備註" v-model:value="formNewCustomerNote" />
+            <div class="addProductLink" @click="isNewCustomer = false">返回選擇顧客</div>
+          </template>
           <div v-if="!isNewProduct && modalMode === 1">
             <product-select-component
               :eventId="currentEventId"
@@ -334,7 +377,7 @@ function clickAddProduct(){
               :defaultValue="formProductOption"
               @selectOption="formProductOption = $event"
               @selectProduct="onSelectProduct"
-              style="margin-bottom: 0;"
+              style="margin-bottom: 0"
             />
             <div class="addProductLink" @click="clickAddProduct()">找不到商品？新增商品</div>
           </div>
@@ -361,16 +404,8 @@ function clickAddProduct(){
               <input type="checkbox" v-model="isAdjustRate" /> 調整數值
             </label>
           </div>
-          <text-input
-            label="小計 (日幣)"
-            v-model:value="formSubtotalJpy"
-            :disabled="true"
-          />
-          <text-input
-            label="小計 (台幣)"
-            v-model:value="formSubtotalTwd"
-            :disabled="true"
-          />
+          <text-input label="小計 (日幣)" v-model:value="formSubtotalJpy" :disabled="true" />
+          <text-input label="小計 (台幣)" v-model:value="formSubtotalTwd" :disabled="true" />
           <order-status-select-component
             :defaultValue="formOrderStatusOption"
             @selectOption="formOrderStatusOption = $event"
@@ -394,6 +429,7 @@ function clickAddProduct(){
   .selectBox {
     display: flex;
     gap: 1rem;
+    margin-bottom: 1rem;
     .shopSelect {
       padding: 0.5rem 1rem;
       font-size: 1rem;
