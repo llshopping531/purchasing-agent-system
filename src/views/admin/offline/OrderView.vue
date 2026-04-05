@@ -352,12 +352,12 @@ function closeModal() {
           <text-input
             label="小計 (日幣)"
             v-model:value="formSubtotalJpy"
-            :disabled="!isAdjustRate"
+            :disabled="true"
           />
           <text-input
             label="小計 (台幣)"
             v-model:value="formSubtotalTwd"
-            :disabled="!isAdjustRate"
+            :disabled="true"
           />
           <order-status-select-component
             :defaultValue="formOrderStatusOption"
