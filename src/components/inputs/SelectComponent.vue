@@ -48,7 +48,7 @@ function filter() {
 </script>
 
 <template>
-  <div class="selectBox">
+  <div class="select">
     <span class="label">{{ label }}</span>
     <input
       class="currentVule"
@@ -74,14 +74,16 @@ function filter() {
 </template>
 
 <style scoped>
-  .selectBox {
+  .select {
     display: flex;
     flex-direction: column;
     width: fit-content;
     margin-bottom: 1rem;
     position: relative;
+    margin-top: 1rem;
     .label {
       margin-bottom: 0.25rem;
+      font-weight: bold;
     }
   }
   .currentVule {
