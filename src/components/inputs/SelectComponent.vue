@@ -106,6 +106,7 @@ function filter() {
     transform: translateY(calc(100% - 1px));
     max-height: 300px;
     overflow-y: scroll;
+    z-index: 1;
     .optionItem {
       padding: 0.5rem;
       min-width: 100px;

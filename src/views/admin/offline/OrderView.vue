@@ -11,6 +11,7 @@ import { productsApi } from '@/services/api/products/products-api'
 import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
 import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
 import PriceRateInputComponent from '@/components/inputs/PriceRateInputComponent.vue'
+import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
@@ -28,7 +29,7 @@ const isShowOrderFormModal = ref<boolean>(false)
 // 1新增 2修改 3刪除
 const modalMode = ref<1 | 2 | 3>(1)
 
-const formCustomerId = ref<number | null>(null)
+const formCustomerOption = ref<Option | undefined>(undefined)
 const formProductOption = ref<Option | undefined>(undefined)
 const selectedProduct = ref<ProductsResBase | undefined>(undefined)
 const editProductInfo = ref<
@@ -150,7 +151,10 @@ function createOrder() {
 function editOrder(currentData: OrderQueryContent) {
   modalMode.value = 2
   currentOrderId.value = currentData.id
-  formCustomerId.value = currentData.customerId
+  formCustomerOption.value = {
+    value: currentData.customerId.toString(),
+    name: currentData.customerName,
+  }
   editCustomerName.value = currentData.customerName
   formProductOption.value = {
     value: currentData.productId.toString(),
@@ -203,7 +207,7 @@ async function confirm() {
   const req = {
     eventId: Number(currentEventId.value),
     channelId: Number(currentShopId.value),
-    customerId: formCustomerId.value ?? 0,
+    customerId: Number(formCustomerOption.value?.value) ?? 0,
     productId,
     quantity: formQuantity.value ?? 0,
     exchangeRate: formExchangeRate.value ?? undefined,
@@ -225,7 +229,7 @@ async function confirm() {
 
 function closeModal() {
   currentOrderId.value = 0
-  formCustomerId.value = null
+  formCustomerOption.value = undefined
   formProductOption.value = undefined
   selectedProduct.value = undefined
   editProductInfo.value = undefined
@@ -248,6 +252,14 @@ function closeModal() {
   formNonCutTarget.value = false
   formPurchaseConfirm.value = false
   isShowOrderFormModal.value = false
+}
+
+function clickAddProduct(){
+  isNewProduct.value = true;
+  formProductOption.value = undefined
+  formExchangeRate.value = null
+  formSubtotalJpy.value = null
+  formSubtotalTwd.value = null
 }
 </script>
 
@@ -314,7 +326,7 @@ function closeModal() {
           </span>
         </div>
         <div class="formGrid">
-          <text-input v-if="modalMode === 1" label="顧客 ID" v-model:value="formCustomerId" />
+          <customer-select-component v-if="modalMode === 1" @selectOption ="formCustomerOption = $event"></customer-select-component>
           <div v-if="!isNewProduct && modalMode === 1">
             <product-select-component
               :eventId="currentEventId"
@@ -324,7 +336,7 @@ function closeModal() {
               @selectProduct="onSelectProduct"
               style="margin-bottom: 0;"
             />
-            <div class="addProductLink" @click="isNewProduct = true">找不到商品？新增商品</div>
+            <div class="addProductLink" @click="clickAddProduct()">找不到商品？新增商品</div>
           </div>
           <div v-if="selectedProduct && !isNewProduct && modalMode === 1" class="productInfo">
             <span>日幣定價：¥{{ selectedProduct.priceJpy }}</span>
