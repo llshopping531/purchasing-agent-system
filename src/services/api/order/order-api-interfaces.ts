@@ -9,15 +9,15 @@ export interface OrderQueryReq {
   /** 通路 ID */
   channelId: number
   /** 客戶關鍵字 */
-  customerKeyword: string
+  customerKeyword?: string
   /** 第幾頁 */
-  page: number
+  page?: number
   /** 一頁有幾筆資料 */
-  size: number
+  size?: number
   /** 排序 */
-  sort: string
+  sort?: string
   /** 排序 (ASC / DESC) */
-  direction: 'ASC' | 'DESC'
+  direction?: 'ASC' | 'DESC'
 }
 
 /**

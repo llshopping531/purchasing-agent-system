@@ -2,6 +2,7 @@
 import { onMounted, ref, watch } from 'vue'
 import TableComponent, { type HeaderRow } from './TableComponent.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
+import PaginationComponent from '@/components/PaginationComponent.vue'
 import { fieldDefsApi } from '@/services/api/sys/field-defs-api'
 import { orderApi, type OrderAllContent } from '@/services/api/order/order-api'
 const pop = defineProps<{
@@ -26,6 +27,11 @@ const selectedOrder = ref<OrderAllContent | null>(null)
 const isShowDetailModal = ref(false)
 const extraFields = ref<{ name: string; value: string }[]>([])
 
+const currentPage = ref(0)
+const pageSize = ref(20)
+const totalPages = ref(0)
+const totalElements = ref(0)
+
 function openDetail(data: OrderAllContent) {
   selectedOrder.value = data
   isShowDetailModal.value = true
@@ -37,13 +43,27 @@ onMounted(() => {
 
 defineExpose({ refresh: getOrderList })
 
-watch(() => [pop.currentEventId, pop.currentShopId], getOrderList)
+watch(() => [pop.currentEventId, pop.currentShopId], () => {
+  currentPage.value = 0
+  getOrderList()
+})
 
 function deleteData(data: OrderAllContent) {
   emit('delete', data)
 }
 function editData(data: OrderAllContent) {
   emit('edit', data)
+}
+
+function onChangePage(page: number) {
+  currentPage.value = page
+  getOrderList()
+}
+
+function onChangeSize(size: number) {
+  pageSize.value = size
+  currentPage.value = 0
+  getOrderList()
 }
 
 async function getFieldDefsApi() {
@@ -58,9 +78,13 @@ async function getOrderList() {
     const req = {
       eventId: Number(pop.currentEventId),
       channelId: Number(pop.currentShopId),
+      page: currentPage.value,
+      size: pageSize.value,
     }
     const res = await orderApi.getOrders(req)
     tableData.value = res.content
+    totalPages.value = res.totalPages
+    totalElements.value = res.totalElements
     emit('tableData', tableData.value)
   }
 }
@@ -85,6 +109,15 @@ async function getOrderList() {
         </div>
       </template>
     </table-component>
+    <pagination-component
+      v-if="totalPages > 0"
+      :page="currentPage"
+      :totalPages="totalPages"
+      :totalElements="totalElements"
+      :size="pageSize"
+      @changePage="onChangePage"
+      @changeSize="onChangeSize"
+    />
   </div>
 
   <modal-component

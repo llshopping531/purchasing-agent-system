@@ -4,9 +4,12 @@ import type {
   CreateOrderRes,
   ModifyOrderReq,
   ModifyOrderRes,
+  OrderQueryContent,
   OrderQueryReq,
   OrderQueryRes,
 } from './order-api-interfaces'
+
+export type OrderAllContent = OrderQueryContent
 
 export const orderApi = {
   // 依活動 ID + 通路 ID 查詢訂單清單
