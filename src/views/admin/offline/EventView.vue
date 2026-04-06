@@ -93,7 +93,7 @@ function closeModal() {
     <confirm-modal-component
       v-if="isShowEventFormModal"
       :name="modalMode === 1 ? '新增活動' : '編輯活動'"
-      :confromText="
+      :confirmText="
         modalMode === 3
           ? `您確定要刪除 ${currentEventName} 嗎？`
           : modalMode === 1

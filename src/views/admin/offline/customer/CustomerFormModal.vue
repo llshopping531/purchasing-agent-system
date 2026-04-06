@@ -69,7 +69,7 @@ defineExpose({ createCustomer, editCustomer })
   <confirm-modal-component
     v-if="isVisible"
     :name="modalMode === 1 ? '新增顧客' : '編輯顧客'"
-    :confromText="modalMode === 1 ? '您確定要新增此顧客嗎？' : '您確定要修改此顧客嗎？'"
+    :confirmText="modalMode === 1 ? '您確定要新增此顧客嗎？' : '您確定要修改此顧客嗎？'"
     width="500px"
     @cancel="closeModal"
     @confirm="confirm"

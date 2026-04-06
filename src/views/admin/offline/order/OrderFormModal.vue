@@ -265,7 +265,7 @@ defineExpose({ createOrder, editOrder, deleteOrder })
   <confirm-modal-component
     v-if="isVisible"
     :name="modalMode === 1 ? '新增訂單' : '編輯訂單'"
-    :confromText="
+    :confirmText="
       modalMode === 3
         ? '您確定要刪除此訂單嗎？'
         : isNewProduct

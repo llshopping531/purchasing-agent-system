@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import ModalComponent from '@/components/ModalComponent.vue'
 import { ref } from 'vue'
-defineProps<{
-  name: string
-  confromText: string
-  isDelete?: { type: boolean; default: false }
-  width?: string
-  isShowCancelBtn?: boolean
-}>()
+withDefaults(
+  defineProps<{
+    name: string
+    confirmText: string
+    isDelete?: boolean
+    width?: string
+  }>(),
+  {
+    isDelete: false,
+    width: '500px',
+  }
+)
 const emit = defineEmits<{
   (e: 'confirm'): void
   (e: 'cancel'): void
@@ -46,7 +51,7 @@ function confirm() {
     <template #content>
       <div class="remind">
         <p>
-          {{ confromText }}
+          {{ confirmText }}
         </p>
         <span>！提醒: 此操作可能無法復原</span>
       </div>

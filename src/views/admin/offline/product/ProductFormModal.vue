@@ -80,7 +80,7 @@ defineExpose({ createProduct, editProduct, deleteProduct })
   <confirm-modal-component
     v-if="isVisible"
     :name="modalMode === 1 ? '新增商品' : '編輯商品'"
-    :confromText="
+    :confirmText="
       modalMode === 3
         ? `您確定要刪除「${currentName}」嗎？`
         : modalMode === 1
