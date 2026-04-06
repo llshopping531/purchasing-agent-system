@@ -1,5 +1,10 @@
 <script setup lang="ts">
+/**
+ * 布林值顯示元件
+ * 將 true/false 轉換為「是／否」文字搭配對應圖示，並以色彩區分語意
+ */
 defineProps<{
+  /** 要顯示的布林值 */
   value: boolean
 }>()
 </script>

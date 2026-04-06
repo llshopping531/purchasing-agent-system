@@ -1,12 +1,18 @@
 <script setup lang="ts">
-
+/**
+ * 通用文字輸入元件
+ * 透過 v-model:value 雙向綁定，支援 disabled 狀態
+ */
 defineProps<{
+  /** 輸入框標籤文字 */
   label: string
+  /** 輸入框佔位提示文字 */
   placeholder?: string
+  /** 是否禁用輸入 */
   disabled?: boolean
 }>()
-const value = defineModel('value')
 
+const value = defineModel('value')
 </script>
 
 <template>

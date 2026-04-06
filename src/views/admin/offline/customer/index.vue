@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * 顧客管理頁面
+ * 顯示分頁的顧客列表，並透過 CustomerFormModal ref 處理新增／編輯操作
+ */
 import { onMounted, ref } from 'vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import PaginationComponent from '@/components/PaginationComponent.vue'
@@ -7,8 +11,10 @@ import CustomerFormModal from './CustomerFormModal.vue'
 import { customersApi } from '@/services/api/customers/customers-api'
 import type { CustomersResBase } from '@/services/api/customers/customers-api-interfaces'
 
+/** CustomerFormModal 元件的 ref，用於呼叫其 createCustomer / editCustomer */
 const customerFormModalRef = ref<InstanceType<typeof CustomerFormModal>>()
 
+/** 表格欄位定義 */
 const headerRow: HeaderRow[] = [
   { name: '客戶名稱', value: 'name', sort: 0, width: '180px' },
   { name: '來源', value: 'sourceName', sort: 0, width: '100px' },
@@ -18,16 +24,24 @@ const headerRow: HeaderRow[] = [
   { name: '備註', value: 'note', sort: 0 },
 ]
 
+/** 當前頁的顧客資料 */
 const tableData = ref<CustomersResBase[]>([])
+/** 當前頁碼（0-based） */
 const currentPage = ref(0)
+/** 每頁筆數 */
 const pageSize = ref(20)
+/** 總頁數 */
 const totalPages = ref(0)
+/** 總筆數 */
 const totalElements = ref(0)
 
 onMounted(() => {
   getCustomerList()
 })
 
+/**
+ * 依目前分頁條件查詢顧客列表
+ */
 async function getCustomerList() {
   const res = await customersApi.getCustomers({
     page: currentPage.value,
@@ -38,11 +52,19 @@ async function getCustomerList() {
   totalElements.value = res.totalElements
 }
 
+/**
+ * 換頁
+ * @param page - 目標頁碼（0-based）
+ */
 function onChangePage(page: number) {
   currentPage.value = page
   getCustomerList()
 }
 
+/**
+ * 更改每頁筆數，並重置至第一頁
+ * @param size - 新的每頁筆數
+ */
 function onChangeSize(size: number) {
   pageSize.value = size
   currentPage.value = 0

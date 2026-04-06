@@ -3,6 +3,10 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import { useUserStore } from '@/stores/user'
 
+/**
+ * Vue Router 實例
+ * 使用 HTML5 History 模式，路由結構分為公開頁面、使用者前台、管理者後台三大區塊
+ */
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -17,6 +21,7 @@ const router = createRouter({
       component: LoginView,
     },
     {
+      /** 使用者前台，需登入才可進入子頁面 */
       path: '/user',
       name: 'user',
       component: () => import('../views/UserView.vue'),
@@ -30,12 +35,14 @@ const router = createRouter({
       ],
     },
     {
+      /** 管理者後台，需登入且具管理員身分 */
       path: '/admin',
       name: 'admin',
       meta: { requiresAuth: true, requiresAdmin: true },
       component: () => import('../views/AdminView.vue'),
       children: [
         {
+          /** 場販專區，預設跳轉至訂單管理 */
           path: 'offline',
           name: 'offline',
           component: () => import('../views/admin/offlineView.vue'),
@@ -72,6 +79,7 @@ const router = createRouter({
           ],
         },
         {
+          /** 通販專區 */
           path: 'online',
           name: 'online',
           component: () => import('../views/admin/onlineView.vue'),
@@ -81,15 +89,17 @@ const router = createRouter({
   ],
 })
 
-// 全域路由守衛
+/**
+ * 全域路由守衛
+ * - 未登入時存取需驗證的頁面，先記錄目標路徑再跳轉至登入頁
+ * - 非管理員存取後台頁面，跳轉回首頁
+ */
 router.beforeEach((to) => {
   const userStore = useUserStore()
-  // 未登入進入登入頁
   if (to.meta.requiresAuth && !userStore.isLogin) {
     userStore.setRedirect(to.fullPath)
     return '/login'
   }
-  // 無管理者權限
   if (to.meta.requiresAdmin && !userStore.isAdmin) return '/'
 })
 

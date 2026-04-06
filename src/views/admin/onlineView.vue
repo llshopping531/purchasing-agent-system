@@ -1,17 +1,28 @@
 <script setup lang="ts">
-interface EventItem {
-  id: number;
-  name: string;
-}
-const eventList: EventItem[] = [
-  { id: 0, name: "12月" },
-  { id: 1, name: "3月" },
-];
+/**
+ * 通販專區頁面（尚在開發中）
+ * 目前使用靜態假資料，待後端 API 完成後替換
+ */
 
+/** 活動項目結構 */
+interface EventItem {
+  /** 活動 ID */
+  id: number
+  /** 活動名稱 */
+  name: string
+}
+
+/** 通販活動清單（暫時為靜態假資料） */
+const eventList: EventItem[] = [
+  { id: 0, name: '12月' },
+  { id: 1, name: '3月' },
+]
+
+/** 通路清單（暫時為靜態假資料） */
 const shopList: EventItem[] = [
-  { id: 0, name: "大交流展" },
-  { id: 1, name: "plaza" },
-];
+  { id: 0, name: '大交流展' },
+  { id: 1, name: 'plaza' },
+]
 </script>
 <template>
   <div class="offline">

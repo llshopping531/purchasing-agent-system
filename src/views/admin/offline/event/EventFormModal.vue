@@ -1,25 +1,46 @@
 <script setup lang="ts">
+/**
+ * 活動新增／編輯／刪除彈窗
+ * 透過 defineExpose 提供 createEvent / editEvent / deleteEvent 方法供父層呼叫
+ * 操作完成後 emit confirmed 通知父層重新載入活動列表
+ */
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import { eventApi, type EventData } from '@/services/api/event-api'
 import { ref } from 'vue'
 
-const emit = defineEmits<{ (e: 'confirmed'): void }>()
+const emit = defineEmits<{
+  /** 新增、修改或刪除成功後觸發，通知父層重新整理活動列表 */
+  (e: 'confirmed'): void
+}>()
 
+/** 彈窗是否顯示 */
 const isVisible = ref(false)
-// 1新增 2修改 3刪除
+/** 操作模式：1 = 新增，2 = 修改，3 = 刪除 */
 const modalMode = ref<1 | 2 | 3>(1)
+/** 目標活動 ID */
 const currentEventId = ref(0)
+/** 表單欄位：活動名稱（刪除模式下用於顯示確認訊息） */
 const currentEventName = ref('')
+/** 表單欄位：開始日期 */
 const currentStartDate = ref('')
+/** 表單欄位：結束日期 */
 const currentEndDate = ref('')
+/** 表單欄位：是否隱藏 */
 const currentIsHidden = ref(false)
 
+/**
+ * 開啟新增活動彈窗
+ */
 function createEvent() {
   modalMode.value = 1
   isVisible.value = true
 }
 
+/**
+ * 開啟編輯活動彈窗，並將現有資料填入表單
+ * @param currentData - 要編輯的活動資料
+ */
 function editEvent(currentData: EventData) {
   modalMode.value = 2
   currentEventId.value = currentData.id
@@ -30,6 +51,10 @@ function editEvent(currentData: EventData) {
   isVisible.value = true
 }
 
+/**
+ * 開啟刪除活動確認彈窗
+ * @param currentData - 要刪除的活動資料
+ */
 function deleteEvent(currentData: EventData) {
   modalMode.value = 3
   currentEventId.value = currentData.id
@@ -37,7 +62,11 @@ function deleteEvent(currentData: EventData) {
   isVisible.value = true
 }
 
+/**
+ * 執行新增、修改或刪除 API，成功後關閉彈窗並通知父層
+ */
 async function confirm() {
+  /** 新增或修改時的請求 body */
   const eventData = {
     name: currentEventName.value,
     startDate: currentStartDate.value,
@@ -51,6 +80,9 @@ async function confirm() {
   emit('confirmed')
 }
 
+/**
+ * 關閉彈窗並重置所有表單欄位
+ */
 function closeModal() {
   currentEventId.value = 0
   currentEventName.value = ''

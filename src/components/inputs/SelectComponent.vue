@@ -1,49 +1,74 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
-import type { Option } from "../../interfaces/common";
+/**
+ * 通用下拉選取元件
+ * 支援輸入關鍵字即時篩選選項，選取後 emit selectOption 事件
+ */
+import { ref, watch } from 'vue'
+import type { Option } from '../../interfaces/common'
+
 const pop = defineProps<{
-  label: string;
-  defaultValue: Option | undefined;
-  optionList: Option[];
-}>();
+  /** 選單標籤文字 */
+  label: string
+  /** 預設選取值 */
+  defaultValue: Option | undefined
+  /** 完整選項清單 */
+  optionList: Option[]
+}>()
+
 const emit = defineEmits<{
-  (e: "selectOption", data: Option): void;
-}>();
+  /** 使用者選取選項時觸發，帶出選取的 Option */
+  (e: 'selectOption', data: Option): void
+}>()
 
-const currentOptionList = ref([...pop.optionList]);
-const isOpenOption = ref(false);
-const inputValue = ref(pop.defaultValue?.name);
+/** 目前顯示的選項清單（經篩選後的結果） */
+const currentOptionList = ref([...pop.optionList])
+/** 下拉清單是否展開 */
+const isOpenOption = ref(false)
+/** 輸入框顯示的文字（選取後更新為選項名稱） */
+const inputValue = ref(pop.defaultValue?.name)
 
+// 當外部傳入的選項清單更新時，同步更新內部清單
 watch(
   () => pop.optionList,
   (newList) => {
-    currentOptionList.value = [...newList];
-  }
-);
+    currentOptionList.value = [...newList]
+  },
+)
 
+// 當外部傳入的預設值更新時，同步更新輸入框文字
 watch(
   () => pop.defaultValue,
   (newDefault) => {
-    inputValue.value = newDefault?.name ?? "";
-  }
-);
+    inputValue.value = newDefault?.name ?? ''
+  },
+)
 
+/** 展開下拉清單 */
 function openOptionList() {
-  isOpenOption.value = true;
+  isOpenOption.value = true
 }
+
+/** 收起下拉清單 */
 function closeOptionList() {
-  isOpenOption.value = false;
+  isOpenOption.value = false
 }
+
+/**
+ * 選取某個選項，收起清單並 emit 事件
+ * @param selectedOption - 使用者點選的選項
+ */
 function selectOption(selectedOption: Option) {
-  isOpenOption.value = false;
-  inputValue.value = selectedOption.name;
-  currentOptionList.value = pop.optionList;
-  emit("selectOption", selectedOption);
+  isOpenOption.value = false
+  inputValue.value = selectedOption.name
+  currentOptionList.value = pop.optionList
+  emit('selectOption', selectedOption)
 }
+
+/** 依輸入框文字即時篩選選項清單 */
 function filter() {
   currentOptionList.value = pop.optionList.filter((option) =>
-    option.name.includes(inputValue.value ?? "")
-  );
+    option.name.includes(inputValue.value ?? ''),
+  )
 }
 </script>
 

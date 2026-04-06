@@ -1,16 +1,28 @@
 <script setup lang="ts">
+/**
+ * 採購清單通路項目元件
+ * 顯示單一通路名稱，點擊後可展開／收合該通路的採購明細表格
+ * isOpen 狀態內聚於此元件，不由父層管理
+ */
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import type { AdditionalProp } from '@/services/api/purchase-api'
 import { ref } from 'vue'
 
 defineProps<{
+  /** 通路名稱（作為標題顯示） */
   channelName: string
+  /** 該通路的採購明細資料 */
   data: AdditionalProp[]
+  /** 表格欄位定義（由父層統一傳入） */
   headerRow: HeaderRow[]
 }>()
 
+/** 是否展開採購明細表格 */
 const isOpen = ref(false)
 
+/**
+ * 切換展開／收合狀態
+ */
 function toggle() {
   isOpen.value = !isOpen.value
 }

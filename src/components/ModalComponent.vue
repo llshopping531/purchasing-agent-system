@@ -1,14 +1,24 @@
 <script setup lang="ts">
+/**
+ * 基礎彈窗元件
+ * 掛載時鎖定 body 捲動，卸載時解除，提供標題、內容 slot 與確定／取消按鈕
+ */
 import { onMounted, onUnmounted } from 'vue'
 import MaskComponent from './MaskComponent.vue'
 
 defineProps<{
+  /** 彈窗標題 */
   name: string
+  /** 彈窗寬度（CSS 值） */
   width?: string
+  /** 是否顯示取消按鈕 */
   isShowCancelBtn?: boolean
 }>()
+
 const emit = defineEmits<{
+  /** 點擊確定時觸發 */
   (e: 'confirm'): void
+  /** 點擊取消或遮罩時觸發 */
   (e: 'cancel'): void
 }>()
 
@@ -20,9 +30,12 @@ onUnmounted(() => {
   document.body.classList.remove('no-scroll')
 })
 
+/** 觸發確定事件 */
 function confirm() {
   emit('confirm')
 }
+
+/** 觸發取消事件 */
 function cancel() {
   emit('cancel')
 }

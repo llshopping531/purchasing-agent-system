@@ -1,8 +1,14 @@
 <script setup lang="ts">
+/**
+ * 自訂樣式的核取方塊輸入元件
+ * 隱藏原生 checkbox，以自訂 SVG 圖示取代視覺呈現
+ */
 defineProps<{
+  /** 核取方塊旁的標籤文字 */
   label: string
 }>()
 
+/** 核取狀態，透過 v-model 雙向綁定 */
 const checked = defineModel<boolean>({ default: false })
 </script>
 

@@ -1,30 +1,60 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
+/**
+ * 通用表格元件
+ * 支援泛型資料列、自訂欄位寬度、slot 覆寫欄位內容，以及編輯／刪除操作欄
+ */
 import { computed } from 'vue'
+
+/** 表頭欄位定義 */
 export interface HeaderRow {
+  /** 欄位顯示名稱 */
   name: string
+  /** 對應資料物件的屬性名稱 */
   value: string
+  /** 排序順序（數字越小越靠前） */
   sort: number
+  /** 欄位寬度（CSS 值，例如 '200px'） */
   width?: string
 }
+
 const pop = defineProps<{
+  /** 表格資料陣列 */
   tableData: T[]
+  /** 表頭欄位定義陣列 */
   headerRow: HeaderRow[]
+  /** 操作欄顯示設定 */
   operate: {
+    /** 是否顯示刪除按鈕 */
     isDelete: boolean
+    /** 是否顯示編輯按鈕 */
     isEdit: boolean
+    /** 是否顯示操作欄 */
     isOperate: boolean
   }
 }>()
+
 const emit = defineEmits<{
+  /** 點擊編輯按鈕時觸發，帶出該列資料 */
   (e: 'edit', data: T): void
+  /** 點擊刪除按鈕時觸發，帶出該列資料 */
   (e: 'delete', data: T): void
 }>()
+
+/** 依 sort 排序後的表頭欄位陣列 */
 const sortedHeaderRow = computed(() => [...pop.headerRow].sort((a, b) => a.sort - b.sort))
 
+/**
+ * 觸發編輯事件
+ * @param data - 該列的完整資料物件
+ */
 function editData(data: T) {
   emit('edit', data)
 }
 
+/**
+ * 觸發刪除事件
+ * @param data - 該列的完整資料物件
+ */
 function deleteData(data: T) {
   emit('delete', data)
 }

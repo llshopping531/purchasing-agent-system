@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * 訂單表格元件
+ * 整合訂單列表查詢、分頁、詳細資料彈窗，並向上 emit 編輯／刪除事件
+ */
 import PaginationComponent from '@/components/PaginationComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import { fieldDefsApi } from '@/services/api/sys/field-defs-api'
@@ -7,15 +11,22 @@ import { onMounted, ref, watch } from 'vue'
 import OrderDetailModal from './OrderDetailModal.vue'
 
 const pop = defineProps<{
+  /** 目前選取的活動 ID（字串形式） */
   currentEventId: string
+  /** 目前選取的通路 ID（字串形式） */
   currentShopId: string
 }>()
+
 const emit = defineEmits<{
+  /** 訂單列表載入完成後觸發，帶出當頁全部資料 */
   (e: 'tableData', data: OrderAllContent[]): void
+  /** 點擊刪除時觸發，帶出目標訂單資料 */
   (e: 'delete', data: OrderAllContent): void
+  /** 點擊編輯時觸發，帶出目標訂單資料 */
   (e: 'edit', data: OrderAllContent): void
 }>()
 
+/** 表頭欄位定義 */
 const headerRow = ref<HeaderRow[]>([
   { name: '購買者', value: 'customerName', sort: 0, width: '150px' },
   { name: '品項', value: 'productName', sort: 0, width: '300px' },
@@ -23,16 +34,29 @@ const headerRow = ref<HeaderRow[]>([
   { name: '訂單狀態', value: 'orderStatusName', sort: 0, width: '100px' },
   { name: '更多資訊', value: 'more', sort: 0, width: '100px' },
 ])
+
+/** 當前頁的訂單資料 */
 const tableData = ref<OrderAllContent[]>([])
+/** 詳細資料彈窗中顯示的訂單 */
 const selectedOrder = ref<OrderAllContent | null>(null)
+/** 是否顯示訂單詳細資料彈窗 */
 const isShowDetailModal = ref(false)
+/** 系統自定義欄位定義清單（用於詳細資料彈窗動態欄位） */
 const extraFields = ref<{ name: string; value: string }[]>([])
 
+/** 當前頁碼（0-based） */
 const currentPage = ref(0)
+/** 每頁筆數 */
 const pageSize = ref(20)
+/** 總頁數 */
 const totalPages = ref(0)
+/** 總筆數 */
 const totalElements = ref(0)
 
+/**
+ * 開啟訂單詳細資料彈窗
+ * @param data - 要顯示的訂單資料
+ */
 function openDetail(data: OrderAllContent) {
   selectedOrder.value = data
   isShowDetailModal.value = true
@@ -44,6 +68,7 @@ onMounted(() => {
 
 defineExpose({ refresh: getOrderList })
 
+// 當活動或通路切換時，重置頁碼並重新查詢
 watch(
   () => [pop.currentEventId, pop.currentShopId],
   () => {
@@ -52,29 +77,53 @@ watch(
   },
 )
 
+/**
+ * 向上 emit 刪除事件
+ * @param data - 目標訂單資料
+ */
 function deleteData(data: OrderAllContent) {
   emit('delete', data)
 }
+
+/**
+ * 向上 emit 編輯事件
+ * @param data - 目標訂單資料
+ */
 function editData(data: OrderAllContent) {
   emit('edit', data)
 }
 
+/**
+ * 換頁
+ * @param page - 目標頁碼（0-based）
+ */
 function onChangePage(page: number) {
   currentPage.value = page
   getOrderList()
 }
 
+/**
+ * 更改每頁筆數
+ * @param size - 新的每頁筆數
+ */
 function onChangeSize(size: number) {
   pageSize.value = size
   currentPage.value = 0
   getOrderList()
 }
 
+/**
+ * 從後端取得 ORDER 實體的自定義欄位定義，供詳細資料彈窗顯示動態欄位
+ */
 async function getFieldDefsApi() {
   const res = await fieldDefsApi.getfieldDefs({ entityType: 'ORDER' })
   extraFields.value = res.content.map((item) => ({ name: item.fieldLabel, value: item.fieldKey }))
 }
 
+/**
+ * 依目前活動 ID、通路 ID 及分頁條件查詢訂單清單
+ * 活動或通路未選取時不發送請求
+ */
 async function getOrderList() {
   if (pop.currentEventId !== '' && pop.currentShopId !== '') {
     const res = await orderApi.getOrders({

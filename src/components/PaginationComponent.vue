@@ -1,20 +1,36 @@
 <script setup lang="ts">
+/**
+ * 分頁元件
+ * 顯示頁碼按鈕（超過 7 頁時以省略號收合），並提供每頁筆數選擇
+ */
 import { computed } from 'vue'
 
 const props = defineProps<{
+  /** 當前頁碼（0-based） */
   page: number
+  /** 總頁數 */
   totalPages: number
+  /** 總筆數 */
   totalElements: number
+  /** 每頁筆數 */
   size: number
 }>()
 
 const emit = defineEmits<{
+  /** 使用者切換頁碼時觸發 */
   (e: 'changePage', page: number): void
+  /** 使用者變更每頁筆數時觸發 */
   (e: 'changeSize', size: number): void
 }>()
 
+/** 每頁筆數的可選選項 */
 const pageSizeOptions = [10, 20, 50, 100]
 
+/**
+ * 計算目前應顯示的頁碼按鈕陣列
+ * 總頁數 ≤ 7 時全部顯示；超過則在當前頁前後各保留 1 頁，其餘以 '...' 代替
+ * @returns 包含頁碼數字或 '...' 的陣列
+ */
 const visiblePages = computed((): (number | '...')[] => {
   const { page, totalPages } = props
   if (totalPages <= 7) {

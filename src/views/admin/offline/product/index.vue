@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * 商品管理頁面
+ * 選取活動與通路後顯示分頁商品列表，並透過 ProductFormModal ref 處理新增／編輯／刪除操作
+ */
 import { ref } from 'vue'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
@@ -9,12 +13,17 @@ import type { Option } from '@/interfaces/common'
 import { productsApi } from '@/services/api/products/products-api'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 
+/** ProductFormModal 的 ref，用於呼叫 createProduct / editProduct / deleteProduct */
 const productFormModalRef = ref<InstanceType<typeof ProductFormModal>>()
 
+/** 目前選取的活動 ID */
 const currentEventId = ref('')
+/** 目前選取的通路 ID */
 const currentShopId = ref('')
+/** 是否已執行過查詢（用於控制表格與新增按鈕的顯示） */
 const isTableQueried = ref(false)
 
+/** 表格欄位定義 */
 const headerRow: HeaderRow[] = [
   { name: '商品名稱', value: 'name', sort: 0, width: '250px' },
   { name: '日幣定價', value: 'priceJpy', sort: 0, width: '100px' },
@@ -23,21 +32,38 @@ const headerRow: HeaderRow[] = [
   { name: '圖片', value: 'image', sort: 0 },
 ]
 
+/** 當前頁的商品資料 */
 const tableData = ref<ProductsResBase[]>([])
+/** 當前頁碼（0-based） */
 const currentPage = ref(0)
+/** 每頁筆數 */
 const pageSize = ref(20)
+/** 總頁數 */
 const totalPages = ref(0)
+/** 總筆數 */
 const totalElements = ref(0)
 
+/**
+ * 選取活動，重置表格並重新查詢
+ * @param data - 選取的活動 Option
+ */
 function selectEvent(data: Option) {
   currentEventId.value = data.value
   resetTable()
 }
+
+/**
+ * 選取通路，重置表格並重新查詢
+ * @param data - 選取的通路 Option
+ */
 function selectShop(data: Option) {
   currentShopId.value = data.value
   resetTable()
 }
 
+/**
+ * 重置頁碼，並在活動與通路都已選取時重新查詢
+ */
 function resetTable() {
   currentPage.value = 0
   if (currentEventId.value && currentShopId.value) {
@@ -45,6 +71,10 @@ function resetTable() {
   }
 }
 
+/**
+ * 依目前活動 ID、通路 ID 及分頁條件查詢商品列表
+ * 活動或通路未選取時不發送請求
+ */
 async function getProductList() {
   if (!currentEventId.value || !currentShopId.value) return
   const res = await productsApi.getProducts({
@@ -59,11 +89,19 @@ async function getProductList() {
   isTableQueried.value = true
 }
 
+/**
+ * 換頁
+ * @param page - 目標頁碼（0-based）
+ */
 function onChangePage(page: number) {
   currentPage.value = page
   getProductList()
 }
 
+/**
+ * 更改每頁筆數，並重置至第一頁
+ * @param size - 新的每頁筆數
+ */
 function onChangeSize(size: number) {
   pageSize.value = size
   currentPage.value = 0

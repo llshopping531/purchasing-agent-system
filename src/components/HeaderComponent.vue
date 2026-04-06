@@ -1,23 +1,42 @@
 <script setup lang="ts">
+/**
+ * 全站共用 Header 元件
+ * 顯示 Logo、系統標題、導覽按鈕，以及登入／登出功能
+ */
 import { useUserStore } from '@/stores/user'
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 defineProps<{
+  /** 系統標題文字 */
   title: string
+  /** 導覽按鈕清單（由父層依當前情境提供） */
   buttonList: {
+    /** 按鈕顯示文字 */
     name: string
+    /** 點擊後跳轉的路由路徑 */
     link: string
   }[]
 }>()
+
 const userStore = useUserStore()
 const router = useRouter()
 const route = useRoute()
+
+/** 是否已登入 */
 const isLogin = ref(userStore.isLogin)
+
+/**
+ * 跳轉至登入頁，並記錄當前路徑以便登入後返回
+ */
 function toLogin() {
   router.push('/login')
   userStore.setRedirect(route.fullPath)
 }
+
+/**
+ * 執行登出，依目前所在區域決定跳轉目標（使用者前台或首頁）
+ */
 function logout() {
   userStore.logout()
   if (route.fullPath.includes('/user')) {

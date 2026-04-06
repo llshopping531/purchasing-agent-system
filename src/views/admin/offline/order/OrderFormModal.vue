@@ -1,4 +1,10 @@
 <script setup lang="ts">
+/**
+ * 訂單新增／修改／刪除彈窗
+ * 支援選取現有顧客或即時新增顧客，選取現有商品或即時新增商品
+ * 訂單金額（小計 JPY/TWD）及匯率支援自動聯動計算
+ * 透過 defineExpose 提供 createOrder / editOrder / deleteOrder 方法供父層呼叫
+ */
 import { ref, watch } from 'vue'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
@@ -15,60 +21,107 @@ import { orderApi } from '@/services/api/order/order-api'
 import type { OrderQueryContent } from '@/services/api/order/order-api-interfaces'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 
-const props = defineProps<{ eventId: string; shopId: string }>()
-const emit = defineEmits<{ (e: 'confirmed'): void }>()
+const props = defineProps<{
+  /** 目前選取的活動 ID（字串形式） */
+  eventId: string
+  /** 目前選取的通路 ID（字串形式） */
+  shopId: string
+}>()
 
-// modal state
+const emit = defineEmits<{
+  /** 新增、修改或刪除成功後觸發，通知父層重新整理訂單列表 */
+  (e: 'confirmed'): void
+}>()
+
+/** 彈窗是否顯示 */
 const isVisible = ref(false)
-// 1新增 2修改 3刪除
+/** 操作模式：1 = 新增，2 = 修改，3 = 刪除 */
 const modalMode = ref<1 | 2 | 3>(1)
+/** 修改／刪除時的目標訂單 ID */
 const currentOrderId = ref(0)
 
-// 顧客
+// ── 顧客欄位 ──────────────────────────────────────────────────
+/** 選取的現有顧客 Option */
 const formCustomerOption = ref<Option | undefined>(undefined)
+/** 是否切換為新增顧客模式 */
 const isNewCustomer = ref(false)
+/** 新增顧客：名稱 */
 const formNewCustomerName = ref('')
+/** 新增顧客：來源 */
 const formNewCustomerSource = ref('')
+/** 新增顧客：是否已私訊官方 */
 const formHasMessagedOfficial = ref(false)
+/** 新增顧客：是否享有折扣 */
 const formIsDiscount = ref(false)
+/** 新增顧客：是否為老闆 */
 const formIsBoss = ref(false)
+/** 新增顧客：備註 */
 const formNewCustomerNote = ref('')
 
-// 商品
+// ── 商品欄位 ──────────────────────────────────────────────────
+/** 選取的現有商品 Option */
 const formProductOption = ref<Option | undefined>(undefined)
+/** 選取的現有商品完整資料（用於計算金額） */
 const selectedProduct = ref<ProductsResBase | undefined>(undefined)
+/** 修改模式下顯示的商品基本資訊（原始定價、匯率） */
 const editProductInfo = ref<
   { name: string; priceJpy: number; priceTwd: number; exchangeRate: number } | undefined
 >(undefined)
+/** 修改模式下顯示的顧客名稱 */
 const editCustomerName = ref('')
+/** 是否切換為新增商品模式 */
 const isNewProduct = ref(false)
+/** 新增商品：名稱 */
 const formNewProductName = ref('')
+/** 新增商品：日幣定價 */
 const formNewProductPriceJpy = ref<number | null>(null)
+/** 新增商品：匯率 */
 const formNewProductExchangeRate = ref<number | null>(null)
+/** 新增商品：台幣定價 */
 const formNewProductPriceTwd = ref<number | null>(null)
+/** 新增商品：圖片 URL */
 const formNewProductImage = ref('')
 
-// 訂單
+// ── 訂單欄位 ──────────────────────────────────────────────────
+/** 是否允許手動調整匯率（否則由商品定價自動帶入） */
 const isAdjustRate = ref(false)
+/** 訂購數量 */
 const formQuantity = ref<number | null>(null)
+/** 匯率 */
 const formExchangeRate = ref<number | null>(null)
+/** 小計（日幣） */
 const formSubtotalJpy = ref<number | null>(null)
+/** 小計（台幣） */
 const formSubtotalTwd = ref<number | null>(null)
+/** 訂單狀態 Option */
 const formOrderStatusOption = ref<Option | undefined>(undefined)
+/** 備註 */
 const formNote = ref('')
+/** 是否為非特典對象 */
 const formNonBonusTarget = ref(false)
+/** 是否固定匯率 */
 const formIsFixedRate = ref(false)
+/** 是否為非分潤對象 */
 const formNonCutTarget = ref(false)
+/** 是否已採購確認 */
 const formPurchaseConfirm = ref(false)
 
+/**
+ * 將日幣金額依匯率換算為台幣，並進位至最近的 5 元
+ * @param priceJpy - 日幣金額
+ * @param rate - 匯率
+ * @returns 進位後的台幣金額
+ */
 function calcPriceTwd(priceJpy: number, rate: number): number {
   const price = priceJpy * rate
   const floored = Math.floor(price)
   return floored % 5 === 0 ? floored : Math.ceil(price / 5) * 5
 }
 
+/** 防止金額 watch 之間循環觸發的 flag */
 let syncingOrder = false
 
+// 數量、匯率或新商品定價變動時，自動重新計算小計
 watch(
   [
     () => formQuantity.value,
@@ -97,6 +150,7 @@ watch(
   },
 )
 
+// 手動調整台幣小計時，反推匯率
 watch(
   () => formSubtotalTwd.value,
   (twd) => {
@@ -108,12 +162,19 @@ watch(
   { flush: 'sync' },
 )
 
+/**
+ * 使用者從下拉選取商品後，帶入商品定價與匯率並重置調整旗標
+ * @param product - 選取的商品完整資料
+ */
 function onSelectProduct(product: ProductsResBase) {
   selectedProduct.value = product
   formExchangeRate.value = product.exchangeRate
   isAdjustRate.value = false
 }
 
+/**
+ * 切換至新增商品模式，清空商品相關欄位
+ */
 function clickAddProduct() {
   isNewProduct.value = true
   formProductOption.value = undefined
@@ -122,8 +183,9 @@ function clickAddProduct() {
   formSubtotalTwd.value = null
 }
 
-// --- 對外公開的開啟方法 ---
-
+/**
+ * 開啟新增訂單彈窗，設定預設數量與訂單狀態
+ */
 function createOrder() {
   modalMode.value = 1
   formQuantity.value = 1
@@ -131,6 +193,10 @@ function createOrder() {
   isVisible.value = true
 }
 
+/**
+ * 開啟編輯訂單彈窗，並將現有資料填入表單
+ * @param currentData - 要編輯的訂單資料
+ */
 function editOrder(currentData: OrderQueryContent) {
   modalMode.value = 2
   currentOrderId.value = currentData.id
@@ -165,13 +231,22 @@ function editOrder(currentData: OrderQueryContent) {
   isVisible.value = true
 }
 
+/**
+ * 開啟刪除訂單確認彈窗
+ * @param currentData - 要刪除的訂單資料
+ */
 function deleteOrder(currentData: OrderQueryContent) {
   modalMode.value = 3
   currentOrderId.value = currentData.id
   isVisible.value = true
 }
 
+/**
+ * 執行新增、修改或刪除 API
+ * 若為新增模式且選擇新增顧客／商品，會先建立顧客／商品再建立訂單
+ */
 async function confirm() {
+  /** 最終使用的顧客 ID */
   let customerId = Number(formCustomerOption.value?.value ?? 0)
 
   if (isNewCustomer.value) {
@@ -186,6 +261,7 @@ async function confirm() {
     customerId = newCustomer.id
   }
 
+  /** 最終使用的商品 ID */
   let productId = Number(formProductOption.value?.value ?? 0)
 
   if (isNewProduct.value) {
@@ -201,6 +277,7 @@ async function confirm() {
     productId = newProduct.id
   }
 
+  /** 訂單請求 body */
   const req = {
     eventId: Number(props.eventId),
     channelId: Number(props.shopId),
@@ -224,6 +301,9 @@ async function confirm() {
   emit('confirmed')
 }
 
+/**
+ * 關閉彈窗並重置所有表單欄位
+ */
 function closeModal() {
   currentOrderId.value = 0
   formCustomerOption.value = undefined

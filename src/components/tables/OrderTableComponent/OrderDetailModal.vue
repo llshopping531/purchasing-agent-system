@@ -1,14 +1,23 @@
 <script setup lang="ts">
+/**
+ * 訂單詳細資料彈窗
+ * 以唯讀方式展示單筆訂單的完整欄位，包含系統自定義欄位
+ */
 import BooleanTransformComponent from '@/components/BooleanTransformComponent.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
 import type { OrderAllContent } from '@/services/api/order/order-api'
 
 defineProps<{
+  /** 要顯示的訂單資料 */
   order: OrderAllContent
+  /** 系統自定義欄位定義（動態渲染於詳細資料末尾） */
   extraFields: { name: string; value: string }[]
 }>()
 
-const emit = defineEmits<{ (e: 'close'): void }>()
+const emit = defineEmits<{
+  /** 關閉彈窗時觸發 */
+  (e: 'close'): void
+}>()
 </script>
 
 <template>
@@ -94,6 +103,7 @@ const emit = defineEmits<{ (e: 'close'): void }>()
             </span>
           </div>
         </div>
+        <!-- 動態渲染系統自定義欄位，每行顯示兩欄 -->
         <template v-for="(_, i) in Math.ceil(extraFields.length / 2)" :key="i">
           <div class="detail-line">
             <div
