@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
-import OrderTableComponent from '@/components/tables/OrderTableComponent.vue'
+import OrderTableComponent from '@/components/tables/OrderTableComponent/index.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import OrderFormModal from './OrderFormModal.vue'

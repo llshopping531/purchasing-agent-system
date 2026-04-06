@@ -52,12 +52,12 @@ const router = createRouter({
             {
               path: 'event',
               name: 'EventView',
-              component: () => import('../views/admin/offline/EventView.vue'),
+              component: () => import('../views/admin/offline/event/index.vue'),
             },
             {
               path: 'purchaseList',
               name: 'PurchaseListView',
-              component: () => import('../views/admin/offline/PurchaseListView.vue'),
+              component: () => import('../views/admin/offline/PurchaseListView/index.vue'),
             },
             {
               path: 'customer',
