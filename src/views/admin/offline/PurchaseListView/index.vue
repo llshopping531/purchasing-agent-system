@@ -31,14 +31,18 @@ const isShowChannelSelect = ref<boolean>(false)
  * 選取活動後，從 API 取得採購統計並轉換為以通路為單位的陣列
  * @param option - 選取的活動 Option
  */
-async function selectEvent(option: Option) {
-  currentEventId.value = Number(option.value)
-  const res = await purchaseListApi.getPurchaseListsAll(Number(option.value))
+async function fetchPurchaseList() {
+  const res = await purchaseListApi.getPurchaseListsAll(currentEventId.value)
   purchaseList.value = Object.keys(res).map((key) => ({
     channelName: key,
     data: res[key] ?? [],
   }))
   displayPurchaseList.value = purchaseList.value
+}
+
+async function selectEvent(option: Option) {
+  currentEventId.value = Number(option.value)
+  await fetchPurchaseList()
   isShowChannelSelect.value = true
 }
 
@@ -77,6 +81,7 @@ function selectChannel(option: Option) {
       :channelName="purchase.channelName"
       :eventId="currentEventId"
       :data="purchase.data"
+      @refresh="fetchPurchaseList"
     ></purchase-channel-item>
   </div>
 </template>

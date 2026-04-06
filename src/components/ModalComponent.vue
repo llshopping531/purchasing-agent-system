@@ -3,8 +3,8 @@
  * 基礎彈窗元件
  * 掛載時鎖定 body 捲動，卸載時解除，提供標題、內容 slot 與確定／取消按鈕
  */
-import { onMounted, onUnmounted } from "vue"
-import MaskComponent from "./MaskComponent.vue"
+import { onMounted, onUnmounted } from 'vue'
+import MaskComponent from './MaskComponent.vue'
 
 defineProps<{
   /** 彈窗標題 */
@@ -17,27 +17,27 @@ defineProps<{
 
 const emit = defineEmits<{
   /** 點擊確定時觸發 */
-  (e: "confirm"): void
+  (e: 'confirm'): void
   /** 點擊取消或遮罩時觸發 */
-  (e: "cancel"): void
+  (e: 'cancel'): void
 }>()
 
 onMounted(() => {
-  document.body.classList.add("no-scroll")
+  document.body.classList.add('no-scroll')
 })
 
 onUnmounted(() => {
-  document.body.classList.remove("no-scroll")
+  document.body.classList.remove('no-scroll')
 })
 
 /** 觸發確定事件 */
 function confirm() {
-  emit("confirm")
+  emit('confirm')
 }
 
 /** 觸發取消事件 */
 function cancel() {
-  emit("cancel")
+  emit('cancel')
 }
 </script>
 <template>
@@ -71,11 +71,7 @@ function cancel() {
   z-index: 201;
 
   .modal-title {
-    background: linear-gradient(
-      135deg,
-      var(--color-primary) 0%,
-      var(--color-primary-dark) 100%
-    );
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     color: #fff;
     padding: 0.875rem 1.5rem;
     font-size: 1.05rem;
