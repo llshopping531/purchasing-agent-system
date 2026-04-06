@@ -54,11 +54,21 @@ const router = createRouter({
               name: 'EventView',
               component: () => import('../views/admin/offline/EventView.vue'),
             },
-             {
+            {
               path: 'purchaseList',
               name: 'PurchaseListView',
               component: () => import('../views/admin/offline/PurchaseListView.vue'),
-            }
+            },
+            {
+              path: 'customer',
+              name: 'CustomerView',
+              component: () => import('../views/admin/offline/customer/index.vue'),
+            },
+            {
+              path: 'product',
+              name: 'ProductView',
+              component: () => import('../views/admin/offline/product/index.vue'),
+            },
           ],
         },
         {

@@ -5,6 +5,8 @@ const functionList = [
   { name: '訂單管理', path: PATH.offlineOrder },
   { name: '活動管理', path: PATH.offlineEvent },
   { name: '採購清單', path: PATH.offlinePurchaseList },
+  { name: '顧客管理', path: PATH.offlineCustomer },
+  { name: '商品管理', path: PATH.offlineProduct },
 ]
 
 </script>
