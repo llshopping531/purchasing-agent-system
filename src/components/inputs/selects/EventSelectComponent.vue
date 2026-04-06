@@ -7,14 +7,19 @@ import { eventApi } from '@/services/api/events/events-api'
 import { onMounted, ref } from 'vue'
 import type { Option } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
-
+import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
+export interface EventOption {
+  selectedData: Option
+  isLocked: boolean
+}
 const emit = defineEmits<{
   /** 使用者選取活動時觸發，帶出活動對應的 Option */
-  (e: 'selectOption', data: Option): void
+  (e: 'selectOption', data: EventOption): void
 }>()
+const eventsAllRes = ref<EventsResBase[]>([])
 const defaultValue = ref<Option>({ name: '請選擇場次', value: '請選擇場次' })
 
-  /** 轉換為 Option 格式的活動清單 */
+/** 轉換為 Option 格式的活動清單 */
 const eventList = ref<Option[]>([{ name: '請選擇場次', value: '請選擇場次' }])
 
 onMounted(() => {
@@ -26,16 +31,18 @@ onMounted(() => {
  * @param data - 選取的 Option
  */
 function selectEvent(data: Option) {
-  emit('selectOption', data)
+  const filtedData = eventsAllRes.value.filter((item) => item.id === Number(data.value))[0]
+  if (!filtedData) return
+  emit('selectOption', { selectedData: data, isLocked: filtedData.isLocked })
 }
 
 /**
  * 從 API 取得所有活動並轉換為 Option 清單
  */
 async function getEventList() {
-  const eventsAllRes = await eventApi.getEventsAll()
-  if (eventsAllRes.length !== 0) {
-    eventList.value = eventsAllRes.map((res) => ({
+  eventsAllRes.value = await eventApi.getEventsAll()
+  if (eventsAllRes.value.length !== 0) {
+    eventList.value = [...eventsAllRes.value].map((res) => ({
       name: res.name,
       value: res.id.toString(),
     }))

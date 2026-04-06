@@ -19,6 +19,7 @@ const headerRow = ref<HeaderRow[]>([
   { name: '開始日期', value: 'startDate', sort: 0, width: '120px' },
   { name: '結束日期', value: 'endDate', sort: 0, width: '120px' },
   { name: '是否顯示', value: 'isHidden', sort: 0, width: '100px' },
+  { name: '是否鎖定', value: 'isLocked', sort: 0, width: '100px' },
 ])
 
 /** EventFormModal 元件的 ref，用於呼叫其 createEvent / editEvent / deleteEvent */
@@ -90,7 +91,10 @@ function onChangeSize(size: number) {
       @change-size="onChangeSize"
     >
       <template #col-isHidden="{ row }">
-        <boolean-transform-component :value="row.isHidden"></boolean-transform-component>
+        <boolean-transform-component :value="!row.isHidden"></boolean-transform-component>
+      </template>
+      <template #col-isLocked="{ row }">
+        <boolean-transform-component :value="row.isLocked"></boolean-transform-component>
       </template>
     </table-component>
     <event-form-modal ref="eventFormModal" @confirmed="getEventList"></event-form-modal>

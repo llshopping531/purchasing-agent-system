@@ -5,7 +5,9 @@
  * 並可開啟統計彈窗查看各商品的訂單數量匯總
  */
 import { ref } from 'vue'
-import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
+import EventSelectComponent, {
+  type EventOption,
+} from '@/components/inputs/selects/EventSelectComponent.vue'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import OrderTableComponent from '@/components/tables/OrderTableComponent/index.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
@@ -31,7 +33,8 @@ const isShowTotalBtn = ref(false)
 const isShowTotalModal = ref(false)
 /** 是否顯示通路下拉 */
 const isShowChannelSelect = ref(false)
-
+/** 當前通路是否已鎖定 */
+const currentEventIsLocked = ref(true)
 
 /** 統計彈窗的表格資料（各商品名稱與數量） */
 const tableData = ref<{ name: string; value: number }[]>([])
@@ -45,8 +48,9 @@ const headerRow = ref<HeaderRow[]>([
  * 選取活動
  * @param data - 選取的活動 Option
  */
-function selectEvent(data: Option) {
-  currentEventId.value = data.value
+function selectEvent(data: EventOption) {
+  currentEventId.value = data.selectedData.value
+  currentEventIsLocked.value = data.isLocked
   isShowChannelSelect.value = true
 }
 
@@ -111,14 +115,8 @@ function onConfirmed() {
         />
       </div>
       <div class="btnBox">
-        <div class="btn" v-if="isShowTotalBtn" @click="isShowTotalModal = true">
-          顯示統計
-        </div>
-        <div
-          class="btn create"
-          v-if="isTableQueried"
-          @click="orderFormModalRef?.createOrder()"
-        >
+        <div class="btn" v-if="isShowTotalBtn" @click="isShowTotalModal = true">顯示統計</div>
+        <div class="btn create" v-if="isTableQueried" @click="orderFormModalRef?.createOrder()">
           新增
         </div>
       </div>
@@ -127,17 +125,14 @@ function onConfirmed() {
       ref="orderTableRef"
       :currentEventId="currentEventId"
       :currentShopId="currentShopId"
+      :isOperate="!currentEventIsLocked"
       @tableData="getTableData"
       @delete="orderFormModalRef?.deleteOrder($event)"
       @edit="orderFormModalRef?.editOrder($event)"
     />
     <router-view />
 
-    <modal-component
-      name="統計"
-      @confirm="isShowTotalModal = false"
-      v-if="isShowTotalModal"
-    >
+    <modal-component name="統計" @confirm="isShowTotalModal = false" v-if="isShowTotalModal">
       <template #content>
         <div class="totalTable">
           <table-component

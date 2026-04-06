@@ -64,6 +64,8 @@ export interface EventsReqBase {
   endDate: string
   /** 是否隱藏 */
   isHidden: boolean
+  /** 是否鎖定 */
+  isLocked: boolean
   /** 自定義欄位 */
   extraData?: ExtraData
 }
@@ -82,6 +84,8 @@ export interface EventsResBase {
   endDate: string
   /** 是否隱藏 */
   isHidden: boolean
+  /** 是否鎖定 */
+  isLocked: boolean
   /** 自定義欄位（物件格式） */
   extraData: ExtraData
   /** 自定義欄位（JSON 字串格式） */

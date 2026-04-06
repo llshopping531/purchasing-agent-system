@@ -3,7 +3,7 @@
  * 採購清單頁面
  * 選取活動後，顯示各通路的採購統計（依通路分組，可個別收合）
  */
-import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
+import EventSelectComponent, { type EventOption } from '@/components/inputs/selects/EventSelectComponent.vue'
 import type { Option } from '@/interfaces/common'
 import { ref } from 'vue'
 import PurchaseChannelItem from './PurchaseChannelItem.vue'
@@ -26,6 +26,8 @@ const purchaseList = ref<PurchaseList[]>([])
 const displayPurchaseList = ref<PurchaseList[]>([])
 /** 是否顯示通路下拉 */
 const isShowChannelSelect = ref<boolean>(false)
+  /** 當前通路是否已鎖定 */
+const currentEventIsLocked = ref(true)
 
 /**
  * 選取活動後，從 API 取得採購統計並轉換為以通路為單位的陣列
@@ -40,8 +42,9 @@ async function fetchPurchaseList() {
   displayPurchaseList.value = purchaseList.value
 }
 
-async function selectEvent(option: Option) {
-  currentEventId.value = Number(option.value)
+async function selectEvent(data: EventOption) {
+  currentEventId.value = Number(data.selectedData.value)
+  currentEventIsLocked.value = data.isLocked
   await fetchPurchaseList()
   isShowChannelSelect.value = true
 }
@@ -81,6 +84,7 @@ function selectChannel(option: Option) {
       :channelName="purchase.channelName"
       :eventId="currentEventId"
       :data="purchase.data"
+      :isOperate="!currentEventIsLocked"
       @refresh="fetchPurchaseList"
     ></purchase-channel-item>
   </div>

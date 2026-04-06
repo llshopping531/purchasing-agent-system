@@ -14,6 +14,8 @@ const pop = defineProps<{
   currentEventId: string
   /** 目前選取的通路 ID（字串形式） */
   currentShopId: string
+  /** 是否可操作 */
+  isOperate: boolean
 }>()
 
 const emit = defineEmits<{
@@ -143,6 +145,8 @@ async function getOrderList() {
   <div class="orderTable">
     <table-component
       :headerRow="headerRow"
+      :is-edit="isOperate"
+      :is-delete="isOperate"
       :tableData="tableData"
       :totalPages="totalPages"
       :currentPage="currentPage"

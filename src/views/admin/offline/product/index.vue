@@ -4,7 +4,7 @@
  * 選取活動與通路後顯示分頁商品列表，並透過 ProductFormModal ref 處理新增／編輯／刪除操作
  */
 import { ref } from 'vue'
-import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
+import EventSelectComponent, { type EventOption } from '@/components/inputs/selects/EventSelectComponent.vue'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import PaginationComponent from '@/components/PaginationComponent.vue'
@@ -44,13 +44,16 @@ const pageSize = ref(20)
 const totalPages = ref(0)
 /** 總筆數 */
 const totalElements = ref(0)
+/** 當前通路是否已鎖定 */
+const currentEventIsLocked = ref(true)
 
 /**
  * 選取活動，重置表格並重新查詢
  * @param data - 選取的活動 Option
  */
-function selectEvent(data: Option) {
-  currentEventId.value = data.value
+function selectEvent(data: EventOption) {
+  currentEventId.value = data.selectedData.value
+  currentEventIsLocked.value = data.isLocked
   currentShopId.value = ''
   isShowChannelSelect.value = true
   resetTable()
@@ -70,6 +73,7 @@ function selectShop(data: Option) {
  */
 function resetTable() {
   currentPage.value = 0
+  tableData.value =[]
   if (currentEventId.value && currentShopId.value) {
     getProductList()
   }
@@ -137,6 +141,8 @@ function onChangeSize(size: number) {
       v-if="isTableQueried"
       :headerRow="headerRow"
       :tableData="tableData"
+      :is-delete="!currentEventIsLocked"
+      :is-edit="!currentEventIsLocked"
       @edit="productFormModalRef?.editProduct($event)"
       @delete="productFormModalRef?.deleteProduct($event)"
     >

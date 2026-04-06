@@ -30,6 +30,8 @@ const currentStartDate = ref('')
 const currentEndDate = ref('')
 /** 表單欄位：是否隱藏 */
 const currentIsHidden = ref(false)
+/** 表單欄位：是否鎖定 */
+const currentIsLocked = ref(false)
 
 /**
  * 開啟新增活動彈窗
@@ -49,7 +51,8 @@ function editEvent(currentData: QueryEventsContent) {
   currentEventName.value = currentData.name
   currentStartDate.value = currentData.startDate
   currentEndDate.value = currentData.endDate
-  currentIsHidden.value = currentData.isHidden
+  currentIsHidden.value = !currentData.isHidden
+  currentIsLocked.value = currentData.isLocked
   isVisible.value = true
 }
 
@@ -73,7 +76,8 @@ async function confirm() {
     name: currentEventName.value,
     startDate: currentStartDate.value,
     endDate: currentEndDate.value,
-    isHidden: currentIsHidden.value,
+    isHidden: !currentIsHidden.value,
+    isLocked: currentIsLocked.value
   }
   if (modalMode.value === 1) await eventApi.postEvents(eventData)
   if (modalMode.value === 2) await eventApi.patchEvents(currentEventId.value, eventData)
@@ -91,6 +95,7 @@ function closeModal() {
   currentStartDate.value = ''
   currentEndDate.value = ''
   currentIsHidden.value = false
+  currentIsLocked.value = false
   isVisible.value = false
 }
 
@@ -116,7 +121,8 @@ defineExpose({ createEvent, editEvent, deleteEvent })
     <template #content>
       <div class="formGrid">
         <text-input label="活動名稱" v-model:value="currentEventName"></text-input>
-        <checkbox-input label="是否顯示" v-model="currentIsHidden" />
+        <checkbox-input label="是否顯示" v-model="currentIsHidden" style="margin-top: auto;"/>
+        <checkbox-input label="是否鎖定" v-model="currentIsLocked" style="margin-top: auto;"/>
         <text-input label="開始日期" v-model:value="currentStartDate"></text-input>
         <text-input label="結束日期" v-model:value="currentEndDate"></text-input>
       </div>

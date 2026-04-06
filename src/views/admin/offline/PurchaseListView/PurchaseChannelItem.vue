@@ -22,6 +22,8 @@ const pops = defineProps<{
   channelName: string
   /** 活動 ID */
   eventId: number
+  /** 是否可操作 */
+  isOperate?:boolean
   /** 該通路的採購明細資料 */
   data: PurchaseListData[]
 }>()
@@ -144,7 +146,8 @@ async function modifyOrderStatus() {
       <table-component
         :headerRow="headerRow"
         :tableData="data"
-        :isDelete="false"
+        :is-edit="isOperate"
+        :is-delete="false"
         @edit="purchaseCheck"
       >
         <!-- 商品名稱欄：可點擊開啟詳細彈窗 -->
