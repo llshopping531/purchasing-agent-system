@@ -48,20 +48,43 @@ function clickChannel(channelName: Channel) {
   </div>
 </template>
 
-<style scope>
+<style scoped>
 .channelList {
   display: flex;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 1.5rem;
+
   .channelItem {
-    padding: 0.5rem 2rem;
+    padding: 0.75rem 1.25rem;
     cursor: pointer;
-    &.active {
-      background: var(--color-primary);
-      color: #fff;
-      font-weight: bold;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    border-bottom: 2.5px solid transparent;
+    transition:
+      color 0.15s,
+      border-color 0.15s;
+    margin-bottom: -1px;
+    text-decoration: none;
+    background: transparent;
+
+    &:hover {
+      color: var(--color-primary);
+      background: transparent;
+    }
+
+    &.active,
+    &.router-link-active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+      font-weight: 600;
+      background: transparent;
     }
   }
 }
+
 .channelContent {
-  padding: 1rem;
+  padding: 1.5rem;
 }
 </style>

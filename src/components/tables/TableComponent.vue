@@ -67,45 +67,79 @@ function deleteData(data: T) {
 </template>
 
 <style scoped>
-.table .header,
-.table .body-item {
-  display: flex;
-  gap: 0.25rem;
-}
 .table {
+  background-color: rgba(124, 111, 224, 0.08);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+
+  .header {
+    display: flex;
+    gap: 1px;
+  }
+
   .header-item,
   .item-col {
     width: calc(100% / var(--row-count));
   }
+
   .header-item {
     background-color: var(--color-primary);
-    padding: 0.25rem 0.5rem;
+    padding: 0.65rem 0.75rem;
     color: #fff;
     text-align: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+
     &.operate {
       width: 120px;
     }
   }
+
+  .body {
+    .body-item {
+      display: flex;
+      gap: 1px;
+      margin-top: 1px;
+      transition: filter 0.1s;
+
+      &:nth-child(even) .item-col {
+        background-color: #f8f6ff;
+      }
+
+      &:hover .item-col {
+        background-color: var(--color-primary-muted);
+      }
+    }
+  }
+
   .item-col {
-    background-color: #fff;
-    padding: 0.25rem 0.5rem;
-  }
-  .body-item {
-    margin-top: 0.25rem;
-    font-size: 14px;
-  }
-  .item-col.operate {
+    background-color: var(--color-surface);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
     display: flex;
-    gap: 0.25rem;
     align-items: center;
+  }
+
+  .item-col.operate {
+    gap: 0.35rem;
+    justify-content: center;
     width: 120px;
     flex-wrap: wrap;
-    justify-content: center;
+
     .btn {
-      padding: 0 0.5rem;
-      font-size: 14px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.8rem;
+      border-radius: var(--radius-sm);
+      box-shadow: none;
+
       &.delete {
-        background-color: #e05c5c;
+        background-color: var(--color-danger);
+
+        &:hover {
+          background-color: var(--color-danger-dark);
+        }
       }
     }
   }

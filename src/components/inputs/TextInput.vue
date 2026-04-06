@@ -20,24 +20,41 @@ const value = defineModel('value')
 .label {
   margin-top: 1rem;
   display: block;
+
   span {
-    font-weight: bold;
-    font-size: 1rem;
+    display: block;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.35rem;
   }
+
   input {
     display: block;
-    margin-top: 0.25rem;
-    padding: 0.5rem 0.75rem;
-    font-size: 1rem;
-    border-radius: 0.25rem;
-    border: 1px solid var(--color-primary);
-    &:focus-visible {
-      outline-color: var(--color-primary);
+    padding: 0.5rem 0.875rem;
+    font-size: 0.9rem;
+    border-radius: var(--radius-md);
+    border: 1.5px solid rgba(124, 111, 224, 0.3);
+    background: var(--color-surface);
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(124, 111, 224, 0.1);
     }
+
+    &:focus-visible {
+      outline: none;
+    }
+
     &:disabled {
-      background-color: #f5f5f5;
+      background: #f5f3ff;
       color: #aaa;
       cursor: not-allowed;
+      border-color: rgba(124, 111, 224, 0.15);
     }
   }
 }

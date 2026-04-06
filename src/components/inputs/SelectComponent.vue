@@ -51,7 +51,7 @@ function filter() {
   <div class="select">
     <span class="label">{{ label }}</span>
     <input
-      class="currentVule"
+      class="currentValue"
       type="text"
       @focus="openOptionList()"
       @blur="closeOptionList()"
@@ -60,7 +60,7 @@ function filter() {
     />
 
     <div class="optionList" v-if="isOpenOption">
-      <div v-if="currentOptionList.length === 0" class="optionItem">---無資料---</div>
+      <div v-if="currentOptionList.length === 0" class="optionItem empty">— 無資料 —</div>
       <div
         class="optionItem"
         v-for="option in currentOptionList"
@@ -74,46 +74,80 @@ function filter() {
 </template>
 
 <style scoped>
-  .select {
-    display: flex;
-    flex-direction: column;
-    width: fit-content;
-    position: relative;
-    margin-top: 1rem;
-    .label {
-      margin-bottom: 0.25rem;
-      font-weight: bold;
-    }
-  }
-  .currentVule {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    border: 1px solid var(--color-primary);
+.select {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  position: relative;
+  margin-top: 1rem;
+  min-width: 180px;
 
-    &:focus-visible {
-      outline: var(--color-primary) auto 2px;
-    }
+  .label {
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
   }
-  .optionList {
-    border: 1px solid #353636;
-    display: inline-block;
-    background: #fff;
-    position: absolute;
-    bottom: 0px;
-    left: 0;
-    right: 0;
-    transform: translateY(calc(100% - 1px));
-    max-height: 300px;
-    overflow-y: scroll;
-    z-index: 1;
-    .optionItem {
-      padding: 0.5rem;
-      min-width: 100px;
+}
+
+.currentValue {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.9rem;
+  border: 1.5px solid rgba(124, 111, 224, 0.3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(124, 111, 224, 0.1);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.optionList {
+  border: 1.5px solid rgba(124, 111, 224, 0.3);
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transform: translateY(calc(100% - 1px));
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 100;
+
+  .optionItem {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.1s;
+
+    &:hover {
+      background: var(--color-primary-muted);
+      color: var(--color-primary-dark);
+    }
+
+    &.empty {
+      color: var(--color-text-muted);
+      text-align: center;
+      cursor: default;
+      font-size: 0.85rem;
+
       &:hover {
-        background-color: var(--color-primary-light);
-        color: #fff;
-        cursor: pointer;
+        background: none;
+        color: var(--color-text-muted);
       }
     }
   }
+}
 </style>

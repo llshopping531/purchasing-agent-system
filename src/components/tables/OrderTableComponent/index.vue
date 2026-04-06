@@ -131,6 +131,12 @@ async function getOrderList() {
 </template>
 
 <style scoped>
+.cancelled {
+  color: var(--color-danger);
+  text-decoration: line-through;
+  opacity: 0.8;
+}
+
 .detail-btn {
   display: flex;
   justify-content: center;

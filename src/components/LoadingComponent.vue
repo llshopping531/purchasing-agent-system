@@ -8,17 +8,27 @@ const loadingStore = useLoadingStore()
 <template>
   <div class="loading" v-if="loadingStore.isLoading">
     <mask-component></mask-component>
-    <div class="icon">
+    <div class="loading-icon">
       <icon-loading></icon-loading>
     </div>
   </div>
 </template>
 <style>
 .loading {
-  .icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  pointer-events: none;
+
+  .loading-icon {
+    position: relative;
+    z-index: 301;
   }
 }
 </style>

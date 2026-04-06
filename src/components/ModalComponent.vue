@@ -30,11 +30,13 @@ function cancel() {
 <template>
   <mask-component @click="cancel"></mask-component>
   <div class="modal" :style="{ width: width }">
-    <div class="title">{{ name }}</div>
-    <slot name="content"></slot>
+    <div class="modal-title">{{ name }}</div>
+    <div class="modal-body">
+      <slot name="content"></slot>
+    </div>
     <div class="btnBox">
       <div class="btn" @click="confirm">確定</div>
-      <div class="btn" @click="cancel" v-if="isShowCancelBtn">取消</div>
+      <div class="btn btn-outline" @click="cancel" v-if="isShowCancelBtn">取消</div>
     </div>
   </div>
 </template>
@@ -44,23 +46,55 @@ function cancel() {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #fff;
-  box-shadow: 1rem 1rem 0.5rem #8887874a;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg);
   width: 700px;
-  max-width: 80%;
-  max-height: 80%;
-  padding: 1rem;
-  overflow: auto;
-  .title {
+  max-width: 92vw;
+  max-height: 88vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 201;
+
+  .modal-title {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: #fff;
+    padding: 0.875rem 1.5rem;
+    font-size: 1.05rem;
+    font-weight: 600;
     text-align: center;
-    font-size: 2rem;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
   }
+
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem 1.5rem;
+
+    &::-webkit-scrollbar {
+      width: 5px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: var(--color-primary-light);
+      border-radius: 3px;
+      opacity: 0.6;
+    }
+  }
+
   .btnBox {
-    margin-top: 3rem;
+    padding: 0.875rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
+    gap: 0.75rem;
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+    background: #faf9ff;
   }
 }
 </style>

@@ -5,7 +5,7 @@ defineProps<{
 </script>
 
 <template>
-  <span class="bool">
+  <span class="bool" :class="{ 'is-true': value, 'is-false': !value }">
     <img v-if="value" alt="isChecked" class="icon" src="@/assets/checked.svg" />
     <img v-if="!value" alt="isChecked" class="icon" src="@/assets/unChecked.svg" />
     {{ value ? '是' : '否' }}
@@ -20,13 +20,19 @@ defineProps<{
   font-size: 0.85rem;
   font-weight: 500;
 
+  &.is-true {
+    color: var(--color-success);
+  }
+
+  &.is-false {
+    color: var(--color-text-muted);
+  }
+
   .icon {
     display: inline-block;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
-    position: relative;
   }
 }
 </style>

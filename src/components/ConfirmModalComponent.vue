@@ -50,10 +50,8 @@ function confirm() {
   >
     <template #content>
       <div class="remind">
-        <p>
-          {{ confirmText }}
-        </p>
-        <span>！提醒: 此操作可能無法復原</span>
+        <p>{{ confirmText }}</p>
+        <span>！提醒：此操作可能無法復原</span>
       </div>
     </template>
   </modal-component>
@@ -61,11 +59,21 @@ function confirm() {
 
 <style>
 .remind {
-  margin-top: 3rem;
   text-align: center;
+  padding: 1.5rem 0.5rem 0.5rem;
+
+  p {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 0.75rem;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+
   span {
-    font-size: 12px;
-    color: #f53f3f;
+    font-size: 0.8rem;
+    color: var(--color-danger);
+    font-weight: 500;
   }
 }
 </style>

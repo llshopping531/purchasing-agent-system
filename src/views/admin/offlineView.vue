@@ -12,7 +12,6 @@ const functionList = [
 </script>
 <template>
   <div class="offline">
-    <!-- <h3 class="title">快速功能</h3> -->
     <div class="functionList">
       <router-link
         :to="item.path"
@@ -28,20 +27,27 @@ const functionList = [
 
 <style>
 .offline {
-  .title {
-    font-weight: bold;
-    color: #183a28;
-  }
   .functionList {
     display: flex;
     gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+
     .functionItem {
-      border: 1px solid var(--color-primary);
+      border: 1.5px solid var(--color-primary);
       color: var(--color-primary);
-      padding: 0.5rem 1rem;
+      padding: 0.35rem 1rem;
       cursor: pointer;
-      &:hover {
-        background-color: var(--color-primary-light);
+      border-radius: var(--radius-xl);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+      text-decoration: none;
+      background: transparent;
+
+      &:hover,
+      &.router-link-active {
+        background: var(--color-primary);
         color: #fff;
       }
     }

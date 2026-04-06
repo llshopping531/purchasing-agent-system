@@ -8,7 +8,8 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #33333345;
-  overflow: hidden;
+  background: rgba(45, 36, 88, 0.45);
+  backdrop-filter: blur(3px);
+  z-index: 200;
 }
 </style>

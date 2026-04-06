@@ -8,16 +8,5 @@ a,
 .green {
   text-decoration: none;
   color: var(--color-primary);
-  transition: 0.4s;
-  padding: 3px;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: var(--color-primary-light);
-    color: #fff;
-  }
-}
-
-@media (min-width: 1024px) {
+  transition: color 0.15s;
 }
