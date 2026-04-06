@@ -78,7 +78,7 @@ function deleteData(data: T) {
     width: calc(100% / var(--row-count));
   }
   .header-item {
-    background-color: #8cbfa4;
+    background-color: var(--color-primary);
     padding: 0.25rem 0.5rem;
     color: #fff;
     text-align: center;
@@ -105,7 +105,7 @@ function deleteData(data: T) {
       padding: 0 0.5rem;
       font-size: 14px;
       &.delete {
-        background-color: #ef6e6e;
+        background-color: #e05c5c;
       }
     }
   }

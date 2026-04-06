@@ -55,7 +55,7 @@ function clickChannel(channelName: Channel) {
     padding: 0.5rem 2rem;
     cursor: pointer;
     &.active {
-      background: #8cbfa5;
+      background: var(--color-primary);
       color: #fff;
       font-weight: bold;
     }

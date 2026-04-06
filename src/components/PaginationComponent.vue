@@ -88,13 +88,13 @@ const visiblePages = computed((): (number | '...')[] => {
   color: #444;
   transition: background 0.15s;
   &:hover:not(:disabled) {
-    background: #f0f9f4;
-    border-color: #8cbfa4;
-    color: #5a9e80;
+    background: var(--color-primary-muted);
+    border-color: var(--color-primary);
+    color: var(--color-primary-dark);
   }
   &.active {
-    background: #8cbfa4;
-    border-color: #8cbfa4;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
     color: #fff;
     cursor: default;
   }
@@ -118,7 +118,7 @@ const visiblePages = computed((): (number | '...')[] => {
   background: #fff;
   &:focus {
     outline: none;
-    border-color: #8cbfa4;
+    border-color: var(--color-primary);
   }
 }
 </style>

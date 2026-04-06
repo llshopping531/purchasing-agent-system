@@ -76,8 +76,8 @@ function toggleTable(index: number) {
     .icon {
       position: absolute;
       display: block;
-      border-left: 3px solid #354a5e;
-      border-bottom: 3px solid #354a5e;
+      border-left: 3px solid var(--color-primary);
+      border-bottom: 3px solid var(--color-primary);
       top: 50%;
       left: 50%;
       width: 10px;

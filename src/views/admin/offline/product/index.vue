@@ -130,7 +130,7 @@ function onChangeSize(size: number) {
     }
   }
   .imageLink {
-    color: #8cbfa4;
+    color: var(--color-primary);
     font-size: 0.85rem;
     &:hover {
       text-decoration: underline;

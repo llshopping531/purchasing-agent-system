@@ -58,7 +58,7 @@ function logout() {
     display: flex;
     gap: 1rem;
     a {
-      border: 1px solid #00bd7e;
+      border: 1px solid var(--color-primary);
       padding: 0.25rem 0.75rem;
     }
   }

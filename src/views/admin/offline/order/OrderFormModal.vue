@@ -377,7 +377,7 @@ defineExpose({ createOrder, editOrder, deleteOrder })
 }
 .addLink {
   font-size: 0.85rem;
-  color: #8cbfa4;
+  color: var(--color-primary);
   cursor: pointer;
   margin-top: 0.4rem;
   &:hover {

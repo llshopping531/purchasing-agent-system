@@ -40,7 +40,7 @@ const shopList: EventItem[] = [
   .shopSelect {
     padding: 0.5rem 1rem;
     font-size: 1rem;
-    border: 1px solid #8cbfa4;
+    border: 1px solid var(--color-primary);
   }
 }
 </style>

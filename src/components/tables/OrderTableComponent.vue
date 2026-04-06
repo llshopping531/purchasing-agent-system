@@ -258,7 +258,7 @@ async function getOrderList() {
     display: block;
     width: 16px;
     height: 16px;
-    border: 2px solid #8cbfa4;
+    border: 2px solid var(--color-primary);
     border-radius: 50%;
     position: relative;
     &::before {
@@ -270,14 +270,14 @@ async function getOrderList() {
       font-size: 11px;
       font-style: italic;
       font-weight: bold;
-      color: #8cbfa4;
+      color: var(--color-primary);
       line-height: 1;
     }
   }
   &:hover .detail-icon {
-    border-color: #5a9e80;
+    border-color: var(--color-primary-dark);
     &::before {
-      color: #5a9e80;
+      color: var(--color-primary-dark);
     }
   }
 }
@@ -296,7 +296,7 @@ async function getOrderList() {
     .detail-label {
       width: 90px;
       flex-shrink: 0;
-      background-color: #8cbfa4;
+      background-color: var(--color-primary);
       color: #fff;
       padding: 0.25rem 0.5rem;
       text-align: center;

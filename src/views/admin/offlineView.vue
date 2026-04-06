@@ -36,12 +36,12 @@ const functionList = [
     display: flex;
     gap: 0.5rem;
     .functionItem {
-      border: 1px solid #00bd7e;
-      color: #00bd7e;
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary);
       padding: 0.5rem 1rem;
       cursor: pointer;
       &:hover {
-        background-color: #8cbfa5;
+        background-color: var(--color-primary-light);
         color: #fff;
       }
     }

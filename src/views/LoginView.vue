@@ -50,10 +50,10 @@ function login() {
     padding: 5rem 5rem 2rem;
     background-color: #fff;
     border-radius: 0.5rem;
-    box-shadow: 0.5rem 0.5rem 1rem #d4dddb;
+    box-shadow: 0.5rem 0.5rem 1rem #d8d4f0;
   }
   h1 {
-    color: #00bd7e;
+    color: var(--color-primary);
     font-weight: bold;
     text-align: center;
   }
@@ -65,7 +65,7 @@ function login() {
       color: #333;
       text-decoration: underline;
       &:hover {
-        color: #00bd7e;
+        color: var(--color-primary);
         background: unset;
       }
     }

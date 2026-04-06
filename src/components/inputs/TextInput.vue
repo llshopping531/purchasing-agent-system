@@ -30,9 +30,9 @@ const value = defineModel('value')
     padding: 0.5rem 0.75rem;
     font-size: 1rem;
     border-radius: 0.25rem;
-    border: 1px solid #00bd7e;
+    border: 1px solid var(--color-primary);
     &:focus-visible {
-      outline-color: #00bd7e;
+      outline-color: var(--color-primary);
     }
     &:disabled {
       background-color: #f5f5f5;

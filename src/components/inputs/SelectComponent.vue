@@ -88,10 +88,10 @@ function filter() {
   .currentVule {
     padding: 0.5rem 1rem;
     font-size: 1rem;
-    border: 1px solid #8cbfa4;
+    border: 1px solid var(--color-primary);
 
     &:focus-visible {
-      outline: #8cbfa4 auto 2px;
+      outline: var(--color-primary) auto 2px;
     }
   }
   .optionList {
@@ -110,7 +110,7 @@ function filter() {
       padding: 0.5rem;
       min-width: 100px;
       &:hover {
-        background-color: #8cbfa5;
+        background-color: var(--color-primary-light);
         color: #fff;
         cursor: pointer;
       }
