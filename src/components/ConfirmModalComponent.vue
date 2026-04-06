@@ -4,7 +4,7 @@ import { ref } from 'vue'
 defineProps<{
   name: string
   confromText: string
-  isDelete: boolean
+  isDelete?: { type: boolean; default: false }
   width?: string
   isShowCancelBtn?: boolean
 }>()
