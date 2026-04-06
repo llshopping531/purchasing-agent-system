@@ -347,12 +347,12 @@ defineExpose({ createOrder, editOrder, deleteOrder })
           @selectOption="formOrderStatusOption = $event"
         />
         <text-input label="備註" v-model:value="formNote" />
-        <div class="checkboxGroup">
+
           <checkbox-input label="非特典對象" v-model="formNonBonusTarget" />
           <checkbox-input label="固定匯率" v-model="formIsFixedRate" />
-          <checkbox-input label="非砍單對象" v-model="formNonCutTarget" />
+          <checkbox-input label="非分潤對象" v-model="formNonCutTarget" />
           <checkbox-input label="採購確認" v-model="formPurchaseConfirm" />
-        </div>
+
       </div>
     </template>
   </confirm-modal-component>
@@ -389,17 +389,5 @@ defineExpose({ createOrder, editOrder, deleteOrder })
   grid-template-columns: 1fr 1fr;
   gap: 0 1.5rem;
   padding: 0 0.5rem;
-  .checkboxGroup {
-    grid-column: span 2;
-    display: flex;
-    gap: 1.5rem;
-    margin-top: 1rem;
-    label {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      cursor: pointer;
-    }
-  }
 }
 </style>

@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import PaginationComponent from '@/components/PaginationComponent.vue'
+import BooleanTransformComponent from '@/components/BooleanTransformComponent.vue'
 import CustomerFormModal from './CustomerFormModal.vue'
 import { customersApi } from '@/services/api/customers/customers-api'
 import type { CustomersResBase } from '@/services/api/customers/customers-api-interfaces'
@@ -62,13 +63,13 @@ function onChangeSize(size: number) {
       @edit="customerFormModalRef?.editCustomer($event)"
     >
       <template #col-hasMessagedOfficial="{ row }">
-        {{ row.hasMessagedOfficial ? '是' : '否' }}
+        <boolean-transform-component :value="row.hasMessagedOfficial"></boolean-transform-component>
       </template>
       <template #col-isDiscount="{ row }">
-        {{ row.isDiscount ? '是' : '否' }}
+        <boolean-transform-component :value="row.isDiscount"></boolean-transform-component>
       </template>
       <template #col-isBoss="{ row }">
-        {{ row.isBoss ? '是' : '否' }}
+        <boolean-transform-component :value="row.isBoss"></boolean-transform-component>
       </template>
     </table-component>
     <pagination-component

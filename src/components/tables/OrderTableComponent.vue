@@ -5,6 +5,7 @@ import ModalComponent from '@/components/ModalComponent.vue'
 import PaginationComponent from '@/components/PaginationComponent.vue'
 import { fieldDefsApi } from '@/services/api/sys/field-defs-api'
 import { orderApi, type OrderAllContent } from '@/services/api/order/order-api'
+import BooleanTransformComponent from '@/components/BooleanTransformComponent.vue'
 const pop = defineProps<{
   currentEventId: string
   currentShopId: string
@@ -20,7 +21,7 @@ const headerRow = ref<HeaderRow[]>([
   { name: '品項', value: 'productName', sort: 0, width: '300px' },
   { name: '數量', value: 'quantity', sort: 0, width: '70px' },
   { name: '訂單狀態', value: 'orderStatusName', sort: 0, width: '100px' },
-  { name: '更多資訊', value: 'more', sort: 0, width: '100px' }
+  { name: '更多資訊', value: 'more', sort: 0, width: '100px' },
 ])
 const tableData = ref<OrderAllContent[]>([])
 const selectedOrder = ref<OrderAllContent | null>(null)
@@ -43,10 +44,13 @@ onMounted(() => {
 
 defineExpose({ refresh: getOrderList })
 
-watch(() => [pop.currentEventId, pop.currentShopId], () => {
-  currentPage.value = 0
-  getOrderList()
-})
+watch(
+  () => [pop.currentEventId, pop.currentShopId],
+  () => {
+    currentPage.value = 0
+    getOrderList()
+  },
+)
 
 function deleteData(data: OrderAllContent) {
   emit('delete', data)
@@ -149,7 +153,7 @@ async function getOrderList() {
             <span class="detail-value">{{ selectedOrder.orderStatusName }}</span>
           </div>
         </div>
-        <div class="detail-line">
+        <!-- <div class="detail-line">
           <div class="detail-row">
             <span class="detail-label">日幣單價</span>
             <span class="detail-value">{{ selectedOrder.productPriceJpy }} JPY</span>
@@ -158,7 +162,7 @@ async function getOrderList() {
             <span class="detail-label">台幣單價</span>
             <span class="detail-value">{{ selectedOrder.productPriceTwd }} TWD</span>
           </div>
-        </div>
+        </div> -->
         <div class="detail-line">
           <div class="detail-row">
             <span class="detail-label">匯率</span>
@@ -184,12 +188,12 @@ async function getOrderList() {
             <span class="detail-label">通路</span>
             <span class="detail-value">{{ selectedOrder.channelName }}</span>
           </div>
-          <div class="detail-row">
+          <!-- <div class="detail-row">
             <span class="detail-label">採購批次</span>
             <span class="detail-value">{{ selectedOrder.purchaseBatch }}</span>
-          </div>
+          </div> -->
         </div>
-        <div class="detail-line">
+        <!-- <div class="detail-line">
           <div class="detail-row">
             <span class="detail-label">前台備註</span>
             <span class="detail-value">{{ selectedOrder.publicNote }}</span>
@@ -198,30 +202,42 @@ async function getOrderList() {
             <span class="detail-label">後台備註</span>
             <span class="detail-value">{{ selectedOrder.adminNote }}</span>
           </div>
-        </div>
+        </div> -->
         <div class="detail-line">
           <div class="detail-row">
             <span class="detail-label">非特典對象</span>
-            <span class="detail-value">{{ selectedOrder.nonBonusTarget ? '是' : '否' }}</span>
+            <span class="detail-value">
+              <boolean-transform-component :value="selectedOrder.nonBonusTarget" />
+            </span>
           </div>
           <div class="detail-row">
             <span class="detail-label">固定匯率</span>
-            <span class="detail-value">{{ selectedOrder.isFixedRate ? '是' : '否' }}</span>
+            <span class="detail-value">
+              <boolean-transform-component :value="selectedOrder.isFixedRate" />
+            </span>
           </div>
         </div>
         <div class="detail-line">
           <div class="detail-row">
-            <span class="detail-label">非砍單對象</span>
-            <span class="detail-value">{{ selectedOrder.nonCutTarget ? '是' : '否' }}</span>
+            <span class="detail-label">非分潤對象</span>
+            <span class="detail-value">
+              <boolean-transform-component :value="selectedOrder.nonCutTarget" />
+            </span>
           </div>
           <div class="detail-row">
             <span class="detail-label">採購確認</span>
-            <span class="detail-value">{{ selectedOrder.purchaseConfirm ? '是' : '否' }}</span>
+            <span class="detail-value">
+              <boolean-transform-component :value="selectedOrder.purchaseConfirm" />
+            </span>
           </div>
         </div>
         <template v-for="(_, i) in Math.ceil(extraFields.length / 2)" :key="i">
           <div class="detail-line">
-            <div class="detail-row" v-for="field in extraFields.slice(i * 2, i * 2 + 2)" :key="field.value">
+            <div
+              class="detail-row"
+              v-for="field in extraFields.slice(i * 2, i * 2 + 2)"
+              :key="field.value"
+            >
               <span class="detail-label">{{ field.name }}</span>
               <span class="detail-value">{{ (selectedOrder as any)[field.value] }}</span>
             </div>
