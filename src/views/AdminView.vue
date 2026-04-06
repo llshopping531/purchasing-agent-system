@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import HeaderComponent from "@/components/HeaderComponent.vue";
 import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
+const route = useRoute();
 const buttonList = [{ name: "前往使用者前台系統", link: "/user" }];
 enum Channel {
-  online = "online",
-  offline = "offline",
+  online = "/admin/online",
+  offline = "/admin/offline",
 }
 const currentChannelTab = ref(Channel.offline);
 
 onMounted(() => {
-  router.push(`/admin/${currentChannelTab.value}`);
+  if (route.path === '/admin') {
+    router.push(currentChannelTab.value);
+  }
 });
 
 function clickChannel(channelName: Channel) {
@@ -37,7 +40,7 @@ function clickChannel(channelName: Channel) {
     <router-link
       :to="Channel.offline"
       class="channelItem"
-      :class="{ active: currentChannelTab === Channel.offline }"
+      :class="{ active: currentChannelTab === Channel.offline || route.path.startsWith('/admin/offline') }"
       @click="clickChannel(Channel.offline)"
     >
       場販專區
