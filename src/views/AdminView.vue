@@ -83,8 +83,4 @@ function clickChannel(channelName: Channel) {
     }
   }
 }
-
-.channelContent {
-  padding: 1.5rem;
-}
 </style>
