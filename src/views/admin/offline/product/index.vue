@@ -124,7 +124,6 @@ function onChangeSize(size: number) {
       v-if="isTableQueried"
       :headerRow="headerRow"
       :tableData="tableData"
-      :operate="{ isDelete: true, isEdit: true, isOperate: true }"
       @edit="productFormModalRef?.editProduct($event)"
       @delete="productFormModalRef?.deleteProduct($event)"
     >

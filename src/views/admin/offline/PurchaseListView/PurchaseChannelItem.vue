@@ -40,7 +40,8 @@ function toggle() {
       <table-component
         :headerRow="headerRow"
         :tableData="data"
-        :operate="{ isDelete: false, isEdit: false, isOperate: false }"
+        :isDelete="false"
+        :isEdit="false"
       ></table-component>
     </div>
   </div>

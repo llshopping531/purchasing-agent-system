@@ -40,7 +40,10 @@ const pop = withDefaults(
   {
     isDelete: true,
     isEdit: true,
-    pageSize: 20,
+    totalPages: 0,
+    currentPage: 1,
+    totalElements: 0,
+    pageSize: 100,
   },
 )
 const emit = defineEmits<{

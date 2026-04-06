@@ -144,8 +144,6 @@ async function getOrderList() {
     <table-component
       :headerRow="headerRow"
       :tableData="tableData"
-      :isDelete="true"
-      :isEdit="true"
       :totalPages="totalPages"
       :currentPage="currentPage"
       :totalElements="totalElements"

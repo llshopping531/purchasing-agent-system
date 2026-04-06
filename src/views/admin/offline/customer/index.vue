@@ -82,7 +82,6 @@ function onChangeSize(size: number) {
       :headerRow="headerRow"
       :tableData="tableData"
       :isDelete="false"
-      :isEdit="true"
       :totalPages="totalPages"
       :currentPage="currentPage"
       :totalElements="totalElements"

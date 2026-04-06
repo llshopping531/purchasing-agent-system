@@ -3,7 +3,7 @@
  * 活動下拉選取元件
  * 掛載時自動從 API 載入所有活動，選取後 emit selectOption 事件
  */
-import { eventApi } from '@/services/api/event-api'
+import { eventApi } from '@/services/api/events/events-api'
 import { onMounted, ref } from 'vue'
 import type { Option } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'

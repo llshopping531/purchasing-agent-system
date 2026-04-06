@@ -6,7 +6,8 @@
  */
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
-import { eventApi, type EventData } from '@/services/api/event-api'
+import { eventApi } from '@/services/api/events/events-api'
+import type { QueryEventsContent } from '@/services/api/events/events-api-interfaces';
 import { ref } from 'vue'
 
 const emit = defineEmits<{
@@ -41,7 +42,7 @@ function createEvent() {
  * 開啟編輯活動彈窗，並將現有資料填入表單
  * @param currentData - 要編輯的活動資料
  */
-function editEvent(currentData: EventData) {
+function editEvent(currentData: QueryEventsContent) {
   modalMode.value = 2
   currentEventId.value = currentData.id
   currentEventName.value = currentData.name
@@ -55,7 +56,7 @@ function editEvent(currentData: EventData) {
  * 開啟刪除活動確認彈窗
  * @param currentData - 要刪除的活動資料
  */
-function deleteEvent(currentData: EventData) {
+function deleteEvent(currentData: QueryEventsContent) {
   modalMode.value = 3
   currentEventId.value = currentData.id
   currentEventName.value = currentData.name
@@ -74,8 +75,8 @@ async function confirm() {
     isHidden: currentIsHidden.value,
   }
   if (modalMode.value === 1) await eventApi.postEvents(eventData)
-  if (modalMode.value === 2) await eventApi.patchEvents(eventData, { id: currentEventId.value })
-  if (modalMode.value === 3) await eventApi.deleteEvents({ id: currentEventId.value })
+  if (modalMode.value === 2) await eventApi.patchEvents(currentEventId.value, eventData)
+  if (modalMode.value === 3) await eventApi.deleteEvents(currentEventId.value)
   closeModal()
   emit('confirmed')
 }
