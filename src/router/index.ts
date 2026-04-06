@@ -47,7 +47,7 @@ const router = createRouter({
             {
               path: 'order',
               name: 'OrderView',
-              component: () => import('../views/admin/offline/OrderView.vue'),
+              component: () => import('../views/admin/offline/order/index.vue'),
             },
             {
               path: 'event',
