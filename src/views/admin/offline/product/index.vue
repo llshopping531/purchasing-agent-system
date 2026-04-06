@@ -22,6 +22,8 @@ const currentEventId = ref('')
 const currentShopId = ref('')
 /** 是否已執行過查詢（用於控制表格與新增按鈕的顯示） */
 const isTableQueried = ref(false)
+/** 是否顯示通路下拉 */
+const isShowChannelSelect = ref(false)
 
 /** 表格欄位定義 */
 const headerRow: HeaderRow[] = [
@@ -49,6 +51,8 @@ const totalElements = ref(0)
  */
 function selectEvent(data: Option) {
   currentEventId.value = data.value
+  currentShopId.value = ''
+  isShowChannelSelect.value = true
   resetTable()
 }
 
@@ -116,7 +120,12 @@ function onChangeSize(size: number) {
     <div class="productHeader">
       <div class="selectBox">
         <event-select-component @selectOption="selectEvent" />
-        <shop-select-component :eventId="currentEventId" @selectOption="selectShop" />
+        <shop-select-component
+          v-if="isShowChannelSelect"
+          :key="currentEventId"
+          :eventId="currentEventId"
+          @selectOption="selectShop"
+        />
       </div>
       <div class="btnBox">
         <div class="btn" v-if="isTableQueried" @click="productFormModalRef?.createProduct()">
@@ -156,11 +165,9 @@ function onChangeSize(size: number) {
 
 <style scoped>
 .product {
-  margin-top: 1rem;
   .selectBox {
     display: flex;
     gap: 1rem;
-    margin-bottom: 1rem;
     flex-wrap: wrap;
     row-gap: 0.25rem;
   }

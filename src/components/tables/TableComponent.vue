@@ -97,11 +97,11 @@ function onChangeSize(pageSize: number) {
 
 <template>
   <div class="table-box">
-    <div class="table" :style="{ '--row-count': pop.headerRow.length + 1 }">
+    <div class="table" :style="{ '--row-count': pop.headerRow.length }">
       <div class="header">
         <div
           class="header-item"
-          :style="{ width: header.width }"
+          :style="{ 'min-width': header.width }"
           v-for="header in sortedHeaderRow"
           :key="header.sort"
           :class="header.value"
@@ -116,7 +116,7 @@ function onChangeSize(pageSize: number) {
             class="item-col"
             v-for="header in sortedHeaderRow"
             :key="header.value"
-            :style="{ width: header.width, '--mobile-span': header.mobileSpan ?? 1 }"
+            :style="{ 'min-width': header.width, '--mobile-span': header.mobileSpan ?? 1 }"
             :class="header.value"
             :data-label="header.name"
           >
@@ -124,7 +124,11 @@ function onChangeSize(pageSize: number) {
               {{ dataRow[header.value] }}
             </slot>
           </div>
-          <div class="item-col operate" v-if="isDelete || isEdit" :style="{ '--mobile-span': 3 }">
+          <div
+            class="item-col operate"
+            v-if="isDelete || isEdit"
+            :style="{ '--mobile-span': 3, 'width': '150px' }"
+          >
             <div class="btn edit" v-if="isEdit" @click="editData(dataRow)">編輯</div>
             <div class="btn delete" v-if="isDelete" @click="deleteData(dataRow)">刪除</div>
           </div>
@@ -145,7 +149,7 @@ function onChangeSize(pageSize: number) {
 
 <style scoped>
 .table-box {
-  width: fit-content;
+  width: 100%;
 }
 
 .table {
@@ -153,7 +157,7 @@ function onChangeSize(pageSize: number) {
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-
+  width: 100%;
 
   .header {
     display: flex;
@@ -175,7 +179,7 @@ function onChangeSize(pageSize: number) {
     letter-spacing: 0.02em;
 
     &.operate {
-      width: 120px;
+      width: 150px;
     }
   }
 
@@ -302,7 +306,7 @@ function onChangeSize(pageSize: number) {
         width: 50%;
         border-radius: 0;
         padding: 0.25rem;
-        &:only-child{
+        &:only-child {
           width: 100%;
         }
       }

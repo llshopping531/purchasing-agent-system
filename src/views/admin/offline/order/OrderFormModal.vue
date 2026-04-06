@@ -360,7 +360,7 @@ defineExpose({ createOrder, editOrder, deleteOrder })
     @confirm="confirm"
   >
     <template #content>
-      <div v-if="modalMode === 2 && editCustomerName && editProductInfo" style="margin-top: 1rem">
+      <div v-if="modalMode === 2 && editCustomerName && editProductInfo">
         {{ editCustomerName }} - {{ editProductInfo.name }}
         <span class="productInfo" style="margin-top: 0.25rem">
           <span>日幣定價：¥{{ editProductInfo.priceJpy }}</span>
@@ -428,11 +428,10 @@ defineExpose({ createOrder, editOrder, deleteOrder })
         />
         <text-input label="備註" v-model:value="formNote" />
 
-          <checkbox-input label="非特典對象" v-model="formNonBonusTarget" />
-          <checkbox-input label="固定匯率" v-model="formIsFixedRate" />
-          <checkbox-input label="非分潤對象" v-model="formNonCutTarget" />
-          <checkbox-input label="採購確認" v-model="formPurchaseConfirm" />
-
+        <checkbox-input label="非特典對象" v-model="formNonBonusTarget" />
+        <checkbox-input label="固定匯率" v-model="formIsFixedRate" />
+        <checkbox-input label="非分潤對象" v-model="formNonCutTarget" />
+        <checkbox-input label="採購確認" v-model="formPurchaseConfirm" />
       </div>
     </template>
   </confirm-modal-component>
@@ -466,12 +465,13 @@ defineExpose({ createOrder, editOrder, deleteOrder })
 }
 .formGrid {
   display: flex;
-    gap: 1.5rem;
-    padding: 0 0.5rem;
-    flex-wrap: wrap;
-    align-items: end;
-    @media (max-width: 768px) {
-      gap: .25rem;
-    }
+  gap: 1.5rem;
+  padding: 0 0.5rem;
+  flex-wrap: wrap;
+  align-items: start;
+  margin-top: 1rem;
+  @media (max-width: 768px) {
+    gap: 0.25rem;
+  }
 }
 </style>

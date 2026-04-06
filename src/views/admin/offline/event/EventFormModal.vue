@@ -130,7 +130,8 @@ defineExpose({ createEvent, editEvent, deleteEvent })
   gap: 1.5rem;
   padding: 0 0.5rem;
   flex-wrap: wrap;
-  align-items: end;
+  align-items: start;
+  margin-top: 1rem;
   @media (max-width: 768px) {
     gap: 0.25rem;
   }

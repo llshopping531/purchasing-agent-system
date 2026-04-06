@@ -120,13 +120,14 @@ defineExpose({ createCustomer, editCustomer })
 
 <style scoped>
 .formGrid {
-    display: flex;
-    gap: 1.5rem;
-    padding: 0 0.5rem;
-    flex-wrap: wrap;
-    align-items: end;
-    @media (max-width: 768px) {
-      gap: .25rem;
-    }
+  display: flex;
+  gap: 1.5rem;
+  padding: 0 0.5rem;
+  flex-wrap: wrap;
+  align-items: start;
+  margin-top: 1rem;
+  @media (max-width: 768px) {
+    gap: 0.25rem;
+  }
 }
 </style>

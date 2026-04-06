@@ -11,7 +11,12 @@ import { channelApi } from '@/services/api/channel-api'
 const pop = defineProps<{
   /** 目前選取的活動 ID（字串形式），變更時自動重新查詢通路 */
   eventId: string
+  /** 是否顯示選項 全部 */
+  isShowAll?: boolean
 }>()
+
+
+const defaultValue = ref<Option>({ name: '請選擇通路', value: '請選擇通路' })
 
 const emit = defineEmits<{
   /** 使用者選取通路時觸發，帶出通路對應的 Option */
@@ -19,7 +24,7 @@ const emit = defineEmits<{
 }>()
 
 /** 轉換為 Option 格式的通路清單 */
-const shopList = ref<Option[]>([])
+const shopList = ref<Option[]>([{ name: '請選擇通路', value: '請選擇通路' }])
 
 /**
  * 將選取的通路向上 emit
@@ -29,12 +34,14 @@ function selectShop(data: Option) {
   emit('selectOption', data)
 }
 
-// 當活動 ID 改變時，重新載入該活動的通路清單
+// 當活動 ID 改變時，重新載入該活動的通路清單；immediate 確保掛載時也會執行
 watch(
   () => pop.eventId,
   (newId) => {
     getChannelList(newId)
+    if (pop.isShowAll) defaultValue.value = { name: '全部', value: '' }
   },
+  { immediate: true },
 )
 
 /**
@@ -48,6 +55,9 @@ async function getChannelList(eventId: string) {
       name: res.name,
       value: res.id.toString(),
     }))
+    if (pop.isShowAll) {
+      shopList.value.unshift({ name: '全部', value: '' })
+    }
   }
 }
 </script>
@@ -55,7 +65,7 @@ async function getChannelList(eventId: string) {
 <template>
   <select-component
     label="通路"
-    :defaultValue="{ name: '', value: '' }"
+    :defaultValue="defaultValue"
     :optionList="shopList"
     @selectOption="selectShop"
   ></select-component>

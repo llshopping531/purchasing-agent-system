@@ -4,59 +4,90 @@
  * 選取活動後，顯示各通路的採購統計（依通路分組，可個別收合）
  */
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
-import type { HeaderRow } from '@/components/tables/TableComponent.vue'
 import type { Option } from '@/interfaces/common'
-import { purchaseListApi, type AdditionalProp } from '@/services/api/purchase-api'
 import { ref } from 'vue'
 import PurchaseChannelItem from './PurchaseChannelItem.vue'
+import type { PurchaseListData } from '@/services/api/purchase/purchase-api-interface'
+import { purchaseListApi } from '@/services/api/purchase/purchase-api'
+import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 
 /** 單一通路的採購統計資料結構 */
 interface PurchaseList {
   /** 通路名稱 */
   channelName: string
   /** 該通路的採購明細 */
-  data: AdditionalProp[]
+  data: PurchaseListData[]
 }
-
-/** 表格欄位定義 */
-const headerRow = ref<HeaderRow[]>([
-  { name: '商品名稱', value: 'productName', sort: 0, width: '200px',mobileSpan: 2 },
-  { name: '應買數量', value: 'shouldBuy', sort: 0, width: '100px' },
-  { name: '已買數量', value: 'purchased', sort: 0, width: '100px' },
-  { name: '未買數量', value: 'remaining', sort: 0, width: '100px' },
-])
-
+/** 當前活動 ID */
+const currentEventId = ref(0)
 /** 依通路整理後的採購清單 */
 const purchaseList = ref<PurchaseList[]>([])
+/** 顯示用採購清單 */
+const displayPurchaseList = ref<PurchaseList[]>([])
+/** 是否顯示通路下拉 */
+const isShowChannelSelect = ref<boolean>(false)
 
 /**
  * 選取活動後，從 API 取得採購統計並轉換為以通路為單位的陣列
  * @param option - 選取的活動 Option
  */
 async function selectEvent(option: Option) {
-  const res = await purchaseListApi.getPurchaseListsAll({ eventId: Number(option.value) })
+  currentEventId.value = Number(option.value)
+  const res = await purchaseListApi.getPurchaseListsAll(Number(option.value))
   purchaseList.value = Object.keys(res).map((key) => ({
     channelName: key,
     data: res[key] ?? [],
   }))
+  displayPurchaseList.value = purchaseList.value
+  isShowChannelSelect.value = true
+}
+
+/**
+ * 選取通路後，進行篩選
+ * @param option - 選取的通路 Option
+ */
+function selectChannel(option: Option) {
+  if (option.value == '') {
+    displayPurchaseList.value = purchaseList.value
+    return
+  }
+  displayPurchaseList.value = [...purchaseList.value].filter(
+    (item) => item.channelName === option.name,
+  )
 }
 </script>
 
 <template>
   <div class="purchase">
+    <h3>採購清單</h3>
+    <p>請選擇場販場次、通路</p>
     <div class="selectBox">
       <event-select-component @select-option="selectEvent"></event-select-component>
+      <shop-select-component
+        v-if="isShowChannelSelect"
+        :key="currentEventId"
+        :event-id="currentEventId.toString()"
+        :isShowAll="true"
+        @select-option="selectChannel"
+      ></shop-select-component>
     </div>
     <purchase-channel-item
-      v-for="purchase in purchaseList"
+      v-for="purchase in displayPurchaseList"
       :key="purchase.channelName"
       :channelName="purchase.channelName"
+      :eventId="currentEventId"
       :data="purchase.data"
-      :headerRow="headerRow"
     ></purchase-channel-item>
   </div>
 </template>
 
 <style scoped>
-
+.purchase {
+  .selectBox {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    row-gap: 0.25rem;
+  }
+}
 </style>

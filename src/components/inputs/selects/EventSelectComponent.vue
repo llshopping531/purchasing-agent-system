@@ -12,9 +12,10 @@ const emit = defineEmits<{
   /** 使用者選取活動時觸發，帶出活動對應的 Option */
   (e: 'selectOption', data: Option): void
 }>()
+const defaultValue = ref<Option>({ name: '請選擇場次', value: '請選擇場次' })
 
-/** 轉換為 Option 格式的活動清單 */
-const eventList = ref<Option[]>([])
+  /** 轉換為 Option 格式的活動清單 */
+const eventList = ref<Option[]>([{ name: '請選擇場次', value: '請選擇場次' }])
 
 onMounted(() => {
   getEventList()
@@ -45,7 +46,7 @@ async function getEventList() {
 <template>
   <select-component
     label="場次"
-    :defaultValue="{ name: '', value: '' }"
+    :defaultValue="defaultValue"
     :optionList="eventList"
     @selectOption="selectEvent"
   ></select-component>

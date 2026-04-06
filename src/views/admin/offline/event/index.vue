@@ -99,7 +99,6 @@ function onChangeSize(size: number) {
 
 <style scoped>
 .event {
-  margin-top: 2rem;
   .eventHeader {
     display: flex;
     gap: 1rem;

@@ -29,6 +29,9 @@ const isTableQueried = ref(false)
 const isShowTotalBtn = ref(false)
 /** 是否顯示統計彈窗 */
 const isShowTotalModal = ref(false)
+/** 是否顯示通路下拉 */
+const isShowChannelSelect = ref(false)
+
 
 /** 統計彈窗的表格資料（各商品名稱與數量） */
 const tableData = ref<{ name: string; value: number }[]>([])
@@ -44,6 +47,7 @@ const headerRow = ref<HeaderRow[]>([
  */
 function selectEvent(data: Option) {
   currentEventId.value = data.value
+  isShowChannelSelect.value = true
 }
 
 /**
@@ -99,11 +103,22 @@ function onConfirmed() {
     <div class="orderHeader">
       <div class="selectBox">
         <event-select-component @selectOption="selectEvent" />
-        <shop-select-component :eventId="currentEventId" @selectOption="selectShop" />
+        <shop-select-component
+          :key="currentEventId"
+          :eventId="currentEventId"
+          @selectOption="selectShop"
+          v-if="isShowChannelSelect"
+        />
       </div>
       <div class="btnBox">
-        <div class="btn" v-if="isShowTotalBtn" @click="isShowTotalModal = true">顯示統計</div>
-        <div class="btn create" v-if="isTableQueried" @click="orderFormModalRef?.createOrder()">
+        <div class="btn" v-if="isShowTotalBtn" @click="isShowTotalModal = true">
+          顯示統計
+        </div>
+        <div
+          class="btn create"
+          v-if="isTableQueried"
+          @click="orderFormModalRef?.createOrder()"
+        >
           新增
         </div>
       </div>
@@ -118,7 +133,11 @@ function onConfirmed() {
     />
     <router-view />
 
-    <modal-component name="統計" @confirm="isShowTotalModal = false" v-if="isShowTotalModal">
+    <modal-component
+      name="統計"
+      @confirm="isShowTotalModal = false"
+      v-if="isShowTotalModal"
+    >
       <template #content>
         <div class="totalTable">
           <table-component
@@ -142,12 +161,11 @@ function onConfirmed() {
 
 <style scoped>
 .order {
-  margin-top: 1rem;
   .selectBox {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
-    row-gap: .25rem;
+    row-gap: 0.25rem;
   }
   .orderHeader {
     display: flex;

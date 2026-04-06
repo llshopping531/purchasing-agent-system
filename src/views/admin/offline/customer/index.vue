@@ -105,7 +105,6 @@ function onChangeSize(size: number) {
 
 <style scoped>
 .customer {
-  margin-top: 1rem;
   .header {
     display: flex;
     align-items: center;
