@@ -3,7 +3,6 @@
  * 訂單表格元件
  * 整合訂單列表查詢、分頁、詳細資料彈窗，並向上 emit 編輯／刪除事件
  */
-import PaginationComponent from '@/components/PaginationComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import { fieldDefsApi } from '@/services/api/sys/field-defs-api'
 import { orderApi, type OrderAllContent } from '@/services/api/order/order-api'
@@ -145,9 +144,16 @@ async function getOrderList() {
     <table-component
       :headerRow="headerRow"
       :tableData="tableData"
-      :operate="{ isDelete: true, isEdit: true, isOperate: true }"
+      :isDelete="true"
+      :isEdit="true"
+      :totalPages="totalPages"
+      :currentPage="currentPage"
+      :totalElements="totalElements"
+      :pageSize="pageSize"
       @delete="deleteData"
       @edit="editData"
+      @change-page="onChangePage"
+      @change-size="onChangeSize"
     >
       <template #col-orderStatusName="{ row }">
         <span :class="{ cancelled: row.orderStatusName === '已取消' }">
@@ -160,15 +166,6 @@ async function getOrderList() {
         </div>
       </template>
     </table-component>
-    <pagination-component
-      v-if="totalPages > 0"
-      :page="currentPage"
-      :totalPages="totalPages"
-      :totalElements="totalElements"
-      :size="pageSize"
-      @changePage="onChangePage"
-      @changeSize="onChangeSize"
-    />
   </div>
 
   <order-detail-modal

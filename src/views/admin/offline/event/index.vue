@@ -14,8 +14,8 @@ const eventList = ref<EventData[]>([])
 /** 表格欄位定義 */
 const headerRow = ref<HeaderRow[]>([
   { name: '活動名稱', value: 'name', sort: 0, width: '200px' },
-  { name: '開始日期', value: 'startDate', sort: 0, width: '100px' },
-  { name: '結束日期', value: 'endDate', sort: 0, width: '100px' },
+  { name: '開始日期', value: 'startDate', sort: 0, width: '120px' },
+  { name: '結束日期', value: 'endDate', sort: 0, width: '120px' },
   { name: '是否顯示', value: 'isHidden', sort: 0, width: '100px' },
 ])
 

@@ -4,6 +4,7 @@
  * 支援泛型資料列、自訂欄位寬度、slot 覆寫欄位內容，以及編輯／刪除操作欄
  */
 import { computed } from 'vue'
+import PaginationComponent from '@/components/PaginationComponent.vue'
 
 /** 表頭欄位定義 */
 export interface HeaderRow {
@@ -17,27 +18,40 @@ export interface HeaderRow {
   width?: string
 }
 
-const pop = defineProps<{
-  /** 表格資料陣列 */
-  tableData: T[]
-  /** 表頭欄位定義陣列 */
-  headerRow: HeaderRow[]
-  /** 操作欄顯示設定 */
-  operate: {
+const pop = withDefaults(
+  defineProps<{
+    /** 表格資料陣列 */
+    tableData: T[]
+    /** 表頭欄位定義陣列 */
+    headerRow: HeaderRow[]
     /** 是否顯示刪除按鈕 */
-    isDelete: boolean
+    isDelete?: boolean
     /** 是否顯示編輯按鈕 */
-    isEdit: boolean
-    /** 是否顯示操作欄 */
-    isOperate: boolean
-  }
-}>()
-
+    isEdit?: boolean
+    /** 總頁數 */
+    totalPages?: number
+    /** 當前頁碼 */
+    currentPage?: number
+    /** 總筆數 */
+    totalElements?: number
+    /** 每頁筆數 */
+    pageSize?: number
+  }>(),
+  {
+    isDelete: true,
+    isEdit: true,
+    pageSize: 20,
+  },
+)
 const emit = defineEmits<{
   /** 點擊編輯按鈕時觸發，帶出該列資料 */
   (e: 'edit', data: T): void
   /** 點擊刪除按鈕時觸發，帶出該列資料 */
   (e: 'delete', data: T): void
+  /** 使用者切換頁碼時觸發 */
+  (e: 'changePage', data: number): void
+  /** 使用者變更每頁筆數時觸發 */
+  (e: 'changeSize', data: number): void
 }>()
 
 /** 依 sort 排序後的表頭欄位陣列 */
@@ -58,45 +72,75 @@ function editData(data: T) {
 function deleteData(data: T) {
   emit('delete', data)
 }
+
+/**
+ * 觸發換頁事件
+ * @param page - 前往的頁碼
+ */
+function onChangePage(page: number) {
+  emit('changePage', page)
+}
+
+/**
+ * 觸發調整每頁筆數事件
+ * @param pageSize - 調整的每頁筆數
+ */
+function onChangeSize(pageSize: number) {
+  emit('changeSize', pageSize)
+}
 </script>
 
 <template>
-  <div class="table" :style="{ '--row-count': pop.headerRow.length + 1 }">
-    <div class="header">
-      <div
-        class="header-item"
-        :style="{ width: header.width }"
-        v-for="header in sortedHeaderRow"
-        :key="header.sort"
-        :class="header.value"
-      >
-        {{ header.name }}
-      </div>
-      <div class="header-item operate" v-if="operate.isOperate">操作</div>
-    </div>
-    <div class="body">
-      <div class="body-item" v-for="(dataRow, index) in pop.tableData" :key="index">
+  <div class="table-box">
+    <div class="table" :style="{ '--row-count': pop.headerRow.length + 1 }">
+      <div class="header">
         <div
-          class="item-col"
-          v-for="header in sortedHeaderRow"
-          :key="header.value"
+          class="header-item"
           :style="{ width: header.width }"
+          v-for="header in sortedHeaderRow"
+          :key="header.sort"
           :class="header.value"
         >
-          <slot :name="`col-${header.value}`" :row="dataRow">
-            {{ dataRow[header.value] }}
-          </slot>
+          {{ header.name }}
         </div>
-        <div class="item-col operate" v-if="operate.isOperate">
-          <div class="btn edit" v-if="operate.isEdit" @click="editData(dataRow)">編輯</div>
-          <div class="btn delete" v-if="operate.isDelete" @click="deleteData(dataRow)">刪除</div>
+        <div class="header-item operate" v-if="isDelete || isEdit">操作</div>
+      </div>
+      <div class="body">
+        <div class="body-item" v-for="(dataRow, index) in pop.tableData" :key="index">
+          <div
+            class="item-col"
+            v-for="header in sortedHeaderRow"
+            :key="header.value"
+            :style="{ width: header.width }"
+            :class="header.value"
+          >
+            <slot :name="`col-${header.value}`" :row="dataRow">
+              {{ dataRow[header.value] }}
+            </slot>
+          </div>
+          <div class="item-col operate" v-if="isDelete || isEdit">
+            <div class="btn edit" v-if="isEdit" @click="editData(dataRow)">編輯</div>
+            <div class="btn delete" v-if="isDelete" @click="deleteData(dataRow)">刪除</div>
+          </div>
         </div>
       </div>
     </div>
+    <pagination-component
+      v-if="totalPages > 0"
+      :page="currentPage"
+      :totalPages="totalPages"
+      :totalElements="totalElements"
+      :size="pageSize"
+      @changePage="onChangePage"
+      @changeSize="onChangeSize"
+    />
   </div>
 </template>
 
 <style scoped>
+.table-box {
+  width: fit-content;
+}
 .table {
   background-color: rgba(124, 111, 224, 0.08);
   border-radius: var(--radius-md);

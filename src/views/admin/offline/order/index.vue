@@ -71,8 +71,9 @@ function getTableData(data: OrderQueryContent[]) {
     itemData.reduce(
       (acc: Record<string, { name: string; value: number }>, cur) => {
         total += cur.value
-        if (!acc[cur.name]) acc[cur.name] = { name: cur.name, value: 0 }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (!acc[cur.name])
+          acc[cur.name] = { name: cur.name, value: 0 }
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(acc[cur.name] as any).value += cur.value
         return acc
       },
@@ -101,7 +102,9 @@ function onConfirmed() {
         <shop-select-component :eventId="currentEventId" @selectOption="selectShop" />
       </div>
       <div class="btn" v-if="isShowTotalBtn" @click="isShowTotalModal = true">顯示統計</div>
-      <div class="btn create" v-if="isTableQueried" @click="orderFormModalRef?.createOrder()">新增</div>
+      <div class="btn create" v-if="isTableQueried" @click="orderFormModalRef?.createOrder()">
+        新增
+      </div>
     </div>
     <order-table-component
       ref="orderTableRef"
@@ -119,7 +122,8 @@ function onConfirmed() {
           <table-component
             :headerRow="headerRow"
             :tableData="tableData"
-            :operate="{ isDelete: false, isEdit: false, isOperate: false }"
+            :isDelete="false"
+            :isEdit="false"
           />
         </div>
       </template>

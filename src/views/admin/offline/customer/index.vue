@@ -18,7 +18,7 @@ const customerFormModalRef = ref<InstanceType<typeof CustomerFormModal>>()
 const headerRow: HeaderRow[] = [
   { name: '客戶名稱', value: 'name', sort: 0, width: '180px' },
   { name: '來源', value: 'sourceName', sort: 0, width: '100px' },
-  { name: '已私訊官方', value: 'hasMessagedOfficial', sort: 0, width: '100px' },
+  { name: '已私訊官方', value: 'hasMessagedOfficial', sort: 0, width: '120px' },
   { name: '優惠對象', value: 'isDiscount', sort: 0, width: '90px' },
   { name: '老闆', value: 'isBoss', sort: 0, width: '70px' },
   { name: '備註', value: 'note', sort: 0 },
@@ -81,8 +81,15 @@ function onChangeSize(size: number) {
     <table-component
       :headerRow="headerRow"
       :tableData="tableData"
-      :operate="{ isDelete: false, isEdit: true, isOperate: true }"
+      :isDelete="false"
+      :isEdit="true"
+      :totalPages="totalPages"
+      :currentPage="currentPage"
+      :totalElements="totalElements"
+      :pageSize="pageSize"
       @edit="customerFormModalRef?.editCustomer($event)"
+      @change-page="onChangePage"
+      @change-size="onChangeSize"
     >
       <template #col-hasMessagedOfficial="{ row }">
         <boolean-transform-component :value="row.hasMessagedOfficial"></boolean-transform-component>
@@ -94,15 +101,6 @@ function onChangeSize(size: number) {
         <boolean-transform-component :value="row.isBoss"></boolean-transform-component>
       </template>
     </table-component>
-    <pagination-component
-      v-if="totalPages > 0"
-      :page="currentPage"
-      :totalPages="totalPages"
-      :totalElements="totalElements"
-      :size="pageSize"
-      @changePage="onChangePage"
-      @changeSize="onChangeSize"
-    />
     <customer-form-modal ref="customerFormModalRef" @confirmed="getCustomerList" />
   </div>
 </template>
