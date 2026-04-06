@@ -5,6 +5,7 @@ import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectC
 import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
 import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
+import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
 import NewCustomerForm from '@/components/forms/NewCustomerForm.vue'
 import NewProductForm from '@/components/forms/NewProductForm.vue'
 import type { Option } from '@/interfaces/common'
@@ -337,9 +338,7 @@ defineExpose({ createOrder, editOrder, deleteOrder })
         <text-input label="數量" v-model:value="formQuantity" />
         <div>
           <text-input label="匯率" v-model:value="formExchangeRate" :disabled="!isAdjustRate" />
-          <label class="adjustRateCheckbox">
-            <input type="checkbox" v-model="isAdjustRate" /> 調整數值
-          </label>
+          <checkbox-input label="調整數值" v-model="isAdjustRate" class="adjustRateCheckbox" />
         </div>
         <text-input label="小計 (日幣)" v-model:value="formSubtotalJpy" :disabled="true" />
         <text-input label="小計 (台幣)" v-model:value="formSubtotalTwd" :disabled="true" />
@@ -349,10 +348,10 @@ defineExpose({ createOrder, editOrder, deleteOrder })
         />
         <text-input label="備註" v-model:value="formNote" />
         <div class="checkboxGroup">
-          <label><input type="checkbox" v-model="formNonBonusTarget" /> 非特典對象</label>
-          <label><input type="checkbox" v-model="formIsFixedRate" /> 固定匯率</label>
-          <label><input type="checkbox" v-model="formNonCutTarget" /> 非砍單對象</label>
-          <label><input type="checkbox" v-model="formPurchaseConfirm" /> 採購確認</label>
+          <checkbox-input label="非特典對象" v-model="formNonBonusTarget" />
+          <checkbox-input label="固定匯率" v-model="formIsFixedRate" />
+          <checkbox-input label="非砍單對象" v-model="formNonCutTarget" />
+          <checkbox-input label="採購確認" v-model="formPurchaseConfirm" />
         </div>
       </div>
     </template>
