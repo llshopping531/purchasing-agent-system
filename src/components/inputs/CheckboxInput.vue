@@ -28,7 +28,6 @@ const checked = defineModel<boolean>({ default: false })
   gap: 0.4rem;
   font-size: 0.9rem;
   cursor: pointer;
-  margin-top: 1rem;
   user-select: none;
   .icon {
     display: inline-block;

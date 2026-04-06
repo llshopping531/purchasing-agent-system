@@ -8,13 +8,14 @@ import { eventApi } from '@/services/api/events/events-api'
 import { onMounted, ref } from 'vue'
 import EventFormModal from './EventFormModal.vue'
 import type { QueryEventsContent } from '@/services/api/events/events-api-interfaces'
+import BooleanTransformComponent from '@/components/BooleanTransformComponent.vue'
 
 /** 活動列表資料 */
 const eventList = ref<QueryEventsContent[]>([])
 
 /** 表格欄位定義 */
 const headerRow = ref<HeaderRow[]>([
-  { name: '活動名稱', value: 'name', sort: 0, width: '200px' },
+  { name: '活動名稱', value: 'name', sort: 0, width: '200px', mobileSpan: 3 },
   { name: '開始日期', value: 'startDate', sort: 0, width: '120px' },
   { name: '結束日期', value: 'endDate', sort: 0, width: '120px' },
   { name: '是否顯示', value: 'isHidden', sort: 0, width: '100px' },
@@ -88,6 +89,9 @@ function onChangeSize(size: number) {
       @change-page="onChangePage"
       @change-size="onChangeSize"
     >
+      <template #col-isHidden="{ row }">
+        <boolean-transform-component :value="row.isHidden"></boolean-transform-component>
+      </template>
     </table-component>
     <event-form-modal ref="eventFormModal" @confirmed="getEventList"></event-form-modal>
   </div>

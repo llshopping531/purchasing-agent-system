@@ -5,7 +5,6 @@
  */
 import { onMounted, ref } from 'vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
-import PaginationComponent from '@/components/PaginationComponent.vue'
 import BooleanTransformComponent from '@/components/BooleanTransformComponent.vue'
 import CustomerFormModal from './CustomerFormModal.vue'
 import { customersApi } from '@/services/api/customers/customers-api'

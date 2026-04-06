@@ -148,9 +148,13 @@ defineExpose({ createProduct, editProduct, deleteProduct })
 
 <style scoped>
 .formGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 1.5rem;
-  padding: 0 0.5rem;
+    display: flex;
+    gap: 1.5rem;
+    padding: 0 0.5rem;
+    flex-wrap: wrap;
+    align-items: end;
+    @media (max-width: 768px) {
+      gap: .25rem;
+    }
 }
 </style>

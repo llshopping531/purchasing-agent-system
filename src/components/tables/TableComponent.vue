@@ -16,6 +16,8 @@ export interface HeaderRow {
   sort: number
   /** 欄位寬度（CSS 值，例如 '200px'） */
   width?: string
+  /** 手機版佔幾格（預設 1） */
+  mobileSpan?: number
 }
 
 const pop = withDefaults(
@@ -114,14 +116,15 @@ function onChangeSize(pageSize: number) {
             class="item-col"
             v-for="header in sortedHeaderRow"
             :key="header.value"
-            :style="{ width: header.width }"
+            :style="{ width: header.width, '--mobile-span': header.mobileSpan ?? 1 }"
             :class="header.value"
+            :data-label="header.name"
           >
             <slot :name="`col-${header.value}`" :row="dataRow">
               {{ dataRow[header.value] }}
             </slot>
           </div>
-          <div class="item-col operate" v-if="isDelete || isEdit">
+          <div class="item-col operate" v-if="isDelete || isEdit" :style="{ '--mobile-span': 3 }">
             <div class="btn edit" v-if="isEdit" @click="editData(dataRow)">編輯</div>
             <div class="btn delete" v-if="isDelete" @click="deleteData(dataRow)">刪除</div>
           </div>
@@ -144,11 +147,13 @@ function onChangeSize(pageSize: number) {
 .table-box {
   width: fit-content;
 }
+
 .table {
   background-color: rgba(124, 111, 224, 0.08);
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+
 
   .header {
     display: flex;
@@ -216,6 +221,89 @@ function onChangeSize(pageSize: number) {
 
         &:hover {
           background-color: var(--color-danger-dark);
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .table-box {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .table {
+    background-color: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    overflow: hidden;
+
+    .header {
+      display: none;
+    }
+
+    .body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+
+      .body-item {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+        margin-top: 0;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        background: #ffffff;
+        &:nth-child(even) .item-col {
+          background-color: var(--color-surface);
+        }
+
+        &:hover .item-col {
+          background-color: var(--color-surface);
+        }
+      }
+    }
+
+    .item-col {
+      grid-column: span var(--mobile-span, 1);
+      width: 100% !important;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid rgba(124, 111, 224, 0.1);
+      font-size: 0.875rem;
+      background-color: var(--color-surface);
+
+      &::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--color-primary);
+        letter-spacing: 0.03em;
+        margin-bottom: 0.15rem;
+        opacity: 0.85;
+      }
+    }
+
+    .item-col.operate {
+      display: flex;
+      flex-direction: row;
+      gap: 0;
+      &::before {
+        display: none;
+      }
+      .btn {
+        width: 50%;
+        border-radius: 0;
+        padding: 0.25rem;
+        &:only-child{
+          width: 100%;
         }
       }
     }

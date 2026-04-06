@@ -25,7 +25,7 @@ const isTableQueried = ref(false)
 
 /** 表格欄位定義 */
 const headerRow: HeaderRow[] = [
-  { name: '商品名稱', value: 'name', sort: 0, width: '250px' },
+  { name: '商品名稱', value: 'name', sort: 0, width: '250px', mobileSpan: 2 },
   { name: '日幣定價', value: 'priceJpy', sort: 0, width: '100px' },
   { name: '台幣定價', value: 'priceTwd', sort: 0, width: '100px' },
   { name: '匯率', value: 'exchangeRate', sort: 0, width: '80px' },
@@ -118,7 +118,11 @@ function onChangeSize(size: number) {
         <event-select-component @selectOption="selectEvent" />
         <shop-select-component :eventId="currentEventId" @selectOption="selectShop" />
       </div>
-      <div class="btn" v-if="isTableQueried" @click="productFormModalRef?.createProduct()">新增</div>
+      <div class="btnBox">
+        <div class="btn" v-if="isTableQueried" @click="productFormModalRef?.createProduct()">
+          新增
+        </div>
+      </div>
     </div>
     <table-component
       v-if="isTableQueried"
@@ -157,13 +161,19 @@ function onChangeSize(size: number) {
     display: flex;
     gap: 1rem;
     margin-bottom: 1rem;
+    flex-wrap: wrap;
+    row-gap: 0.25rem;
   }
   .productHeader {
     display: flex;
     gap: 1rem;
-    align-items: center;
-    .btn {
-      margin-top: 1.5rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+
+    .btnBox {
+      display: flex;
+      gap: 1rem;
     }
   }
   .imageLink {

@@ -20,7 +20,7 @@ interface PurchaseList {
 
 /** 表格欄位定義 */
 const headerRow = ref<HeaderRow[]>([
-  { name: '商品名稱', value: 'productName', sort: 0, width: '200px' },
+  { name: '商品名稱', value: 'productName', sort: 0, width: '200px',mobileSpan: 2 },
   { name: '應買數量', value: 'shouldBuy', sort: 0, width: '100px' },
   { name: '已買數量', value: 'purchased', sort: 0, width: '100px' },
   { name: '未買數量', value: 'remaining', sort: 0, width: '100px' },
@@ -58,7 +58,5 @@ async function selectEvent(option: Option) {
 </template>
 
 <style scoped>
-.purchase {
-  width: fit-content;
-}
+
 </style>

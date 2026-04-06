@@ -63,8 +63,7 @@ function logout() {
 header {
   display: flex;
   align-items: center;
-  padding: 0 1.5rem;
-  height: 56px;
+  padding: 0.5rem 1.5rem;
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
   position: sticky;
@@ -72,6 +71,8 @@ header {
   z-index: 50;
   border-bottom: 1px solid var(--color-border);
   gap: 0.75rem;
+  flex-wrap: wrap;
+  width: 100vw;
 }
 
 header .title {

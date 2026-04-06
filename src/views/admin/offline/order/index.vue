@@ -101,9 +101,11 @@ function onConfirmed() {
         <event-select-component @selectOption="selectEvent" />
         <shop-select-component :eventId="currentEventId" @selectOption="selectShop" />
       </div>
-      <div class="btn" v-if="isShowTotalBtn" @click="isShowTotalModal = true">顯示統計</div>
-      <div class="btn create" v-if="isTableQueried" @click="orderFormModalRef?.createOrder()">
-        新增
+      <div class="btnBox">
+        <div class="btn" v-if="isShowTotalBtn" @click="isShowTotalModal = true">顯示統計</div>
+        <div class="btn create" v-if="isTableQueried" @click="orderFormModalRef?.createOrder()">
+          新增
+        </div>
       </div>
     </div>
     <order-table-component
@@ -144,14 +146,19 @@ function onConfirmed() {
   .selectBox {
     display: flex;
     gap: 1rem;
-    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    row-gap: .25rem;
   }
   .orderHeader {
     display: flex;
     gap: 1rem;
-    align-items: center;
-    .btn {
-      margin-top: 1.5rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+
+    .btnBox {
+      display: flex;
+      gap: 1rem;
     }
   }
   .totalTable {

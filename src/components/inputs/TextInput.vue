@@ -24,7 +24,6 @@ const value = defineModel('value')
 
 <style scoped>
 .label {
-  margin-top: 1rem;
   display: block;
 
   span {

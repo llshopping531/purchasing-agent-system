@@ -104,7 +104,6 @@ function filter() {
   flex-direction: column;
   width: fit-content;
   position: relative;
-  margin-top: 1rem;
   min-width: 180px;
 
   .label {

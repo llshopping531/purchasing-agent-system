@@ -28,7 +28,7 @@ const emit = defineEmits<{
 /** 表頭欄位定義 */
 const headerRow = ref<HeaderRow[]>([
   { name: '購買者', value: 'customerName', sort: 0, width: '150px' },
-  { name: '品項', value: 'productName', sort: 0, width: '300px' },
+  { name: '品項', value: 'productName', sort: 0, width: '300px', mobileSpan: 2 },
   { name: '數量', value: 'quantity', sort: 0, width: '70px' },
   { name: '訂單狀態', value: 'orderStatusName', sort: 0, width: '100px' },
   { name: '更多資訊', value: 'more', sort: 0, width: '100px' },

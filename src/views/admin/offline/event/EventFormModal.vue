@@ -7,7 +7,8 @@
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import { eventApi } from '@/services/api/events/events-api'
-import type { QueryEventsContent } from '@/services/api/events/events-api-interfaces';
+import type { QueryEventsContent } from '@/services/api/events/events-api-interfaces'
+import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
 import { ref } from 'vue'
 
 const emit = defineEmits<{
@@ -113,11 +114,9 @@ defineExpose({ createEvent, editEvent, deleteEvent })
     @confirm="confirm"
   >
     <template #content>
-      <div class="row">
+      <div class="formGrid">
         <text-input label="活動名稱" v-model:value="currentEventName"></text-input>
-        <text-input label="是否顯示" v-model:value="currentIsHidden"></text-input>
-      </div>
-      <div class="row">
+        <checkbox-input label="是否顯示" v-model="currentIsHidden" />
         <text-input label="開始日期" v-model:value="currentStartDate"></text-input>
         <text-input label="結束日期" v-model:value="currentEndDate"></text-input>
       </div>
@@ -126,9 +125,14 @@ defineExpose({ createEvent, editEvent, deleteEvent })
 </template>
 
 <style scoped>
-.row {
+.formGrid {
   display: flex;
-  gap: 1rem;
-  justify-content: center;
+  gap: 1.5rem;
+  padding: 0 0.5rem;
+  flex-wrap: wrap;
+  align-items: end;
+  @media (max-width: 768px) {
+    gap: 0.25rem;
+  }
 }
 </style>
