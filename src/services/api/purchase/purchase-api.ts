@@ -13,7 +13,7 @@ export const purchaseListApi = {
    * @returns 以通路名稱為 key 的採購統計物件
    */
   getPurchaseListsAll: async (id: number): Promise<PurchaseListAllRes> => {
-    return await getApi('/orders/purchase-stats', { eventId: id })
+    return await getApi('/stats/purchase-stats', { eventId: id })
   },
 
   /**
@@ -22,7 +22,7 @@ export const purchaseListApi = {
    * @returns 以通路名稱為 key 的採購統計物件
    */
   getPurchassDetail: async (req: QueryPurchaseDetailReq): Promise<QueryPurchaseDetailRes> => {
-    return await getApi('/orders/purchase-stats/detail', req)
+    return await getApi('/stats/purchase-stats/detail', req)
   },
 
   /**

@@ -84,6 +84,18 @@ const router = createRouter({
           name: 'online',
           component: () => import('../views/admin/onlineView.vue'),
         },
+        {
+          /** 出貨單 */
+          path: 'shipping',
+          name: 'shipping',
+          component: () => import('../views/admin/shippingView/index.vue'),
+        },
+        {
+          /** 結帳單 */
+          path: 'checkout',
+          name: 'checkout',
+          component: () => import('../views/admin/checkoutView.vue'),
+        },
       ],
     },
   ],

@@ -9,6 +9,8 @@ const buttonList = [{ name: "前往使用者前台系統", link: "/user" }];
 enum Channel {
   online = "/admin/online",
   offline = "/admin/offline",
+  shipping = "/admin/shipping",
+  checkout = "/admin/checkout",
 }
 const currentChannelTab = ref(Channel.offline);
 
@@ -44,6 +46,22 @@ function clickChannel(channelName: Channel) {
       @click="clickChannel(Channel.offline)"
     >
       場販專區
+    </router-link>
+    <router-link
+      :to="Channel.shipping"
+      class="channelItem"
+      :class="{ active: currentChannelTab === Channel.shipping }"
+      @click="clickChannel(Channel.shipping)"
+    >
+      出貨單
+    </router-link>
+    <router-link
+      :to="Channel.checkout"
+      class="channelItem"
+      :class="{ active: currentChannelTab === Channel.checkout }"
+      @click="clickChannel(Channel.checkout)"
+    >
+      結帳單
     </router-link>
   </div>
   <div class="channelContent">
