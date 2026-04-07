@@ -5,6 +5,8 @@
  * 操作完成後 emit confirmed 通知父層重新載入商品列表
  */
 import { ref } from 'vue'
+import { useForm } from 'vee-validate'
+import * as yup from 'yup'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import NewProductForm from '@/components/forms/NewProductForm.vue'
 import { productsApi } from '@/services/api/products/products-api'
@@ -31,14 +33,35 @@ const currentId = ref(0)
 /** 刪除確認時顯示的商品名稱 */
 const currentName = ref('')
 
-/** 表單欄位：商品名稱 */
-const name = ref('')
-/** 表單欄位：日幣定價 */
-const priceJpy = ref<number | null>(null)
-/** 表單欄位：匯率 */
-const exchangeRate = ref<number | null>(null)
-/** 表單欄位：台幣定價 */
-const priceTwd = ref<number | null>(null)
+const schema = yup.object({
+  name: yup.string().required('商品名稱為必填'),
+  priceJpy: yup
+    .number()
+    .typeError('請輸入數字')
+    .required('日幣定價為必填')
+    .positive('請輸入正數'),
+  exchangeRate: yup
+    .number()
+    .typeError('請輸入數字')
+    .required('匯率為必填')
+    .positive('請輸入正數'),
+  priceTwd: yup
+    .number()
+    .typeError('請輸入數字')
+    .required('台幣定價為必填')
+    .positive('請輸入正數'),
+})
+
+const { defineField, errors, validate, resetForm } = useForm({
+  validationSchema: schema,
+  initialValues: { name: '', priceJpy: null as number | null, exchangeRate: null as number | null, priceTwd: null as number | null },
+})
+
+const [name] = defineField('name')
+const [priceJpy] = defineField('priceJpy')
+const [exchangeRate] = defineField('exchangeRate')
+const [priceTwd] = defineField('priceTwd')
+
 /** 表單欄位：商品圖片 URL */
 const image = ref('')
 
@@ -47,6 +70,7 @@ const image = ref('')
  */
 function createProduct() {
   modalMode.value = 1
+  resetForm()
   isVisible.value = true
 }
 
@@ -57,10 +81,14 @@ function createProduct() {
 function editProduct(data: ProductsResBase) {
   modalMode.value = 2
   currentId.value = data.id
-  name.value = data.name
-  priceJpy.value = data.priceJpy
-  exchangeRate.value = data.exchangeRate
-  priceTwd.value = data.priceTwd
+  resetForm({
+    values: {
+      name: data.name,
+      priceJpy: data.priceJpy,
+      exchangeRate: data.exchangeRate,
+      priceTwd: data.priceTwd,
+    },
+  })
   image.value = data.image
   isVisible.value = true
 }
@@ -77,15 +105,23 @@ function deleteProduct(data: ProductsResBase) {
 }
 
 /**
+ * 點擊確定前執行驗證，刪除模式跳過驗證
+ */
+async function beforeConfirm(): Promise<boolean> {
+  if (modalMode.value === 3) return true
+  const { valid } = await validate()
+  return valid
+}
+
+/**
  * 執行新增、修改或刪除 API，成功後關閉彈窗並通知父層
  */
 async function confirm() {
   if (modalMode.value === 1 || modalMode.value === 2) {
-    /** 新增或修改時的請求 body */
     const req = {
       eventId: Number(props.eventId),
       channelId: Number(props.shopId),
-      name: name.value,
+      name: name.value ?? '',
       priceJpy: priceJpy.value ?? 0,
       exchangeRate: exchangeRate.value ?? 0,
       priceTwd: priceTwd.value ?? 0,
@@ -105,10 +141,7 @@ async function confirm() {
 function closeModal() {
   currentId.value = 0
   currentName.value = ''
-  name.value = ''
-  priceJpy.value = null
-  exchangeRate.value = null
-  priceTwd.value = null
+  resetForm()
   image.value = ''
   isVisible.value = false
 }
@@ -128,6 +161,7 @@ defineExpose({ createProduct, editProduct, deleteProduct })
           : '您確定要修改此商品嗎？'
     "
     :isDelete="modalMode === 3"
+    :beforeConfirm="beforeConfirm"
     width="500px"
     @cancel="closeModal"
     @confirm="confirm"
@@ -140,6 +174,7 @@ defineExpose({ createProduct, editProduct, deleteProduct })
           v-model:exchangeRate="exchangeRate"
           v-model:priceTwd="priceTwd"
           v-model:image="image"
+          :errors="errors"
         />
       </div>
     </template>

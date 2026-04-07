@@ -7,6 +7,11 @@
 import TextInput from '@/components/inputs/TextInput.vue'
 import PriceRateInputComponent from '@/components/inputs/PriceRateInputComponent.vue'
 
+defineProps<{
+  /** 欄位驗證錯誤訊息 */
+  errors?: Partial<Record<'name' | 'priceJpy' | 'exchangeRate' | 'priceTwd' | 'image', string>>
+}>()
+
 /** 商品名稱 */
 const name = defineModel<string>('name', { default: '' })
 /** 日幣定價 */
@@ -20,11 +25,14 @@ const image = defineModel<string>('image', { default: '' })
 </script>
 
 <template>
-  <text-input label="商品名稱" v-model:value="name" />
+  <text-input label="商品名稱" v-model:value="name" required :error-message="errors?.name" />
   <price-rate-input-component
     v-model:priceJpy="priceJpy"
     v-model:exchangeRate="exchangeRate"
     v-model:priceTwd="priceTwd"
+    :priceJpyError="errors?.priceJpy"
+    :exchangeRateError="errors?.exchangeRate"
+    :priceTwdError="errors?.priceTwd"
   />
-  <text-input label="商品圖片" v-model:value="image" />
+  <text-input label="商品圖片" v-model:value="image" :error-message="errors?.image" />
 </template>

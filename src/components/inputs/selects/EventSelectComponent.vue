@@ -12,6 +12,11 @@ export interface EventOption {
   selectedData: Option
   isLocked: boolean
 }
+defineProps<{
+  /** 是否為必填欄位 */
+  required?: boolean
+}>()
+
 const emit = defineEmits<{
   /** 使用者選取活動時觸發，帶出活動對應的 Option */
   (e: 'selectOption', data: EventOption): void
@@ -55,6 +60,7 @@ async function getEventList() {
     label="場次"
     :defaultValue="defaultValue"
     :optionList="eventList"
+    :required="required"
     @selectOption="selectEvent"
   ></select-component>
 </template>

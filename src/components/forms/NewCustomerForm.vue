@@ -7,6 +7,11 @@
 import TextInput from '@/components/inputs/TextInput.vue'
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
 
+defineProps<{
+  /** 欄位驗證錯誤訊息 */
+  errors?: Partial<Record<'name' | 'source', string>>
+}>()
+
 /** 顧客名稱 */
 const name = defineModel<string>('name', { default: '' })
 /** 來源（例如社群平台） */
@@ -22,8 +27,8 @@ const note = defineModel<string>('note', { default: '' })
 </script>
 
 <template>
-  <text-input label="顧客名稱" v-model:value="name" />
-  <text-input label="來源" v-model:value="source" />
+  <text-input label="顧客名稱" v-model:value="name" required :error-message="errors?.name" />
+  <text-input label="來源" v-model:value="source" required :error-message="errors?.source" />
   <checkbox-input label="已私訊官方" v-model="hasMessagedOfficial" />
   <checkbox-input label="優惠對象" v-model="isDiscount" />
   <checkbox-input label="老闆" v-model="isBoss" />

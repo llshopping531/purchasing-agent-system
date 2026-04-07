@@ -9,6 +9,8 @@ import SelectComponent from '@/components/inputs/SelectComponent.vue'
 defineProps<{
   /** 預設選取的訂單狀態 Option */
   defaultValue?: Option
+  /** 是否為必填欄位 */
+  required?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -29,6 +31,7 @@ const orderStatusOptions: Option[] = [
     label="訂單狀態"
     :optionList="orderStatusOptions"
     :defaultValue="defaultValue"
+    :required="required"
     @selectOption="emit('selectOption', $event)"
   />
 </template>

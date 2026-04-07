@@ -8,6 +8,15 @@
 import { watch } from 'vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 
+defineProps<{
+  /** 日幣定價驗證錯誤訊息 */
+  priceJpyError?: string
+  /** 匯率驗證錯誤訊息 */
+  exchangeRateError?: string
+  /** 台幣定價驗證錯誤訊息 */
+  priceTwdError?: string
+}>()
+
 /** 日幣定價（雙向綁定） */
 const priceJpy = defineModel<number | null>('priceJpy')
 /** 匯率（雙向綁定） */
@@ -68,7 +77,7 @@ watch(
 </script>
 
 <template>
-  <text-input label="日幣定價" v-model:value="priceJpy" />
-  <text-input label="匯率" v-model:value="exchangeRate" />
-  <text-input label="台幣定價" v-model:value="priceTwd" />
+  <text-input label="日幣定價" v-model:value="priceJpy" required :error-message="priceJpyError" />
+  <text-input label="匯率" v-model:value="exchangeRate" required :error-message="exchangeRateError" />
+  <text-input label="台幣定價" v-model:value="priceTwd" required :error-message="priceTwdError" />
 </template>

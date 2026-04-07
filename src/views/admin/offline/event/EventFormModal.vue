@@ -4,12 +4,14 @@
  * 透過 defineExpose 提供 createEvent / editEvent / deleteEvent 方法供父層呼叫
  * 操作完成後 emit confirmed 通知父層重新載入活動列表
  */
+import { ref } from 'vue'
+import { useForm } from 'vee-validate'
+import * as yup from 'yup'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
+import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
 import { eventApi } from '@/services/api/events/events-api'
 import type { QueryEventsContent } from '@/services/api/events/events-api-interfaces'
-import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
-import { ref } from 'vue'
 
 const emit = defineEmits<{
   /** 新增、修改或刪除成功後觸發，通知父層重新整理活動列表 */
@@ -22,12 +24,22 @@ const isVisible = ref(false)
 const modalMode = ref<1 | 2 | 3>(1)
 /** 目標活動 ID */
 const currentEventId = ref(0)
-/** 表單欄位：活動名稱（刪除模式下用於顯示確認訊息） */
-const currentEventName = ref('')
-/** 表單欄位：開始日期 */
-const currentStartDate = ref('')
-/** 表單欄位：結束日期 */
-const currentEndDate = ref('')
+
+const schema = yup.object({
+  name: yup.string().required('活動名稱為必填'),
+  startDate: yup.string().required('開始日期為必填'),
+  endDate: yup.string().required('結束日期為必填'),
+})
+
+const { defineField, errors, validate, resetForm } = useForm({
+  validationSchema: schema,
+  initialValues: { name: '', startDate: '', endDate: '' },
+})
+
+const [currentEventName] = defineField('name')
+const [currentStartDate] = defineField('startDate')
+const [currentEndDate] = defineField('endDate')
+
 /** 表單欄位：是否隱藏 */
 const currentIsHidden = ref(false)
 /** 表單欄位：是否鎖定 */
@@ -38,6 +50,7 @@ const currentIsLocked = ref(false)
  */
 function createEvent() {
   modalMode.value = 1
+  resetForm()
   isVisible.value = true
 }
 
@@ -48,9 +61,13 @@ function createEvent() {
 function editEvent(currentData: QueryEventsContent) {
   modalMode.value = 2
   currentEventId.value = currentData.id
-  currentEventName.value = currentData.name
-  currentStartDate.value = currentData.startDate
-  currentEndDate.value = currentData.endDate
+  resetForm({
+    values: {
+      name: currentData.name,
+      startDate: currentData.startDate,
+      endDate: currentData.endDate,
+    },
+  })
   currentIsHidden.value = !currentData.isHidden
   currentIsLocked.value = currentData.isLocked
   isVisible.value = true
@@ -63,21 +80,29 @@ function editEvent(currentData: QueryEventsContent) {
 function deleteEvent(currentData: QueryEventsContent) {
   modalMode.value = 3
   currentEventId.value = currentData.id
-  currentEventName.value = currentData.name
+  resetForm({ values: { name: currentData.name, startDate: '', endDate: '' } })
   isVisible.value = true
+}
+
+/**
+ * 點擊確定前執行驗證，刪除模式跳過驗證
+ */
+async function beforeConfirm(): Promise<boolean> {
+  if (modalMode.value === 3) return true
+  const { valid } = await validate()
+  return valid
 }
 
 /**
  * 執行新增、修改或刪除 API，成功後關閉彈窗並通知父層
  */
 async function confirm() {
-  /** 新增或修改時的請求 body */
   const eventData = {
-    name: currentEventName.value,
-    startDate: currentStartDate.value,
-    endDate: currentEndDate.value,
+    name: currentEventName.value ?? '',
+    startDate: currentStartDate.value ?? '',
+    endDate: currentEndDate.value ?? '',
     isHidden: !currentIsHidden.value,
-    isLocked: currentIsLocked.value
+    isLocked: currentIsLocked.value,
   }
   if (modalMode.value === 1) await eventApi.postEvents(eventData)
   if (modalMode.value === 2) await eventApi.patchEvents(currentEventId.value, eventData)
@@ -91,9 +116,7 @@ async function confirm() {
  */
 function closeModal() {
   currentEventId.value = 0
-  currentEventName.value = ''
-  currentStartDate.value = ''
-  currentEndDate.value = ''
+  resetForm()
   currentIsHidden.value = false
   currentIsLocked.value = false
   isVisible.value = false
@@ -114,17 +137,33 @@ defineExpose({ createEvent, editEvent, deleteEvent })
           : '您確定要編輯此活動嗎？'
     "
     :isDelete="modalMode === 3"
+    :beforeConfirm="beforeConfirm"
     width="500px"
     @cancel="closeModal"
     @confirm="confirm"
   >
     <template #content>
       <div class="formGrid">
-        <text-input label="活動名稱" v-model:value="currentEventName"></text-input>
-        <checkbox-input label="是否顯示" v-model="currentIsHidden" style="margin-top: auto;"/>
-        <checkbox-input label="是否鎖定" v-model="currentIsLocked" style="margin-top: auto;"/>
-        <text-input label="開始日期" v-model:value="currentStartDate"></text-input>
-        <text-input label="結束日期" v-model:value="currentEndDate"></text-input>
+        <text-input
+          label="活動名稱"
+          v-model:value="currentEventName"
+          required
+          :error-message="errors.name"
+        />
+        <checkbox-input label="是否顯示" v-model="currentIsHidden" style="margin-top: auto;" />
+        <checkbox-input label="是否鎖定" v-model="currentIsLocked" style="margin-top: auto;" />
+        <text-input
+          label="開始日期"
+          v-model:value="currentStartDate"
+          required
+          :error-message="errors.startDate"
+        />
+        <text-input
+          label="結束日期"
+          v-model:value="currentEndDate"
+          required
+          :error-message="errors.endDate"
+        />
       </div>
     </template>
   </confirm-modal-component>

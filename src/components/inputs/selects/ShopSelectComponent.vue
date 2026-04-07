@@ -13,6 +13,8 @@ const pop = defineProps<{
   eventId: string
   /** 是否顯示選項 全部 */
   isShowAll?: boolean
+  /** 是否為必填欄位 */
+  required?: boolean
 }>()
 
 
@@ -67,6 +69,7 @@ async function getChannelList(eventId: string) {
     label="通路"
     :defaultValue="defaultValue"
     :optionList="shopList"
+    :required="pop.required"
     @selectOption="selectShop"
   ></select-component>
 </template>

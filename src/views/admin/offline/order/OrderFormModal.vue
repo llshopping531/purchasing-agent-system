@@ -5,7 +5,7 @@
  * 訂單金額（小計 JPY/TWD）及匯率支援自動聯動計算
  * 透過 defineExpose 提供 createOrder / editOrder / deleteOrder 方法供父層呼叫
  */
-import { ref, watch } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
 import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
@@ -105,6 +105,40 @@ const formIsFixedRate = ref(false)
 const formNonCutTarget = ref(false)
 /** 是否已採購確認 */
 const formPurchaseConfirm = ref(false)
+
+// ── 驗證錯誤訊息 ──────────────────────────────────────────────
+const formErrors = reactive<{
+  customer: string
+  product: string
+  quantity: string
+  newCustomerName: string
+  newCustomerSource: string
+  newProductName: string
+  newProductPriceJpy: string
+  newProductExchangeRate: string
+  newProductPriceTwd: string
+}>({
+  customer: '',
+  product: '',
+  quantity: '',
+  newCustomerName: '',
+  newCustomerSource: '',
+  newProductName: '',
+  newProductPriceJpy: '',
+  newProductExchangeRate: '',
+  newProductPriceTwd: '',
+})
+
+/** 欄位值變動時清除對應錯誤 */
+watch(formCustomerOption, () => { formErrors.customer = '' })
+watch(formProductOption, () => { formErrors.product = '' })
+watch(formQuantity, () => { formErrors.quantity = '' })
+watch(formNewCustomerName, () => { formErrors.newCustomerName = '' })
+watch(formNewCustomerSource, () => { formErrors.newCustomerSource = '' })
+watch(formNewProductName, () => { formErrors.newProductName = '' })
+watch(formNewProductPriceJpy, () => { formErrors.newProductPriceJpy = '' })
+watch(formNewProductExchangeRate, () => { formErrors.newProductExchangeRate = '' })
+watch(formNewProductPriceTwd, () => { formErrors.newProductPriceTwd = '' })
 
 /**
  * 將日幣金額依匯率換算為台幣，並進位至最近的 5 元
@@ -242,6 +276,68 @@ function deleteOrder(currentData: OrderQueryContent) {
 }
 
 /**
+ * 點擊確定前執行驗證，刪除模式跳過驗證
+ */
+async function beforeConfirm(): Promise<boolean> {
+  if (modalMode.value === 3) return true
+
+  // 重置所有錯誤
+  Object.keys(formErrors).forEach((k) => {
+    formErrors[k as keyof typeof formErrors] = ''
+  })
+
+  let valid = true
+
+  // 新增模式驗證顧客
+  if (modalMode.value === 1) {
+    if (isNewCustomer.value) {
+      if (!formNewCustomerName.value.trim()) {
+        formErrors.newCustomerName = '顧客名稱為必填'
+        valid = false
+      }
+      if (!formNewCustomerSource.value.trim()) {
+        formErrors.newCustomerSource = '來源為必填'
+        valid = false
+      }
+    } else if (!formCustomerOption.value) {
+      formErrors.customer = '請選擇顧客'
+      valid = false
+    }
+
+    // 新增模式驗證商品
+    if (isNewProduct.value) {
+      if (!formNewProductName.value.trim()) {
+        formErrors.newProductName = '商品名稱為必填'
+        valid = false
+      }
+      if (!formNewProductPriceJpy.value) {
+        formErrors.newProductPriceJpy = '日幣定價為必填'
+        valid = false
+      }
+      if (!formNewProductExchangeRate.value) {
+        formErrors.newProductExchangeRate = '匯率為必填'
+        valid = false
+      }
+      if (!formNewProductPriceTwd.value) {
+        formErrors.newProductPriceTwd = '台幣定價為必填'
+        valid = false
+      }
+    } else if (!formProductOption.value) {
+      formErrors.product = '請選擇商品'
+      valid = false
+    }
+  }
+
+  // 數量必填（新增與修改皆驗證）
+  if (!formQuantity.value) {
+    formErrors.quantity = '數量為必填'
+    valid = false
+  }
+
+  return valid
+}
+
+/**
  * 執行新增、修改或刪除 API
  * 若為新增模式且選擇新增顧客／商品，會先建立顧客／商品再建立訂單
  */
@@ -335,6 +431,9 @@ function closeModal() {
   formIsFixedRate.value = false
   formNonCutTarget.value = false
   formPurchaseConfirm.value = false
+  Object.keys(formErrors).forEach((k) => {
+    formErrors[k as keyof typeof formErrors] = ''
+  })
   isVisible.value = false
 }
 
@@ -355,6 +454,7 @@ defineExpose({ createOrder, editOrder, deleteOrder })
             : '您確定要修改此訂單嗎？'
     "
     :isDelete="modalMode === 3"
+    :beforeConfirm="beforeConfirm"
     width="600px"
     @cancel="closeModal"
     @confirm="confirm"
@@ -371,8 +471,10 @@ defineExpose({ createOrder, editOrder, deleteOrder })
       <div class="formGrid">
         <div v-if="modalMode === 1 && !isNewCustomer">
           <customer-select-component
+            required
             @selectOption="formCustomerOption = $event"
           ></customer-select-component>
+          <span v-if="formErrors.customer" class="field-error">{{ formErrors.customer }}</span>
           <div class="addLink" @click="isNewCustomer = true">新增顧客</div>
         </div>
         <template v-if="isNewCustomer">
@@ -383,12 +485,14 @@ defineExpose({ createOrder, editOrder, deleteOrder })
             v-model:isDiscount="formIsDiscount"
             v-model:isBoss="formIsBoss"
             v-model:note="formNewCustomerNote"
+            :errors="{ name: formErrors.newCustomerName || undefined, source: formErrors.newCustomerSource || undefined }"
           />
           <div class="addLink" @click="isNewCustomer = false">返回選擇顧客</div>
         </template>
 
         <div v-if="!isNewProduct && modalMode === 1">
           <product-select-component
+            required
             :eventId="props.eventId"
             :channelId="props.shopId"
             :defaultValue="formProductOption"
@@ -396,6 +500,7 @@ defineExpose({ createOrder, editOrder, deleteOrder })
             @selectProduct="onSelectProduct"
             style="margin-bottom: 0"
           />
+          <span v-if="formErrors.product" class="field-error">{{ formErrors.product }}</span>
           <div class="addLink" @click="clickAddProduct">找不到商品？新增商品</div>
         </div>
         <div v-if="selectedProduct && !isNewProduct && modalMode === 1" class="productInfo">
@@ -411,11 +516,24 @@ defineExpose({ createOrder, editOrder, deleteOrder })
             v-model:exchangeRate="formNewProductExchangeRate"
             v-model:priceTwd="formNewProductPriceTwd"
             v-model:image="formNewProductImage"
+            :errors="{
+              name: formErrors.newProductName || undefined,
+              priceJpy: formErrors.newProductPriceJpy || undefined,
+              exchangeRate: formErrors.newProductExchangeRate || undefined,
+              priceTwd: formErrors.newProductPriceTwd || undefined,
+            }"
           />
           <div class="addLink" @click="isNewProduct = false">返回選擇商品</div>
         </template>
 
-        <text-input label="數量" v-model:value="formQuantity" />
+        <div>
+          <text-input
+            label="數量"
+            v-model:value="formQuantity"
+            required
+            :error-message="formErrors.quantity"
+          />
+        </div>
         <div>
           <text-input label="匯率" v-model:value="formExchangeRate" :disabled="!isAdjustRate" />
           <checkbox-input label="調整數值" v-model="isAdjustRate" class="adjustRateCheckbox" />
@@ -473,5 +591,12 @@ defineExpose({ createOrder, editOrder, deleteOrder })
   @media (max-width: 768px) {
     gap: 0.25rem;
   }
+}
+.field-error {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-danger, #e53e3e);
+  margin-top: 0.25rem;
+  font-weight: 500;
 }
 </style>

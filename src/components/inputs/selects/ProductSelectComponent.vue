@@ -17,6 +17,8 @@ const props = defineProps<{
   channelId: string
   /** 預設選取的商品 Option */
   defaultValue?: Option
+  /** 是否為必填欄位 */
+  required?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -75,6 +77,7 @@ function onSelect(option: Option) {
     label="商品"
     :optionList="productOptions"
     :defaultValue="defaultValue"
+    :required="props.required"
     @selectOption="onSelect"
   />
 </template>

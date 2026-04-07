@@ -11,6 +11,8 @@ import { customersApi } from '@/services/api/customers/customers-api'
 defineProps<{
   /** 預設選取的顧客 Option */
   defaultValue?: Option
+  /** 是否為必填欄位 */
+  required?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -42,6 +44,7 @@ async function getCustomerList() {
     label="客戶"
     :optionList="customerList"
     :defaultValue="defaultValue"
+    :required="required"
     @selectOption="emit('selectOption', $event)"
   />
 </template>

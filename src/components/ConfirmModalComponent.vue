@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import ModalComponent from '@/components/ModalComponent.vue'
 import { ref } from 'vue'
-withDefaults(
+const props = withDefaults(
   defineProps<{
     name: string
     confirmText: string
     isDelete?: boolean
     width?: string
+    /** 點擊確定前執行的驗證函式，回傳 false 時阻止進入確認彈窗 */
+    beforeConfirm?: () => boolean | Promise<boolean>
   }>(),
   {
     isDelete: false,
@@ -25,6 +27,13 @@ function cancel() {
 function confirm() {
   emit('confirm')
 }
+async function handleFirstConfirm() {
+  if (props.beforeConfirm) {
+    const valid = await props.beforeConfirm()
+    if (!valid) return
+  }
+  isShowConfirmModal.value = true
+}
 </script>
 
 <template>
@@ -32,7 +41,7 @@ function confirm() {
     v-if="!isDelete"
     :name="name"
     width="500px"
-    @confirm="isShowConfirmModal = true"
+    @confirm="handleFirstConfirm"
     @cancel="cancel"
     :isShowCancelBtn="true"
   >

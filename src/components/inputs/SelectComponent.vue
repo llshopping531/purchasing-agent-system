@@ -13,6 +13,8 @@ const pop = defineProps<{
   defaultValue: Option | undefined
   /** 完整選項清單 */
   optionList: Option[]
+  /** 是否為必填欄位（顯示紅色星號） */
+  required?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -74,7 +76,7 @@ function filter() {
 
 <template>
   <div class="select">
-    <span class="label">{{ label }}</span>
+    <span class="label">{{ label }}<span v-if="pop.required" class="required-mark">*</span></span>
     <input
       class="currentValue"
       type="text"
@@ -111,6 +113,13 @@ function filter() {
     font-weight: 600;
     font-size: 0.875rem;
     color: var(--color-text-secondary);
+    display: flex;
+    gap: 0.25rem;
+
+    .required-mark {
+      color: var(--color-danger, #e53e3e);
+      font-weight: 700;
+    }
   }
 }
 
