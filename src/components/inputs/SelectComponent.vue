@@ -106,7 +106,6 @@ function filter() {
   flex-direction: column;
   width: fit-content;
   position: relative;
-  min-width: 180px;
 
   .label {
     margin-bottom: 0.35rem;
@@ -122,6 +121,7 @@ function filter() {
   border: 1.5px solid rgba(124, 111, 224, 0.3);
   border-radius: var(--radius-md);
   background: var(--color-surface);
+  width: 100%;
   transition:
     border-color 0.15s,
     box-shadow 0.15s;

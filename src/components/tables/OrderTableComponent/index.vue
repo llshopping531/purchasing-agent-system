@@ -4,11 +4,19 @@
  * 整合訂單列表查詢、分頁、詳細資料彈窗，並向上 emit 編輯／刪除事件
  */
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
+import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { fieldDefsApi } from '@/services/api/sys/field-defs-api'
 import { orderApi, type OrderAllContent } from '@/services/api/order/order-api'
 import { onMounted, ref, watch } from 'vue'
 import OrderDetailModal from './OrderDetailModal.vue'
 import DrawsResultModal from './DrawsResultModal.vue'
+import type { Option } from '@/interfaces/common'
+
+const orderStatusOptions: Option[] = [
+  { value: '1', name: '已喊單' },
+  { value: '2', name: '已購買' },
+  { value: '3', name: '已取消' },
+]
 
 const pop = defineProps<{
   /** 目前選取的活動 ID（字串形式） */
@@ -175,6 +183,31 @@ function closeDrawsModal() {
   getOrderList()
   isShowDrawsModal.value = false
 }
+
+/**
+ * 直接在列表更新訂單狀態
+ * @param row - 目標訂單資料
+ * @param newStatus - 新的訂單狀態值
+ */
+async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
+  await orderApi.patchOrders(row.id, {
+    eventId: row.eventId,
+    channelId: row.channelId,
+    customerId: row.customerId,
+    productId: row.productId,
+    quantity: row.quantity,
+    exchangeRate: row.exchangeRate,
+    subtotalJpy: row.subtotalJpy,
+    subtotalTwd: row.subtotalTwd,
+    orderStatus: newStatus,
+    nonBonusTarget: row.nonBonusTarget,
+    isFixedRate: row.isFixedRate,
+    nonCutTarget: row.nonCutTarget,
+    purchaseConfirm: row.purchaseConfirm,
+    note: row.note,
+  })
+  await getOrderList()
+}
 </script>
 
 <template>
@@ -212,7 +245,15 @@ function closeDrawsModal() {
         </span>
       </template>
       <template #col-orderStatusName="{ row }">
-        <span :class="{ cancelled: row.orderStatusName === '已取消' }">
+        <select-component
+          v-if="isOperate"
+          label=""
+          class="status-select"
+          :defaultValue="{ value: row.orderStatus, name: row.orderStatusName }"
+          :optionList="orderStatusOptions"
+          @selectOption="updateOrderStatus(row, $event.value)"
+        />
+        <span v-else :class="{ cancelled: row.orderStatusName === '已取消' }">
           {{ row.orderStatusName }}
         </span>
       </template>
