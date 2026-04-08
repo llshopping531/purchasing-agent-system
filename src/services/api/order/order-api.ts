@@ -4,6 +4,8 @@ import type {
   CreateDrawsResultRes,
   CreateOrderReq,
   CreateOrderRes,
+  DrawsTransferReq,
+  DrawsTransferRes,
   GetDrawsResultRes,
   ModifyDrawsResultReq,
   ModifyDrawsResultRes,
@@ -89,5 +91,14 @@ export const orderApi = {
    */
   deleteDrawsResult: async (orderId: number): Promise<void> => {
     return await deleteApi(`/orders/draws/${orderId}`)
+  },
+
+  /**
+   * 轉單：將指定訂單的部分或全部數量轉給另一位客戶
+   * @param req - 新增訂單所需欄位
+   * @returns 轉單後的訂單資料
+   */
+  drawsTransfer: async (orderId: number,req: DrawsTransferReq): Promise<DrawsTransferRes> => {
+    return await postApi(`/orders/${orderId}/transfer`, req)
   },
 }

@@ -7,13 +7,20 @@ import { ref, onMounted } from 'vue'
 import type { Option } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { customersApi } from '@/services/api/customers/customers-api'
-
-defineProps<{
-  /** 預設選取的顧客 Option */
-  defaultValue?: Option
-  /** 是否為必填欄位 */
-  required?: boolean
-}>()
+withDefaults(
+  defineProps<{
+    /** 預設選取的顧客 Option */
+    defaultValue?: Option
+    /** 是否為必填欄位 */
+    required?: boolean
+    /** 標題 */
+    title?: string
+  }>(),
+  {
+    /** 標題 */
+    title: '顧客',
+  },
+)
 
 const emit = defineEmits<{
   /** 使用者選取顧客時觸發，帶出顧客對應的 Option */
@@ -41,7 +48,7 @@ async function getCustomerList() {
 
 <template>
   <select-component
-    label="客戶"
+    :label="title"
     :optionList="customerList"
     :defaultValue="defaultValue"
     :required="required"

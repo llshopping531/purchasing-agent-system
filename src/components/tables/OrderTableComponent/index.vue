@@ -153,6 +153,11 @@ async function getOrderList() {
     emit('tableData', tableData.value)
   }
 }
+
+function closeDrawsModal() {
+  getOrderList()
+  isShowDrawsModal.value = false
+}
 </script>
 
 <template>
@@ -204,7 +209,7 @@ async function getOrderList() {
   <draws-result-modal
     v-if="isShowDrawsModal && selectedBlindOrder"
     :order="selectedBlindOrder"
-    @close="isShowDrawsModal = false"
+    @close="closeDrawsModal"
   />
 </template>
 
@@ -226,7 +231,6 @@ async function getOrderList() {
 }
 .more-icons {
   display: flex;
-  /* justify-content: center; */
   align-items: center;
   gap: 0.4rem;
   flex-wrap: wrap;

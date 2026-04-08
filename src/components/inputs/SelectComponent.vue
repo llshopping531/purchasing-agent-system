@@ -113,13 +113,6 @@ function filter() {
     font-weight: 600;
     font-size: 0.875rem;
     color: var(--color-text-secondary);
-    display: flex;
-    gap: 0.25rem;
-
-    .required-mark {
-      color: var(--color-danger, #e53e3e);
-      font-weight: 700;
-    }
   }
 }
 

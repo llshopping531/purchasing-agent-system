@@ -41,9 +41,8 @@ const value = defineModel('value')
     font-weight: 600;
     font-size: 0.875rem;
     color: var(--color-text-secondary);
-    display: flex;
-    gap: 0.25rem;
     margin-bottom: 0.25rem;
+    display: block;
     .required-mark {
       display: inline;
       color: var(--color-danger, #e53e3e);

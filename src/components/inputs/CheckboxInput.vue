@@ -1,22 +1,44 @@
 <script setup lang="ts">
-/**
- * 自訂樣式的核取方塊輸入元件
- * 隱藏原生 checkbox，以自訂 SVG 圖示取代視覺呈現
- */
-defineProps<{
-  /** 核取方塊旁的標籤文字 */
+import { computed } from 'vue'
+
+const props = defineProps<{
   label: string
+  /** 多選模式時使用，代表此 checkbox 的值 */
+  value?: string
 }>()
 
-/** 核取狀態，透過 v-model 雙向綁定 */
-const checked = defineModel<boolean>({ default: false })
+const model = defineModel<boolean | string[]>({ default: false })
+
+// 自動判斷勾選狀態
+const isChecked = computed(() => {
+  if (Array.isArray(model.value)) {
+    return model.value.includes(props.value ?? '')
+  }
+  return model.value
+})
+
+const handleChange = (e: Event) => {
+  const checked = (e.target as HTMLInputElement).checked
+
+  if (Array.isArray(model.value)) {
+    const newVal = [...model.value]
+    if (checked) {
+      newVal.push(props.value ?? '')
+    } else {
+      newVal.splice(newVal.indexOf(props.value ?? ''), 1)
+    }
+    model.value = newVal
+  } else {
+    model.value = checked
+  }
+}
 </script>
 
 <template>
   <label class="checkboxInput">
-    <input type="checkbox" v-model="checked" />
-    <img v-if="checked" alt="isChecked" class="icon" src="@/assets/checked.svg" />
-    <img v-if="!checked" alt="isChecked" class="icon" src="@/assets/unChecked.svg" />
+    <input type="checkbox" :checked="isChecked" @change="handleChange" />
+    <img v-if="isChecked" alt="isChecked" class="icon" src="@/assets/checked.svg" />
+    <img v-if="!isChecked" alt="isChecked" class="icon" src="@/assets/unChecked.svg" />
     <span>{{ label }}</span>
   </label>
 </template>

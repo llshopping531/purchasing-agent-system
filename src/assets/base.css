@@ -171,3 +171,9 @@ p {
 html.no-scroll {
   overflow: hidden;
 }
+
+.required-mark {
+  color: var(--color-danger, #e53e3e);
+  font-weight: 700;
+  margin-left: 0.25rem;
+}
