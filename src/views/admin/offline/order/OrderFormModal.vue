@@ -130,15 +130,33 @@ const formErrors = reactive<{
 })
 
 /** 欄位值變動時清除對應錯誤 */
-watch(formCustomerOption, () => { formErrors.customer = '' })
-watch(formProductOption, () => { formErrors.product = '' })
-watch(formQuantity, () => { formErrors.quantity = '' })
-watch(formNewCustomerName, () => { formErrors.newCustomerName = '' })
-watch(formNewCustomerSource, () => { formErrors.newCustomerSource = '' })
-watch(formNewProductName, () => { formErrors.newProductName = '' })
-watch(formNewProductPriceJpy, () => { formErrors.newProductPriceJpy = '' })
-watch(formNewProductExchangeRate, () => { formErrors.newProductExchangeRate = '' })
-watch(formNewProductPriceTwd, () => { formErrors.newProductPriceTwd = '' })
+watch(formCustomerOption, () => {
+  formErrors.customer = ''
+})
+watch(formProductOption, () => {
+  formErrors.product = ''
+})
+watch(formQuantity, () => {
+  formErrors.quantity = ''
+})
+watch(formNewCustomerName, () => {
+  formErrors.newCustomerName = ''
+})
+watch(formNewCustomerSource, () => {
+  formErrors.newCustomerSource = ''
+})
+watch(formNewProductName, () => {
+  formErrors.newProductName = ''
+})
+watch(formNewProductPriceJpy, () => {
+  formErrors.newProductPriceJpy = ''
+})
+watch(formNewProductExchangeRate, () => {
+  formErrors.newProductExchangeRate = ''
+})
+watch(formNewProductPriceTwd, () => {
+  formErrors.newProductPriceTwd = ''
+})
 
 /**
  * 將日幣金額依匯率換算為台幣，並進位至最近的 5 元
@@ -152,10 +170,11 @@ function calcPriceTwd(priceJpy: number, rate: number): number {
   return floored % 5 === 0 ? floored : Math.ceil(price / 5) * 5
 }
 
-/** 修改模式下，依當前匯率即時推算的台幣單價（供參考用） */
-const editUnitTwd = computed(() => {
-  if (!editProductInfo.value?.priceJpy || !formExchangeRate.value) return null
-  return calcPriceTwd(editProductInfo.value.priceJpy, formExchangeRate.value)
+/** 匯率連動的台幣售價（單價 × 當前匯率） */
+const currentUnitTwd = computed(() => {
+  const priceJpy = editProductInfo.value?.priceJpy ?? selectedProduct.value?.priceJpy
+  if (!priceJpy || !formExchangeRate.value) return null
+  return calcPriceTwd(priceJpy, formExchangeRate.value)
 })
 
 /** 防止金額 watch 之間循環觸發的 flag */
@@ -467,7 +486,7 @@ defineExpose({ createOrder, editOrder, deleteOrder })
     "
     :isDelete="modalMode === 3"
     :beforeConfirm="beforeConfirm"
-    width="600px"
+    width="500px"
     @cancel="closeModal"
     @confirm="confirm"
   >
@@ -476,92 +495,112 @@ defineExpose({ createOrder, editOrder, deleteOrder })
         {{ editCustomerName }} - {{ editProductInfo.name }}
         <span class="productInfo" style="margin-top: 0.25rem">
           <span>日幣定價：¥{{ editProductInfo.priceJpy }}</span>
-          <span>台幣單價：NT${{ editUnitTwd ?? editProductInfo.priceTwd }}</span>
+          <span>台幣單價：NT${{ editProductInfo.priceTwd }}</span>
           <span>匯率：{{ editProductInfo.exchangeRate }}</span>
         </span>
       </div>
-      <div class="formGrid">
-        <div v-if="modalMode === 1 && !isNewCustomer">
-          <customer-select-component
-            required
-            @selectOption="formCustomerOption = $event"
-          ></customer-select-component>
-          <span v-if="formErrors.customer" class="field-error">{{ formErrors.customer }}</span>
-          <div class="addLink" @click="isNewCustomer = true">新增顧客</div>
+      <div class="form">
+        <div class="row">
+          <div v-if="modalMode === 1 && !isNewCustomer">
+            <customer-select-component
+              required
+              @selectOption="formCustomerOption = $event"
+            ></customer-select-component>
+            <span v-if="formErrors.customer" class="field-error">{{ formErrors.customer }}</span>
+            <div class="addLink" @click="isNewCustomer = true">新增顧客</div>
+          </div>
+          <template v-if="isNewCustomer">
+            <div class="newForm">
+              <new-customer-form
+                v-model:name="formNewCustomerName"
+                v-model:source="formNewCustomerSource"
+                v-model:hasMessagedOfficial="formHasMessagedOfficial"
+                v-model:isDiscount="formIsDiscount"
+                v-model:isBoss="formIsBoss"
+                v-model:note="formNewCustomerNote"
+                :errors="{
+                  name: formErrors.newCustomerName || undefined,
+                  source: formErrors.newCustomerSource || undefined,
+                }"
+              />
+              <div class="addLink" @click="isNewCustomer = false">返回選擇顧客</div>
+            </div>
+          </template>
+          <div>
+            <div v-if="!isNewProduct && modalMode === 1">
+              <product-select-component
+                required
+                :eventId="props.eventId"
+                :channelId="props.shopId"
+                :defaultValue="formProductOption"
+                @selectOption="formProductOption = $event"
+                @selectProduct="onSelectProduct"
+                style="margin-bottom: 0"
+              />
+              <span v-if="formErrors.product" class="field-error">{{ formErrors.product }}</span>
+              <div class="addLink" @click="clickAddProduct">找不到商品？新增商品</div>
+            </div>
+          </div>
+          <template v-if="isNewProduct">
+            <div class="newForm">
+              <new-product-form
+                v-model:name="formNewProductName"
+                v-model:priceJpy="formNewProductPriceJpy"
+                v-model:exchangeRate="formNewProductExchangeRate"
+                v-model:priceTwd="formNewProductPriceTwd"
+                v-model:image="formNewProductImage"
+                :errors="{
+                  name: formErrors.newProductName || undefined,
+                  priceJpy: formErrors.newProductPriceJpy || undefined,
+                  exchangeRate: formErrors.newProductExchangeRate || undefined,
+                  priceTwd: formErrors.newProductPriceTwd || undefined,
+                }"
+              />
+              <div class="addLink" @click="isNewProduct = false">返回選擇商品</div>
+            </div>
+          </template>
         </div>
-        <template v-if="isNewCustomer">
-          <new-customer-form
-            v-model:name="formNewCustomerName"
-            v-model:source="formNewCustomerSource"
-            v-model:hasMessagedOfficial="formHasMessagedOfficial"
-            v-model:isDiscount="formIsDiscount"
-            v-model:isBoss="formIsBoss"
-            v-model:note="formNewCustomerNote"
-            :errors="{ name: formErrors.newCustomerName || undefined, source: formErrors.newCustomerSource || undefined }"
-          />
-          <div class="addLink" @click="isNewCustomer = false">返回選擇顧客</div>
-        </template>
-
-        <div v-if="!isNewProduct && modalMode === 1">
-          <product-select-component
-            required
-            :eventId="props.eventId"
-            :channelId="props.shopId"
-            :defaultValue="formProductOption"
-            @selectOption="formProductOption = $event"
-            @selectProduct="onSelectProduct"
-            style="margin-bottom: 0"
-          />
-          <span v-if="formErrors.product" class="field-error">{{ formErrors.product }}</span>
-          <div class="addLink" @click="clickAddProduct">找不到商品？新增商品</div>
-        </div>
-        <div v-if="selectedProduct && !isNewProduct && modalMode === 1" class="productInfo">
-          <span>日幣定價：¥{{ selectedProduct.priceJpy }}</span>
-          <span>台幣定價：NT${{ selectedProduct.priceTwd }}</span>
-          <span>匯率：{{ selectedProduct.exchangeRate }}</span>
-        </div>
-
-        <template v-if="isNewProduct">
-          <new-product-form
-            v-model:name="formNewProductName"
-            v-model:priceJpy="formNewProductPriceJpy"
-            v-model:exchangeRate="formNewProductExchangeRate"
-            v-model:priceTwd="formNewProductPriceTwd"
-            v-model:image="formNewProductImage"
-            :errors="{
-              name: formErrors.newProductName || undefined,
-              priceJpy: formErrors.newProductPriceJpy || undefined,
-              exchangeRate: formErrors.newProductExchangeRate || undefined,
-              priceTwd: formErrors.newProductPriceTwd || undefined,
-            }"
-          />
-          <div class="addLink" @click="isNewProduct = false">返回選擇商品</div>
-        </template>
-
-        <div>
+        <div class="row">
           <text-input
             label="數量"
             v-model:value="formQuantity"
             required
             :error-message="formErrors.quantity"
           />
-        </div>
-        <div>
-          <text-input label="匯率" v-model:value="formExchangeRate" :disabled="!isAdjustRate" />
-          <checkbox-input label="調整數值" v-model="isAdjustRate" class="adjustRateCheckbox" />
-        </div>
-        <text-input label="小計 (日幣)" v-model:value="formSubtotalJpy" :disabled="true" />
-        <text-input label="小計 (台幣)" v-model:value="formSubtotalTwd" :disabled="true" />
-        <order-status-select-component
-          :defaultValue="formOrderStatusOption"
-          @selectOption="formOrderStatusOption = $event"
-        />
-        <text-input label="備註" v-model:value="formNote" />
 
-        <checkbox-input label="非特典對象" v-model="formNonBonusTarget" />
-        <checkbox-input label="固定匯率" v-model="formIsFixedRate" />
-        <checkbox-input label="非分潤對象" v-model="formNonCutTarget" />
-        <checkbox-input label="採購確認" v-model="formPurchaseConfirm" />
+          <div>
+            <text-input label="匯率" v-model:value="formExchangeRate" :disabled="!isAdjustRate" />
+            <checkbox-input label="調整數值" v-model="isAdjustRate" class="adjustRateCheckbox" />
+            <span
+              v-if="
+                selectedProduct &&
+                !isNewProduct &&
+                modalMode === 1 &&
+                (isAdjustRate || formExchangeRate !== selectedProduct.exchangeRate)
+              "
+              class="unit-twd-hint"
+              >台幣定價：NT${{ selectedProduct.priceTwd }}</span
+            >
+            <span v-if="currentUnitTwd !== null" class="unit-twd-hint"
+              >台幣售價：NT${{ currentUnitTwd }}</span
+            >
+          </div>
+        </div>
+        <div class="row">
+          <text-input label="小計 (日幣)" v-model:value="formSubtotalJpy" :disabled="true" />
+          <text-input label="小計 (台幣)" v-model:value="formSubtotalTwd" :disabled="true" />
+        </div>
+        <div class="row">
+          <order-status-select-component
+            :defaultValue="formOrderStatusOption"
+            @selectOption="formOrderStatusOption = $event"
+          />
+          <text-input label="備註" v-model:value="formNote" />
+        </div>
+        <div class="row checkbox">
+          <checkbox-input label="非特典對象" v-model="formNonBonusTarget" />
+          <checkbox-input label="非分潤對象" v-model="formNonCutTarget" />
+        </div>
       </div>
     </template>
   </confirm-modal-component>
@@ -575,6 +614,11 @@ defineExpose({ createOrder, editOrder, deleteOrder })
   font-size: 0.8rem;
   color: #888;
   margin-top: 0;
+}
+.unit-twd-hint {
+  display: block;
+  font-size: 0.78rem;
+  color: #888;
 }
 .adjustRateCheckbox {
   display: flex;
@@ -593,13 +637,28 @@ defineExpose({ createOrder, editOrder, deleteOrder })
     text-decoration: underline;
   }
 }
-.formGrid {
-  display: flex;
-  gap: 1.5rem;
-  padding: 0 0.5rem;
-  flex-wrap: wrap;
-  align-items: start;
-  margin-top: 1rem;
+.form {
+  .row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    &:last-child {
+      margin-bottom: 0;
+    }
+    &.checkbox{
+      justify-content: start;
+    }
+    .newForm {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      background: #f3f3f3;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+    }
+  }
   @media (max-width: 768px) {
     gap: 0.25rem;
   }
