@@ -1,13 +1,24 @@
 <script setup lang="ts">
+import { watch } from 'vue'
 import IconLoading from '@/components/icons/IconLoading.vue'
 import MaskComponent from '@/components/MaskComponent.vue'
-import { useLoadingStore } from '@/stores/loading';
+import { useLoadingStore } from '@/stores/loading'
+import { useModalLayer } from '@/composables/useModalLayer'
 
 const loadingStore = useLoadingStore()
+const { acquire, release } = useModalLayer()
+
+watch(
+  () => loadingStore.isLoading,
+  (val) => {
+    if (val) acquire()
+    else release()
+  },
+)
 </script>
 <template>
   <div class="loading" v-if="loadingStore.isLoading">
-    <mask-component></mask-component>
+    <mask-component :zIndex="290"></mask-component>
     <div class="loading-icon">
       <icon-loading></icon-loading>
     </div>
@@ -24,7 +35,6 @@ const loadingStore = useLoadingStore()
   align-items: center;
   justify-content: center;
   z-index: 300;
-  pointer-events: none;
 
   .loading-icon {
     position: relative;

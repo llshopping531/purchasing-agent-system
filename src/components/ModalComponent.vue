@@ -3,8 +3,9 @@
  * 基礎彈窗元件
  * 掛載時鎖定 body 捲動，卸載時解除，提供標題、內容 slot 與確定／取消按鈕
  */
-import { onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import MaskComponent from './MaskComponent.vue'
+import { useModalLayer } from '@/composables/useModalLayer'
 
 defineProps<{
   /** 彈窗標題 */
@@ -22,12 +23,18 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
+const { acquire, release } = useModalLayer()
+const maskZ = ref(200)
+const modalZ = ref(201)
+
 onMounted(() => {
-  document.body.classList.add('no-scroll')
+  const z = acquire()
+  maskZ.value = z.maskZ
+  modalZ.value = z.modalZ
 })
 
 onUnmounted(() => {
-  document.body.classList.remove('no-scroll')
+  release()
 })
 
 /** 觸發確定事件 */
@@ -41,8 +48,8 @@ function cancel() {
 }
 </script>
 <template>
-  <mask-component @click="cancel"></mask-component>
-  <div class="modal" :style="{ width: width }">
+  <mask-component :zIndex="maskZ" @click="cancel"></mask-component>
+  <div class="modal" :style="{ width, zIndex: modalZ }">
     <div class="modal-title">{{ name }}</div>
     <div class="modal-body">
       <slot name="content"></slot>
