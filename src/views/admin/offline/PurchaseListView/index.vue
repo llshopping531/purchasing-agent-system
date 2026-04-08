@@ -26,8 +26,10 @@ const purchaseList = ref<PurchaseList[]>([])
 const displayPurchaseList = ref<PurchaseList[]>([])
 /** 是否顯示通路下拉 */
 const isShowChannelSelect = ref<boolean>(false)
-  /** 當前通路是否已鎖定 */
+/** 當前通路是否已鎖定 */
 const currentEventIsLocked = ref(true)
+/** 當前選取的通路篩選條件 */
+const currentChannelFilter = ref<Option | null>(null)
 
 /**
  * 選取活動後，從 API 取得採購統計並轉換為以通路為單位的陣列
@@ -39,12 +41,24 @@ async function fetchPurchaseList() {
     channelName: key,
     data: res[key] ?? [],
   }))
-  displayPurchaseList.value = purchaseList.value
+  applyChannelFilter()
+}
+
+function applyChannelFilter() {
+  const filter = currentChannelFilter.value
+  if (!filter || filter.value === '') {
+    displayPurchaseList.value = purchaseList.value
+  } else {
+    displayPurchaseList.value = purchaseList.value.filter(
+      (item) => item.channelName === filter.name,
+    )
+  }
 }
 
 async function selectEvent(data: EventOption) {
   currentEventId.value = Number(data.selectedData.value)
   currentEventIsLocked.value = data.isLocked
+  currentChannelFilter.value = null
   await fetchPurchaseList()
   isShowChannelSelect.value = true
 }
@@ -54,13 +68,8 @@ async function selectEvent(data: EventOption) {
  * @param option - 選取的通路 Option
  */
 function selectChannel(option: Option) {
-  if (option.value == '') {
-    displayPurchaseList.value = purchaseList.value
-    return
-  }
-  displayPurchaseList.value = [...purchaseList.value].filter(
-    (item) => item.channelName === option.name,
-  )
+  currentChannelFilter.value = option
+  applyChannelFilter()
 }
 </script>
 

@@ -5,7 +5,7 @@
  * 訂單金額（小計 JPY/TWD）及匯率支援自動聯動計算
  * 透過 defineExpose 提供 createOrder / editOrder / deleteOrder 方法供父層呼叫
  */
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
 import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
@@ -152,6 +152,12 @@ function calcPriceTwd(priceJpy: number, rate: number): number {
   return floored % 5 === 0 ? floored : Math.ceil(price / 5) * 5
 }
 
+/** 修改模式下，依當前匯率即時推算的台幣單價（供參考用） */
+const editUnitTwd = computed(() => {
+  if (!editProductInfo.value?.priceJpy || !formExchangeRate.value) return null
+  return calcPriceTwd(editProductInfo.value.priceJpy, formExchangeRate.value)
+})
+
 /** 防止金額 watch 之間循環觸發的 flag */
 let syncingOrder = false
 
@@ -179,6 +185,12 @@ watch(
       const rate = formExchangeRate.value ?? selectedProduct.value.exchangeRate
       formSubtotalJpy.value = qty * selectedProduct.value.priceJpy
       formSubtotalTwd.value = qty * calcPriceTwd(selectedProduct.value.priceJpy, rate)
+      syncingOrder = false
+    } else if (editProductInfo.value && !syncingOrder) {
+      syncingOrder = true
+      const rate = formExchangeRate.value ?? editProductInfo.value.exchangeRate
+      formSubtotalJpy.value = qty * editProductInfo.value.priceJpy
+      formSubtotalTwd.value = qty * calcPriceTwd(editProductInfo.value.priceJpy, rate)
       syncingOrder = false
     }
   },
@@ -464,7 +476,7 @@ defineExpose({ createOrder, editOrder, deleteOrder })
         {{ editCustomerName }} - {{ editProductInfo.name }}
         <span class="productInfo" style="margin-top: 0.25rem">
           <span>日幣定價：¥{{ editProductInfo.priceJpy }}</span>
-          <span>台幣單價：NT${{ editProductInfo.priceTwd }}</span>
+          <span>台幣單價：NT${{ editUnitTwd ?? editProductInfo.priceTwd }}</span>
           <span>匯率：{{ editProductInfo.exchangeRate }}</span>
         </span>
       </div>

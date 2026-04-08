@@ -6,6 +6,7 @@
  */
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import type {
+  PurchaseCheckReq,
   PurchaseDetail,
   PurchaseListData,
   QueryPurchaseDetailReq,
@@ -23,7 +24,7 @@ const pops = defineProps<{
   /** 活動 ID */
   eventId: number
   /** 是否可操作 */
-  isOperate?:boolean
+  isOperate?: boolean
   /** 該通路的採購明細資料 */
   data: PurchaseListData[]
 }>()
@@ -57,6 +58,8 @@ const selectedData = ref<PurchaseListData>()
 const buyedNum = defineModel<number>('buyedNum', { default: 0 })
 /** 是否顯示採購確認彈窗 */
 const isOpenCheckConfirmModal = ref<boolean>(false)
+/** 當前選擇的商品資料 */
+const currentData = ref<PurchaseListData>()
 
 /**
  * 切換展開／收合狀態
@@ -78,7 +81,8 @@ async function oponDetail(data: PurchaseListData) {
  * 點擊編輯按鈕，開啟採購回報彈窗並查詢明細資料
  * @param data 採購資料列
  */
-function purchaseCheck(data: PurchaseListData) {
+function openPurchaseCheck(data: PurchaseListData) {
+  currentData.value = data
   getDetail(data)
   selectedData.value = data
   buyedNum.value = data.purchased
@@ -106,27 +110,17 @@ function confirmBuyed() {
   console.log(buyedNum.value)
   isOpenCheckConfirmModal.value = false
   isOpenCheckModal.value = false
-  modifyOrderStatus()
+  purchaseCheck()
 }
 
-async function modifyOrderStatus() {
-  let accumulated = 0
-  const toBePurchasedIds: number[] = []
-  const toBeCalledIds: number[] = []
-
-  for (const order of currentDetail.value) {
-    if (accumulated + order.quantity <= buyedNum.value) {
-      accumulated += order.quantity
-      if (order.orderStatus !== '2') toBePurchasedIds.push(order.id)
-    } else {
-      if (order.orderStatus !== '1') toBeCalledIds.push(order.id)
-    }
+async function purchaseCheck() {
+  if (!currentData.value) return
+  const req: PurchaseCheckReq = {
+    productId: currentData.value.productId,
+    purchaseQty: Number(buyedNum.value),
   }
 
-  await Promise.all([
-    ...toBeCalledIds.map((id) => purchaseListApi.modifyOrderStatus(id, { orderStatus: '1' })),
-    ...toBePurchasedIds.map((id) => purchaseListApi.modifyOrderStatus(id, { orderStatus: '2' })),
-  ])
+  await purchaseListApi.purchaseCheck(req)
   emit('refresh')
 }
 </script>
@@ -148,7 +142,7 @@ async function modifyOrderStatus() {
         :tableData="data"
         :is-edit="isOperate"
         :is-delete="false"
-        @edit="purchaseCheck"
+        @edit="openPurchaseCheck"
       >
         <!-- 商品名稱欄：可點擊開啟詳細彈窗 -->
         <template #col-productName="{ row }">

@@ -6,7 +6,7 @@ export interface PurchaseListAllRes {
   [key: string]: PurchaseListData[]
 }
 
-/** 單一商品採購統計明細 */
+/** 單一商品採購統計資料 */
 export interface PurchaseListData {
   /** 通路 ID */
   channelId: number
@@ -83,4 +83,10 @@ export interface PurchaseDetail {
   purchaserName: string
   /** 通路名稱 */
   channelName: string
+}
+
+/** 處理採購 request */
+export interface PurchaseCheckReq {
+  productId: number
+  purchaseQty: number
 }
