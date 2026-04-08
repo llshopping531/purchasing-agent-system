@@ -34,7 +34,7 @@ const headerRow = ref<HeaderRow[]>([
   { name: '品項', value: 'productName', sort: 0, width: '300px', mobileSpan: 2 },
   { name: '數量', value: 'quantity', sort: 0, width: '70px' },
   { name: '訂單狀態', value: 'orderStatusName', sort: 0, width: '100px' },
-  { name: '更多資訊', value: 'more', sort: 0, width: '100px' },
+  { name: '更多', value: 'more', sort: 0, width: '100px' },
 ])
 
 /** 當前頁的訂單資料 */
@@ -178,11 +178,16 @@ async function getOrderList() {
       </template>
       <template #col-more="{ row }">
         <div class="more-icons">
-          <div class="detail-btn" @click="openDetail(row)">
-            <span class="detail-icon"></span>
+          <div class="detail-btn more-btn" @click="openDetail(row)">
+            <span class="detail-icon"></span>資訊
           </div>
-          <div class="draws-btn" v-if="row.isBlindBox" @click="openDraws(row)" title="查看盲抽結果">
-            <span class="draws-icon"></span>
+          <div
+            class="draws-btn more-btn"
+            v-if="row.isBlindBox"
+            @click="openDraws(row)"
+            title="查看盲抽結果"
+          >
+            <span class="draws-icon"></span>拆拆
           </div>
         </div>
       </template>
@@ -209,12 +214,22 @@ async function getOrderList() {
   text-decoration: line-through;
   opacity: 0.8;
 }
-
+.more-btn {
+  display: flex;
+  gap: 0.25rem;
+  &.draws-btn {
+    color: #d97708;
+  }
+  &.detail-btn {
+    color: #7c70e0;
+  }
+}
 .more-icons {
   display: flex;
-  justify-content: center;
+  /* justify-content: center; */
   align-items: center;
   gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
 .detail-btn {

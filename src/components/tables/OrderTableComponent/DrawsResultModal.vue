@@ -157,7 +157,7 @@ async function confirmInner() {
     <template #content>
       <div class="draws-modal-body">
         <div class="draws-toolbar">
-          <span class="draws-count">共 {{ drawsList.length }} 筆 / 訂購數量 {{ order.quantity }}</span>
+          <span class="draws-count">共 {{ drawsList.length }} 筆已拆 / 訂購數量 {{ order.quantity }}</span>
           <div class="btn create" @click="openCreate">新增</div>
         </div>
 

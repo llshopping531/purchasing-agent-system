@@ -116,7 +116,7 @@ function onChangeSize(pageSize: number) {
             class="item-col"
             v-for="header in sortedHeaderRow"
             :key="header.value"
-            :style="{ 'min-width': header.width, '--mobile-span': header.mobileSpan ?? 1 }"
+            :style="{ '--col-width': header.width, '--mobile-span': header.mobileSpan ?? 1 }"
             :class="header.value"
             :data-label="header.name"
           >
@@ -167,6 +167,9 @@ function onChangeSize(pageSize: number) {
   .header-item,
   .item-col {
     width: calc(100% / var(--row-count));
+    @media (min-width: 769px) {
+      min-width: var(--col-width);
+    }
   }
 
   .header-item {
