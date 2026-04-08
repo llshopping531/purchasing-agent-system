@@ -4,7 +4,9 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(npm install:*)",
       "Bash(npx vue-tsc:*)",
-      "Bash(npx vite:*)"
+      "Bash(npx vite:*)",
+      "Read(//Users/lily/Desktop/project/**)",
+      "Read(//Users/lily/Desktop/**)"
     ]
   }
 }

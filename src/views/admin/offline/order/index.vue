@@ -52,6 +52,9 @@ function selectEvent(data: EventOption) {
   currentEventId.value = data.selectedData.value
   currentEventIsLocked.value = data.isLocked
   isShowChannelSelect.value = true
+  currentShopId.value = ''
+  isShowTotalBtn.value = false
+  isTableQueried.value = false
 }
 
 /**
@@ -69,7 +72,7 @@ function selectShop(data: Option) {
  */
 function getTableData(data: OrderQueryContent[]) {
   isTableQueried.value = true
-  if (data.length !== 0) isShowTotalBtn.value = true
+  isShowTotalBtn.value = data.length !== 0
 
   /** 各訂單的品項與數量 */
   const itemData = data.map((item) => ({ name: item.productName, value: item.quantity }))
@@ -122,6 +125,8 @@ function onConfirmed() {
       </div>
     </div>
     <order-table-component
+      v-if="currentShopId"
+      v-show="isShowTotalBtn"
       ref="orderTableRef"
       :currentEventId="currentEventId"
       :currentShopId="currentShopId"

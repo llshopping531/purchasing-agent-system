@@ -14,7 +14,7 @@ export interface OrderQueryReq {
   page?: number
   /** 一頁有幾筆資料 */
   size?: number
-  /** 排序 */
+  /** 排序欄位 */
   sort?: string
   /** 排序 (ASC / DESC) */
   direction?: 'ASC' | 'DESC'

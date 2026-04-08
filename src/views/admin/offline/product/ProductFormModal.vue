@@ -84,9 +84,9 @@ function editProduct(data: ProductsResBase) {
   resetForm({
     values: {
       name: data.name,
-      priceJpy: data.priceJpy,
-      exchangeRate: data.exchangeRate,
-      priceTwd: data.priceTwd,
+      priceJpy: Number(data.priceJpy),
+      exchangeRate: Number(data.exchangeRate),
+      priceTwd: Number(data.priceTwd),
     },
   })
   image.value = data.image

@@ -1,3 +1,4 @@
+import { useErrorStore } from '@/stores/error'
 import { useLoadingStore } from '@/stores/loading'
 import { useUserStore } from '@/stores/user'
 import type { AxiosInstance, AxiosResponse } from 'axios'
@@ -18,6 +19,8 @@ interface BaseApiRes<T> {
 
 /** 全域 loading store 實例，用於在請求期間顯示載入遮罩 */
 const loadingStore = useLoadingStore()
+/** 全域 error store 實例，用於顯示 API 錯誤彈窗 */
+const errorStore = useErrorStore()
 
 /** axios 實例，統一設定 baseURL 與 timeout */
 const api: AxiosInstance = axios.create({
@@ -37,6 +40,7 @@ export const getApi = async <resT, reqT>(url: string, req?: reqT): Promise<resT>
   loadingStore.open()
   const res = await api.get<BaseApiRes<resT>>(url, { params: req })
   loadingStore.close()
+  if (res.data.code !== 200) { errorStore.show(res.data.message); throw new Error(res.data.message) }
   return res.data.data
 }
 
@@ -52,6 +56,7 @@ export const postApi = async <resT, reqT>(url: string, req: reqT): Promise<resT>
   loadingStore.open()
   const res = await api.post<BaseApiRes<resT>>(url, req)
   loadingStore.close()
+  if (res.data.code !== 200) { errorStore.show(res.data.message); throw new Error(res.data.message) }
   return res.data.data
 }
 
@@ -73,6 +78,7 @@ export const patchApi = async <resT, reqT, paramsT>(
   loadingStore.open()
   const res = await api.patch<BaseApiRes<resT>>(url, req, { params: params })
   loadingStore.close()
+  if (res.data.code !== 200) { errorStore.show(res.data.message); throw new Error(res.data.message) }
   return res.data.data
 }
 
@@ -88,6 +94,7 @@ export const deleteApi = async <resT, paramsT>(url: string, params?: paramsT): P
   loadingStore.open()
   const res = await api.delete<BaseApiRes<resT>>(url, { params: params })
   loadingStore.close()
+  if (res.data.code !== 200) { errorStore.show(res.data.message); throw new Error(res.data.message) }
   return res.data.data
 }
 

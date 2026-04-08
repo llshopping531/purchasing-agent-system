@@ -18,6 +18,8 @@ export interface HeaderRow {
   width?: string
   /** 手機版佔幾格（預設 1） */
   mobileSpan?: number
+  /** 是否可排序 */
+  sortable?: boolean
 }
 
 const pop = withDefaults(
@@ -38,6 +40,10 @@ const pop = withDefaults(
     totalElements?: number
     /** 每頁筆數 */
     pageSize?: number
+    /** 目前排序欄位 */
+    sortField?: string
+    /** 目前排序方向 */
+    sortDirection?: 'ASC' | 'DESC'
   }>(),
   {
     isDelete: true,
@@ -57,7 +63,20 @@ const emit = defineEmits<{
   (e: 'changePage', data: number): void
   /** 使用者變更每頁筆數時觸發 */
   (e: 'changeSize', data: number): void
+  /** 點擊可排序欄位時觸發 */
+  (e: 'sort', field: string, direction: 'ASC' | 'DESC'): void
 }>()
+
+/**
+ * 點擊欄位標頭進行排序
+ * 若已是當前排序欄位則切換方向，否則預設 ASC
+ */
+function onSortClick(header: HeaderRow) {
+  if (!header.sortable) return
+  const direction =
+    pop.sortField === header.value && pop.sortDirection === 'ASC' ? 'DESC' : 'ASC'
+  emit('sort', header.value, direction)
+}
 
 /** 依 sort 排序後的表頭欄位陣列 */
 const sortedHeaderRow = computed(() => [...pop.headerRow].sort((a, b) => a.sort - b.sort))
@@ -104,9 +123,14 @@ function onChangeSize(pageSize: number) {
           :style="{ 'min-width': header.width }"
           v-for="header in sortedHeaderRow"
           :key="header.sort"
-          :class="header.value"
+          :class="[header.value, { sortable: header.sortable }]"
+          @click="onSortClick(header)"
         >
           {{ header.name }}
+          <span v-if="header.sortable" class="sort-icon">
+            <span :class="['arrow', 'asc', { active: sortField === header.value && sortDirection === 'ASC' }]">▲</span>
+            <span :class="['arrow', 'desc', { active: sortField === header.value && sortDirection === 'DESC' }]">▼</span>
+          </span>
         </div>
         <div class="header-item operate" v-if="isDelete || isEdit">操作</div>
       </div>
@@ -180,6 +204,33 @@ function onChangeSize(pageSize: number) {
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+
+    &.sortable {
+      cursor: pointer;
+      user-select: none;
+      &:hover {
+        background-color: var(--color-primary-dark);
+      }
+    }
+
+    .sort-icon {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+      gap: 1px;
+
+      .arrow {
+        font-size: 0.55rem;
+        opacity: 0.35;
+        &.active {
+          opacity: 1;
+        }
+      }
+    }
 
     &.operate {
       width: 150px;

@@ -30,12 +30,17 @@ const emit = defineEmits<{
 
 /** 表頭欄位定義 */
 const headerRow = ref<HeaderRow[]>([
-  { name: '購買者', value: 'customerName', sort: 0, width: '150px' },
-  { name: '品項', value: 'productName', sort: 0, width: '300px', mobileSpan: 2 },
-  { name: '數量', value: 'quantity', sort: 0, width: '70px' },
-  { name: '訂單狀態', value: 'orderStatusName', sort: 0, width: '100px' },
-  { name: '更多', value: 'more', sort: 0, width: '100px' },
+  { name: '購買者', value: 'customerName', sort: 0, width: '150px', sortable: true },
+  { name: '品項', value: 'productName', sort: 1, width: '300px', mobileSpan: 2, sortable: true },
+  { name: '數量', value: 'quantity', sort: 2, width: '70px' },
+  { name: '訂單狀態', value: 'orderStatusName', sort: 3, width: '100px', sortable: true },
+  { name: '更多', value: 'more', sort: 4, width: '100px' },
 ])
+
+/** 目前排序欄位 */
+const sortField = ref<string | undefined>(undefined)
+/** 目前排序方向 */
+const sortDirection = ref<'ASC' | 'DESC' | undefined>(undefined)
 
 /** 當前頁的訂單資料 */
 const tableData = ref<OrderAllContent[]>([])
@@ -118,6 +123,16 @@ function onChangePage(page: number) {
 }
 
 /**
+ * 點擊欄位排序
+ */
+function onSort(field: string, direction: 'ASC' | 'DESC') {
+  sortField.value = field
+  sortDirection.value = direction
+  currentPage.value = 0
+  getOrderList()
+}
+
+/**
  * 更改每頁筆數
  * @param size - 新的每頁筆數
  */
@@ -146,6 +161,8 @@ async function getOrderList() {
       channelId: Number(pop.currentShopId),
       page: currentPage.value,
       size: pageSize.value,
+      sort: sortField.value,
+      direction: sortDirection.value,
     })
     tableData.value = res.content
     totalPages.value = res.totalPages
@@ -171,11 +188,29 @@ function closeDrawsModal() {
       :currentPage="currentPage"
       :totalElements="totalElements"
       :pageSize="pageSize"
+      :sortField="sortField"
+      :sortDirection="sortDirection"
+      @sort="onSort"
       @delete="deleteData"
       @edit="editData"
       @change-page="onChangePage"
       @change-size="onChangeSize"
     >
+      <template #col-customerName="{ row }">
+        <span :class="{ cancelled: row.orderStatusName === '已取消' }">
+          {{ row.customerName }}
+        </span>
+      </template>
+      <template #col-productName="{ row }">
+        <span :class="{ cancelled: row.orderStatusName === '已取消' }">
+          {{ row.productName }}
+        </span>
+      </template>
+      <template #col-quantity="{ row }">
+        <span :class="{ cancelled: row.orderStatusName === '已取消' }">
+          {{ row.quantity }}
+        </span>
+      </template>
       <template #col-orderStatusName="{ row }">
         <span :class="{ cancelled: row.orderStatusName === '已取消' }">
           {{ row.orderStatusName }}
