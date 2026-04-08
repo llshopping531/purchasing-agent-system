@@ -119,7 +119,7 @@ function onConfirmed() {
       </div>
       <div class="btnBox">
         <div class="btn" v-if="isShowTotalBtn" @click="isShowTotalModal = true">顯示統計</div>
-        <div class="btn create" v-if="isTableQueried" @click="orderFormModalRef?.createOrder()">
+        <div class="btn create" v-if="isTableQueried && !currentEventIsLocked" @click="orderFormModalRef?.createOrder()">
           新增
         </div>
       </div>

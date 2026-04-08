@@ -132,7 +132,7 @@ function onChangeSize(size: number) {
         />
       </div>
       <div class="btnBox">
-        <div class="btn" v-if="isTableQueried" @click="productFormModalRef?.createProduct()">
+        <div class="btn" v-if="isTableQueried && !currentEventIsLocked" @click="productFormModalRef?.createProduct()">
           新增
         </div>
       </div>
