@@ -9,6 +9,7 @@ import IconCalendarDays from '@/components/icons/IconCalendarDays.vue'
 import IconUsers from '@/components/icons/IconUsers.vue'
 import IconListCheck from '@/components/icons/IconListCheck.vue'
 import IconBars from '@/components/icons/IconBars.vue'
+import IconCartShopping from '@/components/icons/IconCartShopping.vue'
 
 const isCollapsed = ref(false)
 const isMobileOpen = ref(false)
@@ -19,6 +20,7 @@ const productItem = { name: '商品管理', path: PATH.offlineProduct }
 const eventItem = { name: '活動管理', path: PATH.offlineEvent }
 const customerItem = { name: '顧客管理', path: PATH.offlineCustomer }
 const purchaseListItem = { name: '採購清單', path: PATH.offlinePurchaseList }
+const customerOrdersItem = { name: '個人購物清單', path: PATH.offlineCustomerOrders }
 
 router.afterEach(() => {
   isMobileOpen.value = false
@@ -81,6 +83,12 @@ router.afterEach(() => {
           <router-link :to="purchaseListItem.path" class="nav-item" :title="isCollapsed ? purchaseListItem.name : ''">
             <icon-list-check class="nav-icon" />
             <span class="nav-item-name">{{ purchaseListItem.name }}</span>
+          </router-link>
+
+          <!-- 個人購物清單 (FA6 cart-shopping) -->
+          <router-link :to="customerOrdersItem.path" class="nav-item" :title="isCollapsed ? customerOrdersItem.name : ''">
+            <icon-cart-shopping class="nav-icon" />
+            <span class="nav-item-name">{{ customerOrdersItem.name }}</span>
           </router-link>
         </div>
       </nav>
