@@ -96,13 +96,14 @@ onMounted(() => {
 
 defineExpose({ refresh: getOrderList })
 
-// 當活動或通路切換時，重置頁碼並重新查詢
+// 當活動或通路切換時，重置頁碼並重新查詢（immediate 確保元件掛載時也會執行）
 watch(
   () => [pop.currentEventId, pop.currentShopId],
   () => {
     currentPage.value = 0
     getOrderList()
   },
+  { immediate: true },
 )
 
 /**
