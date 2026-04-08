@@ -22,7 +22,6 @@ export default defineConfig({
       '/api': {
         target: 'http://203.161.58.130:3000', // 後端 API
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''), // 可去掉 /api 前綴
       },
     },
   },
