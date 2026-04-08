@@ -8,6 +8,7 @@ import { fieldDefsApi } from '@/services/api/sys/field-defs-api'
 import { orderApi, type OrderAllContent } from '@/services/api/order/order-api'
 import { onMounted, ref, watch } from 'vue'
 import OrderDetailModal from './OrderDetailModal.vue'
+import DrawsResultModal from './DrawsResultModal.vue'
 
 const pop = defineProps<{
   /** 目前選取的活動 ID（字串形式） */
@@ -42,6 +43,10 @@ const tableData = ref<OrderAllContent[]>([])
 const selectedOrder = ref<OrderAllContent | null>(null)
 /** 是否顯示訂單詳細資料彈窗 */
 const isShowDetailModal = ref(false)
+/** 盲抽結果彈窗中顯示的訂單 */
+const selectedBlindOrder = ref<OrderAllContent | null>(null)
+/** 是否顯示盲抽結果彈窗 */
+const isShowDrawsModal = ref(false)
 /** 系統自定義欄位定義清單（用於詳細資料彈窗動態欄位） */
 const extraFields = ref<{ name: string; value: string }[]>([])
 
@@ -61,6 +66,15 @@ const totalElements = ref(0)
 function openDetail(data: OrderAllContent) {
   selectedOrder.value = data
   isShowDetailModal.value = true
+}
+
+/**
+ * 開啟盲抽結果管理彈窗
+ * @param data - 目標訂單資料
+ */
+function openDraws(data: OrderAllContent) {
+  selectedBlindOrder.value = data
+  isShowDrawsModal.value = true
 }
 
 onMounted(() => {
@@ -163,8 +177,13 @@ async function getOrderList() {
         </span>
       </template>
       <template #col-more="{ row }">
-        <div class="detail-btn" @click="openDetail(row)">
-          <span class="detail-icon"></span>
+        <div class="more-icons">
+          <div class="detail-btn" @click="openDetail(row)">
+            <span class="detail-icon"></span>
+          </div>
+          <div class="draws-btn" v-if="row.isBlindBox" @click="openDraws(row)" title="查看盲抽結果">
+            <span class="draws-icon"></span>
+          </div>
         </div>
       </template>
     </table-component>
@@ -176,6 +195,12 @@ async function getOrderList() {
     :extraFields="extraFields"
     @close="isShowDetailModal = false"
   />
+
+  <draws-result-modal
+    v-if="isShowDrawsModal && selectedBlindOrder"
+    :order="selectedBlindOrder"
+    @close="isShowDrawsModal = false"
+  />
 </template>
 
 <style scoped>
@@ -183,6 +208,13 @@ async function getOrderList() {
   color: var(--color-danger);
   text-decoration: line-through;
   opacity: 0.8;
+}
+
+.more-icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .detail-btn {
@@ -214,6 +246,38 @@ async function getOrderList() {
     border-color: var(--color-primary-dark);
     &::before {
       color: var(--color-primary-dark);
+    }
+  }
+}
+
+.draws-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  .draws-icon {
+    display: block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--color-warning, #d97706);
+    border-radius: 3px;
+    position: relative;
+    &::before {
+      content: '?';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--color-warning, #d97706);
+      line-height: 1;
+    }
+  }
+  &:hover .draws-icon {
+    border-color: #b45309;
+    &::before {
+      color: #b45309;
     }
   }
 }

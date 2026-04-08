@@ -1,4 +1,4 @@
-import type { ExtraData } from "../common-api-interface"
+import type { ExtraData } from '../common-api-interface'
 
 /**
  *  依活動 ID + 通路 ID 查詢訂單清單 request
@@ -137,4 +137,40 @@ export interface OrderResBase {
   purchaserName: string
   /** 通路名稱 */
   channelName: string
+  /** 已拆數量 */
+  drawCount: number
+  /** 是否為盲抽 */
+  isBlindBox: boolean
+}
+
+/** 查詢訂單的抽取結果 res */
+export type GetDrawsResultRes = DrawsData[]
+
+/** 新增訂單的抽取結果 req */
+export type CreateDrawsResultReq = DrawsResultBase
+
+/** 新增訂單的抽取結果 res */
+export type CreateDrawsResultRes = DrawsData
+
+/** 更新訂單的抽取結果 req */
+export type ModifyDrawsResultReq = DrawsResultBase
+
+/** 更新訂單的抽取結果 res */
+export type ModifyDrawsResultRes = DrawsData
+
+// 共用
+
+/** 抽取結果 */
+export interface DrawsData extends DrawsResultBase {
+  /** 抽取結果 ID */
+  id: number
+  /** 訂單 ID */
+  orderId: number
+}
+
+export interface DrawsResultBase {
+  /** 結果 */
+  result: string
+  /** 備註 */
+  note: string
 }

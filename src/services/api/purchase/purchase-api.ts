@@ -1,4 +1,4 @@
-import { getApi, patchApi, postApi } from '../base-api'
+import { getApi, patchApi } from '../base-api'
 import type {
   PurchaseCheckReq,
   PurchaseListAllRes,
@@ -31,6 +31,6 @@ export const purchaseListApi = {
    * @param req - 包含 商品 ID、採購數量 的查詢參數
    */
   purchaseCheck: async (req: PurchaseCheckReq): Promise<void> => {
-    return await postApi(`/orders/purchase`, req)
+    return await patchApi(`/orders/purchase`, req)
   },
 }

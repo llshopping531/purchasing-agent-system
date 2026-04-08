@@ -1,7 +1,12 @@
 import { deleteApi, getApi, patchApi, postApi } from '../base-api'
 import type {
+  CreateDrawsResultReq,
+  CreateDrawsResultRes,
   CreateOrderReq,
   CreateOrderRes,
+  GetDrawsResultRes,
+  ModifyDrawsResultReq,
+  ModifyDrawsResultRes,
   ModifyOrderReq,
   ModifyOrderRes,
   OrderQueryContent,
@@ -48,5 +53,41 @@ export const orderApi = {
    */
   deleteOrders: async (id: number): Promise<void> => {
     return await deleteApi(`/orders/${id}`)
+  },
+
+  /**
+   * 查詢訂單的抽取結果
+   * @param orderId - 訂單 Id
+   * @returns 分頁後的訂單清單
+   */
+  getDrawsResult: async (orderId: number): Promise<GetDrawsResultRes> => {
+    return await getApi(`/orders/${orderId}/draws`)
+  },
+
+  /**
+   * 新增訂單的抽取結果
+   * @param req - 新增訂單所需欄位
+   * @returns 新增後的訂單資料
+   */
+  postDrawsResult: async (orderId: number,req: CreateDrawsResultReq): Promise<CreateDrawsResultRes> => {
+    return await postApi(`/orders/${orderId}/draws`, req)
+  },
+
+  /**
+   * 修改訂單的抽取結果
+   * @param id - 目標訂單 ID
+   * @param req - 要更新的訂單欄位
+   * @returns 修改後的訂單資料
+   */
+  patchDrawsResult: async (orderId: number, req: ModifyDrawsResultReq): Promise<ModifyDrawsResultRes> => {
+    return await patchApi(`/orders/draws/${orderId}`, req)
+  },
+
+  /**
+   * 刪除訂單的抽取結果
+   * @param id - 目標訂單 ID
+   */
+  deleteDrawsResult: async (orderId: number): Promise<void> => {
+    return await deleteApi(`/orders/draws/${orderId}`)
   },
 }
