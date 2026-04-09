@@ -1,13 +1,19 @@
 <script setup lang="ts">
+import { accountApi } from '@/services/api/account/account-api'
 import { useUserStore } from '@/stores/user'
-import TextInput from '../components/inputs/TextInput.vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import TextInput from '../components/inputs/TextInput.vue'
 
 const userStore = useUserStore()
 const router = useRouter()
 
-function login() {
-  userStore.login({ name: 'Lily', admin: true })
+const account = ref('')
+const password = ref('')
+
+async function login() {
+  const data = await accountApi.login({ account: account.value, password: password.value })
+  userStore.login({ token: data.token, role: data.role })
   let path = userStore.redirectPath
   if (path === '') {
     path = userStore.isAdmin ? '/admin' : '/user'
@@ -25,8 +31,8 @@ function login() {
       <h1>會員登入</h1>
       <p class="subtitle">歡迎回來，請登入您的帳號</p>
 
-      <text-input label="帳號" placeholder="請輸入帳號" />
-      <text-input label="密碼" placeholder="請輸入密碼" />
+      <text-input v-model:value="account" label="帳號" placeholder="請輸入帳號" />
+      <text-input v-model:value="password" label="密碼" placeholder="請輸入密碼" />
 
       <button class="btn login-btn" type="button" @click="login()">登入</button>
 

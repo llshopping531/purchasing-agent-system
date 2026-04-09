@@ -28,18 +28,19 @@ export const useUserStore = defineStore('user', {
      * 執行登入，將使用者資訊寫入 store 並持久化至 localStorage
      * @param user - 包含名稱與管理員身分的使用者物件
      */
-    login(user: { name: string; admin: boolean }) {
+    login(user: { token: string; role: string }) {
       localStorage.setItem('isLogin', 'true')
+      localStorage.setItem('token', user.token)
       this.isLogin = true
-      this.isAdmin = user.admin
-      this.name = user.name
+      this.isAdmin = user.role === 'ROLE_ADMIN'
     },
 
     /**
      * 執行登出，清除 store 中的使用者資訊並更新 localStorage
      */
     logout() {
-      localStorage.setItem('isLogin', 'false')
+      localStorage.removeItem('isLogin')
+      localStorage.removeItem('token')
       this.isLogin = false
       this.isAdmin = false
       this.name = ''
