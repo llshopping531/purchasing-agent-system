@@ -37,10 +37,7 @@ const api: AxiosInstance = axios.create({
  * @returns 解包後的資料
  */
 export const getApi = async <resT, reqT>(url: string, req?: reqT): Promise<resT> => {
-  loadingStore.open()
   const res = await api.get<BaseApiRes<resT>>(url, { params: req })
-  loadingStore.close()
-  if (res.data.code !== 200) { errorStore.show(res.data.message); throw new Error(res.data.message) }
   return res.data.data
 }
 
@@ -53,10 +50,7 @@ export const getApi = async <resT, reqT>(url: string, req?: reqT): Promise<resT>
  * @returns 解包後的資料
  */
 export const postApi = async <resT, reqT>(url: string, req: reqT): Promise<resT> => {
-  loadingStore.open()
   const res = await api.post<BaseApiRes<resT>>(url, req)
-  loadingStore.close()
-  if (res.data.code !== 200) { errorStore.show(res.data.message); throw new Error(res.data.message) }
   return res.data.data
 }
 
@@ -75,10 +69,7 @@ export const patchApi = async <resT, reqT, paramsT>(
   req?: reqT,
   params?: paramsT,
 ): Promise<resT> => {
-  loadingStore.open()
   const res = await api.patch<BaseApiRes<resT>>(url, req, { params: params })
-  loadingStore.close()
-  if (res.data.code !== 200) { errorStore.show(res.data.message); throw new Error(res.data.message) }
   return res.data.data
 }
 
@@ -91,37 +82,44 @@ export const patchApi = async <resT, reqT, paramsT>(
  * @returns 解包後的資料
  */
 export const deleteApi = async <resT, paramsT>(url: string, params?: paramsT): Promise<resT> => {
-  loadingStore.open()
   const res = await api.delete<BaseApiRes<resT>>(url, { params: params })
-  loadingStore.close()
-  if (res.data.code !== 200) { errorStore.show(res.data.message); throw new Error(res.data.message) }
   return res.data.data
 }
 
-// 請求攔截器：自動附加 Authorization Token
+// 請求攔截器：開啟 loading、自動附加 Authorization Token
 api.interceptors.request.use(
   (config) => {
+    loadingStore.open()
     const userStore = useUserStore()
-
     config.headers = {
       ...config.headers,
       Authorization: userStore.isLogin ? `Bearer ${localStorage.getItem('token')}` : undefined,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
-
     return config
   },
   (error) => Promise.reject(error),
 )
 
-// 回應攔截器：統一錯誤處理，401 時自動登出並導向登入頁
+// 回應攔截器：關閉 loading、處理業務碼錯誤與 HTTP 錯誤
 api.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    loadingStore.close()
+    const data = response.data as BaseApiRes<unknown>
+    if (data.code !== 200) {
+      errorStore.show(data.message)
+      return Promise.reject(new Error(data.message))
+    }
+    return response
+  },
   (error) => {
+    loadingStore.close()
     if (error.response?.status === 401) {
       const userStore = useUserStore()
       userStore.logout()
       window.location.href = '/login'
+    } else {
+      errorStore.show(error.message)
     }
     return Promise.reject(error)
   },
