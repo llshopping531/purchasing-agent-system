@@ -17,11 +17,6 @@ interface BaseApiRes<T> {
   data: T
 }
 
-/** 全域 loading store 實例，用於在請求期間顯示載入遮罩 */
-const loadingStore = useLoadingStore()
-/** 全域 error store 實例，用於顯示 API 錯誤彈窗 */
-const errorStore = useErrorStore()
-
 /** axios 實例，統一設定 baseURL 與 timeout */
 const api: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -89,13 +84,11 @@ export const deleteApi = async <resT, paramsT>(url: string, params?: paramsT): P
 // 請求攔截器：開啟 loading、自動附加 Authorization Token
 api.interceptors.request.use(
   (config) => {
-    loadingStore.open()
+    useLoadingStore().open()
     const userStore = useUserStore()
-    config.headers = {
-      ...config.headers,
-      Authorization: userStore.isLogin ? `Bearer ${localStorage.getItem('token')}` : undefined,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    if (userStore.isLogin) {
+      config.headers.Authorization = `Bearer ${localStorage.getItem('token')}`
+    }
     return config
   },
   (error) => Promise.reject(error),
@@ -104,22 +97,22 @@ api.interceptors.request.use(
 // 回應攔截器：關閉 loading、處理業務碼錯誤與 HTTP 錯誤
 api.interceptors.response.use(
   (response: AxiosResponse) => {
-    loadingStore.close()
+    useLoadingStore().close()
     const data = response.data as BaseApiRes<unknown>
     if (data.code !== 200) {
-      errorStore.show(data.message)
+      useErrorStore().show(data.message)
       return Promise.reject(new Error(data.message))
     }
     return response
   },
   (error) => {
-    loadingStore.close()
+    useLoadingStore().close()
     if (error.response?.status === 401) {
       const userStore = useUserStore()
       userStore.logout()
       window.location.href = '/login'
     } else {
-      errorStore.show(error.message)
+      useErrorStore().show(error.message)
     }
     return Promise.reject(error)
   },

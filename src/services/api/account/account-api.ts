@@ -8,6 +8,6 @@ export const accountApi = {
    * @returns token、userId、role、customerId
    */
   login: async (req: LoginReq): Promise<LoginRes> => {
-    return await postApi('/api/admin/account/login', req)
+    return await postApi('/account/login', req)
   },
 }

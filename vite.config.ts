@@ -22,6 +22,9 @@ export default defineConfig({
       '/api': {
         target: 'http://203.161.58.130:3000', // 後端 API
         changeOrigin: true,
+        headers: {
+          Origin: 'http://203.161.58.130:3000',
+        },
       },
     },
   },
