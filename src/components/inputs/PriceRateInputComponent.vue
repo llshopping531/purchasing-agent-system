@@ -1,11 +1,10 @@
 <script setup lang="ts">
 /**
  * 日幣定價 / 匯率 / 台幣定價 聯動輸入元件
- * 三個欄位互相連動：更動其中任兩個時，自動計算第三個
+ * 三個欄位互相連動：失焦時依「最後編輯的欄位」自動計算第三個
  * - 台幣定價 = 日幣定價 × 匯率，並進位至最近的 5 元
  * - 更動台幣定價時，反推匯率（保留 4 位小數）
  */
-import { watch } from 'vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 
 defineProps<{
@@ -36,48 +35,27 @@ function calcPriceTwd(jpy: number, rate: number): number {
   return floored % 5 === 0 ? floored : Math.ceil(price / 5) * 5
 }
 
-/** 防止三個 watch 循環觸發的 flag */
-let syncing = false
+/** 日幣定價失焦：重新計算台幣定價 */
+function onBlurJpy() {
+  if (!priceJpy.value || !exchangeRate.value) return
+  priceTwd.value = calcPriceTwd(priceJpy.value, exchangeRate.value)
+}
 
-// 日幣定價變動時，重新計算台幣定價
-watch(
-  () => priceJpy.value,
-  (jpy) => {
-    if (syncing || !jpy || !exchangeRate.value) return
-    syncing = true
-    priceTwd.value = calcPriceTwd(jpy, exchangeRate.value)
-    syncing = false
-  },
-  { flush: 'sync' },
-)
+/** 匯率失焦：重新計算台幣定價 */
+function onBlurRate() {
+  if (!exchangeRate.value || !priceJpy.value) return
+  priceTwd.value = calcPriceTwd(priceJpy.value, exchangeRate.value)
+}
 
-// 匯率變動時，重新計算台幣定價
-watch(
-  () => exchangeRate.value,
-  (rate) => {
-    if (syncing || !rate || !priceJpy.value) return
-    syncing = true
-    priceTwd.value = calcPriceTwd(priceJpy.value, rate)
-    syncing = false
-  },
-  { flush: 'sync' },
-)
-
-// 台幣定價變動時，反推匯率
-watch(
-  () => priceTwd.value,
-  (twd) => {
-    if (syncing || !twd || !priceJpy.value) return
-    syncing = true
-    exchangeRate.value = parseFloat((twd / priceJpy.value).toFixed(4))
-    syncing = false
-  },
-  { flush: 'sync' },
-)
+/** 台幣定價失焦：反推匯率 */
+function onBlurTwd() {
+  if (!priceTwd.value || !priceJpy.value) return
+  exchangeRate.value = parseFloat((priceTwd.value / priceJpy.value).toFixed(2))
+}
 </script>
 
 <template>
-  <text-input label="日幣定價" v-model:value="priceJpy" required :error-message="priceJpyError" />
-  <text-input label="匯率" v-model:value="exchangeRate" required :error-message="exchangeRateError" />
-  <text-input label="台幣定價" v-model:value="priceTwd" required :error-message="priceTwdError" />
+  <text-input label="日幣定價" v-model:value="priceJpy" required :error-message="priceJpyError" @blur="onBlurJpy" />
+  <text-input label="匯率" v-model:value="exchangeRate" required :error-message="exchangeRateError" @blur="onBlurRate" />
+  <text-input label="台幣定價" v-model:value="priceTwd" required :error-message="priceTwdError" @blur="onBlurTwd" />
 </template>

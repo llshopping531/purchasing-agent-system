@@ -16,6 +16,8 @@ defineProps<{
   errorMessage?: string
 }>()
 
+const emit = defineEmits<{ (e: 'blur'): void }>()
+
 const value = defineModel('value')
 </script>
 
@@ -27,6 +29,7 @@ const value = defineModel('value')
       :placeholder="placeholder"
       v-model="value"
       :disabled="disabled"
+      @blur="emit('blur')"
       :class="{ 'input-error': errorMessage }"
     />
     <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
