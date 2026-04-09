@@ -3,7 +3,7 @@
  * 日幣定價 / 匯率 / 台幣定價 聯動輸入元件
  * 三個欄位互相連動：失焦時依「最後編輯的欄位」自動計算第三個
  * - 台幣定價 = 日幣定價 × 匯率，並進位至最近的 5 元
- * - 更動台幣定價時，反推匯率（保留 4 位小數）
+ * - 更動台幣定價時，反推匯率（保留 2 位小數）
  */
 import TextInput from '@/components/inputs/TextInput.vue'
 
@@ -55,7 +55,7 @@ function onBlurTwd() {
 </script>
 
 <template>
-  <text-input label="日幣定價" v-model:value="priceJpy" required :error-message="priceJpyError" @blur="onBlurJpy" />
-  <text-input label="匯率" v-model:value="exchangeRate" required :error-message="exchangeRateError" @blur="onBlurRate" />
-  <text-input label="台幣定價" v-model:value="priceTwd" required :error-message="priceTwdError" @blur="onBlurTwd" />
+  <text-input label="日幣定價" v-model:value="priceJpy"  :error-message="priceJpyError" @blur="onBlurJpy" />
+  <text-input label="匯率" v-model:value="exchangeRate"  :error-message="exchangeRateError" @blur="onBlurRate" />
+  <text-input label="台幣定價" v-model:value="priceTwd"  :error-message="priceTwdError" @blur="onBlurTwd" />
 </template>

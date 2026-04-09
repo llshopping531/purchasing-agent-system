@@ -38,18 +38,21 @@ const schema = yup.object({
   priceJpy: yup
     .number()
     .typeError('請輸入數字')
-    .required('日幣定價為必填')
-    .positive('請輸入正數'),
+    .positive('請輸入正數')
+    .nullable()
+    .optional(),
   exchangeRate: yup
     .number()
     .typeError('請輸入數字')
-    .required('匯率為必填')
-    .positive('請輸入正數'),
+    .positive('請輸入正數')
+    .nullable()
+    .optional(),
   priceTwd: yup
     .number()
     .typeError('請輸入數字')
-    .required('台幣定價為必填')
-    .positive('請輸入正數'),
+    .positive('請輸入正數')
+    .nullable()
+    .optional(),
 })
 
 const { defineField, errors, validate, resetForm } = useForm({

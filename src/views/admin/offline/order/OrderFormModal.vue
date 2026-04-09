@@ -341,18 +341,6 @@ async function beforeConfirm(): Promise<boolean> {
         formErrors.newProductName = '商品名稱為必填'
         valid = false
       }
-      if (!formNewProductPriceJpy.value) {
-        formErrors.newProductPriceJpy = '日幣定價為必填'
-        valid = false
-      }
-      if (!formNewProductExchangeRate.value) {
-        formErrors.newProductExchangeRate = '匯率為必填'
-        valid = false
-      }
-      if (!formNewProductPriceTwd.value) {
-        formErrors.newProductPriceTwd = '台幣定價為必填'
-        valid = false
-      }
     } else if (!formProductOption.value) {
       formErrors.product = '請選擇商品'
       valid = false

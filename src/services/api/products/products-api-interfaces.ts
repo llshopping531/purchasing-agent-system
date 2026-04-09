@@ -87,13 +87,13 @@ export interface ProductsReqBase {
   /** 商品名稱 */
   name: string
   /** 日幣定價 */
-  priceJpy: number
+  priceJpy?: number
   /** 匯率 */
-  exchangeRate: number
+  exchangeRate?: number
   /** 台幣定價 */
-  priceTwd: number
+  priceTwd?: number
   /** 商品圖片 */
-  image: string
+  image?: string
   /** 自定義欄位 */
   extraData?: ExtraData
 }
