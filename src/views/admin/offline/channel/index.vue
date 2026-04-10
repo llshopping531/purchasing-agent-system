@@ -105,7 +105,6 @@ function onChangeSize(size: number) {
   .selectBox {
     display: flex;
     gap: 1rem;
-    flex-wrap: wrap;
     row-gap: 0.25rem;
   }
   .channelHeader {

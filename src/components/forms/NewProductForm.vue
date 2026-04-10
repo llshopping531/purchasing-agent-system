@@ -44,7 +44,10 @@ const image = defineModel<string>('image', { default: '' })
   flex-wrap: wrap;
   gap: 1rem;
   .label {
-    min-width: calc(50% - .5rem);
+    min-width: calc(50% - 0.5rem);
+    @media (max-width: 768px) {
+      width: 100%;
+    }
   }
 }
 </style>

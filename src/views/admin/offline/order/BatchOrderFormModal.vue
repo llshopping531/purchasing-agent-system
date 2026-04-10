@@ -452,6 +452,9 @@ const statusLabel: Record<QueueStatus, string> = {
   align-items: flex-start;
   .text-input {
     width: calc(100% / 3 - 11px);
+    @media (max-width: 768px) {
+      width: 100%;
+    }
   }
 }
 

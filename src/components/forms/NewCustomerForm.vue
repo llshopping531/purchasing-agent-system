@@ -27,6 +27,7 @@ const note = defineModel<string>('note', { default: '' })
 </script>
 
 <template>
+  <div class="new-customer"></div>
   <text-input label="顧客名稱" v-model:value="name" required :error-message="errors?.name" />
   <text-input label="來源" v-model:value="source" required :error-message="errors?.source" />
   <checkbox-input label="已私訊官方" v-model="hasMessagedOfficial" />
@@ -34,3 +35,11 @@ const note = defineModel<string>('note', { default: '' })
   <checkbox-input label="老闆" v-model="isBoss" />
   <text-input label="備註" v-model:value="note" />
 </template>
+
+<style>
+.new-customer {
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+</style>

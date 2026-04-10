@@ -104,7 +104,7 @@ function filter() {
 .select {
   display: flex;
   flex-direction: column;
-  width: fit-content;
+  width: 100%;
   position: relative;
 
   .label {

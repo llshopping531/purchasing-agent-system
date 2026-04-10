@@ -144,26 +144,35 @@ defineExpose({ createEvent, editEvent, deleteEvent })
   >
     <template #content>
       <div class="formGrid">
-        <text-input
-          label="活動名稱"
-          v-model:value="currentEventName"
-          required
-          :error-message="errors.name"
-        />
-        <checkbox-input label="是否顯示" v-model="currentIsHidden" style="margin-top: auto;" />
-        <checkbox-input label="是否鎖定" v-model="currentIsLocked" style="margin-top: auto;" />
-        <text-input
-          label="開始日期"
-          v-model:value="currentStartDate"
-          required
-          :error-message="errors.startDate"
-        />
-        <text-input
-          label="結束日期"
-          v-model:value="currentEndDate"
-          required
-          :error-message="errors.endDate"
-        />
+        <div class="formItem">
+          <text-input
+            label="活動名稱"
+            v-model:value="currentEventName"
+            required
+            :error-message="errors.name"
+          />
+        </div>
+        <div class="formItem-checkbox">
+          <checkbox-input label="是否顯示" v-model="currentIsHidden" style="margin-top: auto" />
+
+          <checkbox-input label="是否鎖定" v-model="currentIsLocked" style="margin-top: auto" />
+        </div>
+        <div class="formItem">
+          <text-input
+            label="開始日期"
+            v-model:value="currentStartDate"
+            required
+            :error-message="errors.startDate"
+          />
+        </div>
+        <div class="formItem">
+          <text-input
+            label="結束日期"
+            v-model:value="currentEndDate"
+            required
+            :error-message="errors.endDate"
+          />
+        </div>
       </div>
     </template>
   </confirm-modal-component>
@@ -179,6 +188,13 @@ defineExpose({ createEvent, editEvent, deleteEvent })
   margin-top: 1rem;
   @media (max-width: 768px) {
     gap: 0.25rem;
+    .formItem {
+      width: 100%;
+    }
+    .formItem-checkbox {
+      width: 100%;
+      display: flex;
+    }
   }
 }
 </style>
