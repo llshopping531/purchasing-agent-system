@@ -17,6 +17,8 @@ const props = defineProps<{
   eventId: string
   /** 目前選取的通路 ID（字串形式） */
   shopId: string
+  /** 通路預設匯率，新增商品時自動帶入 */
+  defaultExchangeRate?: number
 }>()
 
 const emit = defineEmits<{
@@ -73,7 +75,7 @@ const image = ref('')
  */
 function createProduct() {
   modalMode.value = 1
-  resetForm()
+  resetForm({ values: { name: '', priceJpy: null, exchangeRate: props.defaultExchangeRate ?? null, priceTwd: null } })
   isVisible.value = true
 }
 

@@ -26,6 +26,8 @@ const props = defineProps<{
   eventId: string
   /** 目前選取的通路 ID（字串形式） */
   shopId: string
+  /** 通路預設匯率，新增商品時自動帶入 */
+  defaultExchangeRate?: number
 }>()
 
 const emit = defineEmits<{
@@ -243,6 +245,7 @@ function onSelectProduct(product: ProductsResBase) {
 function clickAddProduct() {
   isNewProduct.value = true
   formProductOption.value = undefined
+  formNewProductExchangeRate.value = props.defaultExchangeRate ?? null
   formExchangeRate.value = null
   formSubtotalJpy.value = null
   formSubtotalTwd.value = null

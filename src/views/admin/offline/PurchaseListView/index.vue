@@ -9,7 +9,7 @@ import { ref } from 'vue'
 import PurchaseChannelItem from './PurchaseChannelItem.vue'
 import type { PurchaseListData } from '@/services/api/purchase/purchase-api-interface'
 import { purchaseListApi } from '@/services/api/purchase/purchase-api'
-import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
+import ShopSelectComponent, { type ShopOption } from '@/components/inputs/selects/ShopSelectComponent.vue'
 
 /** 單一通路的採購統計資料結構 */
 interface PurchaseList {
@@ -67,8 +67,8 @@ async function selectEvent(data: EventOption) {
  * 選取通路後，進行篩選
  * @param option - 選取的通路 Option
  */
-function selectChannel(option: Option) {
-  currentChannelFilter.value = option
+function selectChannel(option: ShopOption) {
+  currentChannelFilter.value = option.selectedData
   applyChannelFilter()
 }
 </script>

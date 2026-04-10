@@ -8,12 +8,11 @@ import { ref } from 'vue'
 import EventSelectComponent, {
   type EventOption,
 } from '@/components/inputs/selects/EventSelectComponent.vue'
-import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
+import ShopSelectComponent, { type ShopOption } from '@/components/inputs/selects/ShopSelectComponent.vue'
 import OrderTableComponent from '@/components/tables/OrderTableComponent/index.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import OrderFormModal from './OrderFormModal.vue'
-import type { Option } from '@/interfaces/common'
 import type { OrderQueryContent } from '@/services/api/order/order-api-interfaces'
 
 /** OrderTableComponent 的 ref，用於呼叫 refresh 重新載入列表 */
@@ -25,6 +24,8 @@ const orderFormModalRef = ref<InstanceType<typeof OrderFormModal>>()
 const currentEventId = ref('')
 /** 目前選取的通路 ID */
 const currentShopId = ref('')
+/** 目前選取的通路預設匯率 */
+const currentShopExchangeRate = ref(0)
 /** 是否已執行過查詢（用於控制新增按鈕顯示） */
 const isTableQueried = ref(false)
 /** 是否顯示統計按鈕（有資料時才顯示） */
@@ -61,8 +62,9 @@ function selectEvent(data: EventOption) {
  * 選取通路
  * @param data - 選取的通路 Option
  */
-function selectShop(data: Option) {
-  currentShopId.value = data.value
+function selectShop(data: ShopOption) {
+  currentShopId.value = data.selectedData.value
+  currentShopExchangeRate.value = data.exchangeRate
 }
 
 /**
@@ -154,6 +156,7 @@ function onConfirmed() {
       ref="orderFormModalRef"
       :eventId="currentEventId"
       :shopId="currentShopId"
+      :defaultExchangeRate="currentShopExchangeRate"
       @confirmed="onConfirmed"
     />
   </div>

@@ -7,6 +7,12 @@ import { ref, watch } from 'vue'
 import type { Option } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { channelApi } from '@/services/api/channels/channels-api'
+import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
+
+export interface ShopOption {
+  selectedData: Option
+  exchangeRate: number
+}
 
 const pop = defineProps<{
   /** 目前選取的活動 ID（字串形式），變更時自動重新查詢通路 */
@@ -17,23 +23,25 @@ const pop = defineProps<{
   required?: boolean
 }>()
 
-
 const defaultValue = ref<Option>({ name: '請選擇通路', value: '請選擇通路' })
 
 const emit = defineEmits<{
-  /** 使用者選取通路時觸發，帶出通路對應的 Option */
-  (e: 'selectOption', data: Option): void
+  /** 使用者選取通路時觸發，帶出通路對應的 ShopOption */
+  (e: 'selectOption', data: ShopOption): void
 }>()
 
+/** 原始通路清單（保留完整資料以供 emit 使用） */
+const channelAllRes = ref<QueryChannelsAllRes[]>([])
 /** 轉換為 Option 格式的通路清單 */
 const shopList = ref<Option[]>([{ name: '請選擇通路', value: '請選擇通路' }])
 
 /**
- * 將選取的通路向上 emit
+ * 將選取的通路向上 emit（附帶匯率）
  * @param data - 選取的 Option
  */
 function selectShop(data: Option) {
-  emit('selectOption', data)
+  const channel = channelAllRes.value.find((c) => c.id === Number(data.value))
+  emit('selectOption', { selectedData: data, exchangeRate: channel?.exchangeRate ?? 0 })
 }
 
 // 當活動 ID 改變時，重新載入該活動的通路清單；immediate 確保掛載時也會執行
@@ -51,9 +59,9 @@ watch(
  * @param eventId - 活動 ID 字串
  */
 async function getChannelList(eventId: string) {
-  const channelAllRes = await channelApi.getChannelsAll({ eventId: Number(eventId) })
-  if (channelAllRes.length !== 0) {
-    shopList.value = channelAllRes.map((res) => ({
+  channelAllRes.value = await channelApi.getChannelsAll({ eventId: Number(eventId) })
+  if (channelAllRes.value.length !== 0) {
+    shopList.value = channelAllRes.value.map((res) => ({
       name: res.name,
       value: res.id.toString(),
     }))

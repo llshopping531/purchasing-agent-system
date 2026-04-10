@@ -5,11 +5,10 @@
  */
 import { ref } from 'vue'
 import EventSelectComponent, { type EventOption } from '@/components/inputs/selects/EventSelectComponent.vue'
-import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
+import ShopSelectComponent, { type ShopOption } from '@/components/inputs/selects/ShopSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import PaginationComponent from '@/components/PaginationComponent.vue'
 import ProductFormModal from './ProductFormModal.vue'
-import type { Option } from '@/interfaces/common'
 import { productsApi } from '@/services/api/products/products-api'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 
@@ -20,6 +19,8 @@ const productFormModalRef = ref<InstanceType<typeof ProductFormModal>>()
 const currentEventId = ref('')
 /** 目前選取的通路 ID */
 const currentShopId = ref('')
+/** 目前選取的通路預設匯率 */
+const currentShopExchangeRate = ref(0)
 /** 是否已執行過查詢（用於控制表格與新增按鈕的顯示） */
 const isTableQueried = ref(false)
 /** 是否顯示通路下拉 */
@@ -63,8 +64,9 @@ function selectEvent(data: EventOption) {
  * 選取通路，重置表格並重新查詢
  * @param data - 選取的通路 Option
  */
-function selectShop(data: Option) {
-  currentShopId.value = data.value
+function selectShop(data: ShopOption) {
+  currentShopId.value = data.selectedData.value
+  currentShopExchangeRate.value = data.exchangeRate
   resetTable()
 }
 
@@ -164,6 +166,7 @@ function onChangeSize(size: number) {
       ref="productFormModalRef"
       :eventId="currentEventId"
       :shopId="currentShopId"
+      :defaultExchangeRate="currentShopExchangeRate"
       @confirmed="getProductList"
     />
   </div>
