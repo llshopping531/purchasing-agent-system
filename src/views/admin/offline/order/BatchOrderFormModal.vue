@@ -212,7 +212,7 @@ async function addAndSubmit() {
       channelId: Number(props.shopId),
       customerId,
       productId,
-      orderStatus: '已喊單',
+      orderStatus: "1",
       quantity: item.quantity,
       isFixedRate: item.isFixedRate,
       nonCutTarget: item.nonCutTarget,
