@@ -23,7 +23,7 @@ const pop = defineProps<{
   required?: boolean
 }>()
 
-const defaultValue = ref<Option>({ name: '請選擇通路', value: '請選擇通路' })
+const defaultValue = ref<Option>({ name: '請選擇通路', value: '' })
 
 const emit = defineEmits<{
   /** 使用者選取通路時觸發，帶出通路對應的 ShopOption */
@@ -33,7 +33,7 @@ const emit = defineEmits<{
 /** 原始通路清單（保留完整資料以供 emit 使用） */
 const channelAllRes = ref<QueryChannelsAllRes[]>([])
 /** 轉換為 Option 格式的通路清單 */
-const shopList = ref<Option[]>([{ name: '請選擇通路', value: '請選擇通路' }])
+const shopList = ref<Option[]>([{ name: '請選擇通路', value: '' }])
 
 /**
  * 將選取的通路向上 emit（附帶匯率）

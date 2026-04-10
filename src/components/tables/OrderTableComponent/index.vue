@@ -164,20 +164,20 @@ async function getFieldDefsApi() {
  * 活動或通路未選取時不發送請求
  */
 async function getOrderList() {
-  if (pop.currentEventId !== '' && pop.currentShopId !== '') {
-    const res = await orderApi.getOrders({
-      eventId: Number(pop.currentEventId),
-      channelId: Number(pop.currentShopId),
-      page: currentPage.value,
-      size: pageSize.value,
-      sort: sortField.value,
-      direction: sortDirection.value,
-    })
-    tableData.value = res.content
-    totalPages.value = res.totalPages
-    totalElements.value = res.totalElements
-    emit('tableData', tableData.value)
-  }
+  if (!pop.currentEventId || !pop.currentShopId) return
+console.log(pop.currentShopId)
+  const res = await orderApi.getOrders({
+    eventId: Number(pop.currentEventId),
+    channelId: Number(pop.currentShopId),
+    page: currentPage.value,
+    size: pageSize.value,
+    sort: sortField.value,
+    direction: sortDirection.value,
+  })
+  tableData.value = res.content
+  totalPages.value = res.totalPages
+  totalElements.value = res.totalElements
+  emit('tableData', tableData.value)
 }
 
 function closeDrawsModal() {
