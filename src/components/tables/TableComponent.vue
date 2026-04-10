@@ -73,8 +73,7 @@ const emit = defineEmits<{
  */
 function onSortClick(header: HeaderRow) {
   if (!header.sortable) return
-  const direction =
-    pop.sortField === header.value && pop.sortDirection === 'ASC' ? 'DESC' : 'ASC'
+  const direction = pop.sortField === header.value && pop.sortDirection === 'ASC' ? 'DESC' : 'ASC'
   emit('sort', header.value, direction)
 }
 
@@ -128,8 +127,22 @@ function onChangeSize(pageSize: number) {
         >
           {{ header.name }}
           <span v-if="header.sortable" class="sort-icon">
-            <span :class="['arrow', 'asc', { active: sortField === header.value && sortDirection === 'ASC' }]">▲</span>
-            <span :class="['arrow', 'desc', { active: sortField === header.value && sortDirection === 'DESC' }]">▼</span>
+            <span
+              :class="[
+                'arrow',
+                'asc',
+                { active: sortField === header.value && sortDirection === 'ASC' },
+              ]"
+              >▲</span
+            >
+            <span
+              :class="[
+                'arrow',
+                'desc',
+                { active: sortField === header.value && sortDirection === 'DESC' },
+              ]"
+              >▼</span
+            >
           </span>
         </div>
         <div class="header-item operate" v-if="isDelete || isEdit">操作</div>
@@ -151,7 +164,7 @@ function onChangeSize(pageSize: number) {
           <div
             class="item-col operate"
             v-if="isDelete || isEdit"
-            :style="{ '--mobile-span': 3, 'width': '150px' }"
+            :style="{ '--mobile-span': 3, width: '150px' }"
           >
             <div class="btn edit" v-if="isEdit" @click="editData(dataRow)">編輯</div>
             <div class="btn delete" v-if="isDelete" @click="deleteData(dataRow)">刪除</div>
@@ -178,11 +191,9 @@ function onChangeSize(pageSize: number) {
 
 .table {
   background-color: rgba(124, 111, 224, 0.08);
-  border-radius: var(--radius-md);
-  overflow: hidden;
   box-shadow: var(--shadow-sm);
   width: 100%;
-
+  border-radius: var(--radius-md);
   .header {
     display: flex;
     gap: 1px;
@@ -208,6 +219,12 @@ function onChangeSize(pageSize: number) {
     align-items: center;
     justify-content: center;
     gap: 0.35rem;
+    &:first-child {
+      border-top-left-radius: var(--radius-md);
+    }
+    &:last-child {
+      border-top-right-radius: var(--radius-md);
+    }
 
     &.sortable {
       cursor: pointer;
@@ -251,6 +268,14 @@ function onChangeSize(pageSize: number) {
       &:hover .item-col {
         background-color: var(--color-primary-muted);
       }
+
+      &:last-child .item-col:first-child {
+        border-bottom-left-radius: var(--radius-md);
+      }
+
+      &:last-child .item-col:last-child {
+        border-bottom-right-radius: var(--radius-md);
+      }
     }
   }
 
@@ -290,14 +315,12 @@ function onChangeSize(pageSize: number) {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    overflow: hidden;
   }
 
   .table {
     background-color: transparent;
     box-shadow: none;
     border-radius: 0;
-    overflow: hidden;
 
     .header {
       display: none;
@@ -314,7 +337,6 @@ function onChangeSize(pageSize: number) {
         gap: 0;
         margin-top: 0;
         border-radius: var(--radius-md);
-        overflow: hidden;
         box-shadow: var(--shadow-sm);
         background: #ffffff;
         &:nth-child(even) .item-col {
