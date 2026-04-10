@@ -4,7 +4,7 @@
  * 點擊 ＋ 立即送出 API（非同步，不需等待）
  * 關閉時若仍有送出中的項目，顯示等待畫面直到全部完成
  */
-import { ref, watch, computed } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import MaskComponent from '@/components/MaskComponent.vue'
 import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
 import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
@@ -60,30 +60,36 @@ const queue = ref<QueueItem[]>([])
 const hasSubmitting = computed(() => queue.value.some((i) => i.status === 'submitting'))
 const hasSuccess = computed(() => queue.value.some((i) => i.status === 'success'))
 
-// ── 顧客欄位 ──────────────────────────────────────────────────
-const isNewCustomer = ref(false)
-const formCustomerOption = ref<Option | undefined>(undefined)
-const formNewCustomerName = ref('')
-const formNewCustomerSource = ref('')
-const formHasMessagedOfficial = ref(false)
-const formIsDiscount = ref(false)
-const formIsBoss = ref(false)
-const formNewCustomerNote = ref('')
+// ── 表單狀態 ──────────────────────────────────────────────────
+const form = reactive({
+  // 顧客
+  isNewCustomer: false,
+  customerOption: undefined as Option | undefined,
+  newCustomerName: '',
+  newCustomerSource: '',
+  hasMessagedOfficial: false,
+  isDiscount: false,
+  isBoss: false,
+  newCustomerNote: '',
+  // 商品
+  isNewProduct: false,
+  productOption: undefined as Option | undefined,
+  product: undefined as ProductsResBase | undefined,
+  newProductName: '',
+  newProductPriceJpy: null as number | null,
+  newProductExchangeRate: null as number | null,
+  newProductPriceTwd: null as number | null,
+  newProductImage: '',
+  // 訂單
+  quantity: 1 as number | null,
+  isFixedRate: false,
+  nonCutTarget: false,
+})
 
-// ── 商品欄位 ──────────────────────────────────────────────────
-const isNewProduct = ref(false)
-const formProductOption = ref<Option | undefined>(undefined)
-const formProduct = ref<ProductsResBase | undefined>(undefined)
-const formNewProductName = ref('')
-const formNewProductPriceJpy = ref<number | null>(null)
-const formNewProductExchangeRate = ref<number | null>(null)
-const formNewProductPriceTwd = ref<number | null>(null)
-const formNewProductImage = ref('')
-
-// ── 訂單欄位 ──────────────────────────────────────────────────
-const formQuantity = ref<number | null>(1)
-const formIsFixedRate = ref(false)
-const formNonCutTarget = ref(false)
+/** 回傳當下表單值的純值快照（避免 async closure 讀到後續的 reactive 變更） */
+function snapshotForm() {
+  return { ...form }
+}
 
 const formErrors = ref({
   customer: '',
@@ -95,18 +101,18 @@ const formErrors = ref({
 })
 
 function onSelectProduct(product: ProductsResBase) {
-  formProduct.value = product
+  form.product = product
 }
 
 function clickAddCustomer() {
-  isNewCustomer.value = true
-  formCustomerOption.value = undefined
+  form.isNewCustomer = true
+  form.customerOption = undefined
 }
 
 function clickAddProduct() {
-  isNewProduct.value = true
-  formProductOption.value = undefined
-  formProduct.value = undefined
+  form.isNewProduct = true
+  form.productOption = undefined
+  form.product = undefined
 }
 
 // ── 立即新增並送出 ────────────────────────────────────────────
@@ -121,82 +127,82 @@ async function addAndSubmit() {
   }
   let valid = true
 
-  if (isNewCustomer.value) {
-    if (!formNewCustomerName.value.trim()) {
+  if (form.isNewCustomer) {
+    if (!form.newCustomerName.trim()) {
       formErrors.value.newCustomerName = '顧客名稱為必填'
       valid = false
     }
-    if (!formNewCustomerSource.value.trim()) {
+    if (!form.newCustomerSource.trim()) {
       formErrors.value.newCustomerSource = '來源為必填'
       valid = false
     }
-  } else if (!formCustomerOption.value) {
+  } else if (!form.customerOption) {
     formErrors.value.customer = '請選擇顧客'
     valid = false
   }
 
-  if (isNewProduct.value) {
-    if (!formNewProductName.value.trim()) {
+  if (form.isNewProduct) {
+    if (!form.newProductName.trim()) {
       formErrors.value.newProductName = '商品名稱為必填'
       valid = false
     }
-  } else if (!formProductOption.value || !formProduct.value) {
+  } else if (!form.productOption || !form.product) {
     formErrors.value.product = '請選擇商品'
     valid = false
   }
 
-  if (formQuantity.value === null || formQuantity.value === undefined) {
+  if (form.quantity === null || form.quantity === undefined) {
     formErrors.value.quantity = '數量為必填'
     valid = false
-  } else if (formQuantity.value <= 0) {
+  } else if (form.quantity <= 0) {
     formErrors.value.quantity = '數量不得為 0'
     valid = false
   }
 
   if (!valid) return
 
-  // 顯示名稱（用於記錄清單）
-  const customerLabel = isNewCustomer.value
-    ? formNewCustomerName.value
-    : formCustomerOption.value!.name
-  const productLabel = isNewProduct.value ? formNewProductName.value : formProductOption.value!.name
+  // 立即快照所有表單值，避免 submit closure 讀到後續的 reactive 變更
+  const snap = snapshotForm()
+
+  const customerLabel = snap.isNewCustomer ? snap.newCustomerName : snap.customerOption!.name
+  const productLabel = snap.isNewProduct ? snap.newProductName : snap.productOption!.name
 
   const item: QueueItem = {
     id: `${Date.now()}-${Math.random()}`,
     customerOption: { value: '', name: customerLabel },
     productOption: { value: '', name: productLabel },
-    quantity: formQuantity.value!,
-    isFixedRate: formIsFixedRate.value,
-    nonCutTarget: formNonCutTarget.value,
+    quantity: snap.quantity!,
+    isFixedRate: snap.isFixedRate,
+    nonCutTarget: snap.nonCutTarget,
     status: 'submitting',
   }
   queue.value.push(item)
 
   // 建立顧客 / 商品後送出訂單，不等待
   const submit = async () => {
-    let customerId = Number(formCustomerOption.value?.value ?? 0)
-    if (isNewCustomer.value) {
+    let customerId = Number(snap.customerOption?.value ?? 0)
+    if (snap.isNewCustomer) {
       const newCustomer = await customersApi.postCustomers({
-        name: formNewCustomerName.value,
-        source: formNewCustomerSource.value,
-        hasMessagedOfficial: formHasMessagedOfficial.value,
-        isDiscount: formIsDiscount.value,
-        isBoss: formIsBoss.value,
-        note: formNewCustomerNote.value,
+        name: snap.newCustomerName,
+        source: snap.newCustomerSource,
+        hasMessagedOfficial: snap.hasMessagedOfficial,
+        isDiscount: snap.isDiscount,
+        isBoss: snap.isBoss,
+        note: snap.newCustomerNote,
       })
       customerId = newCustomer.id
     }
 
-    let productId = Number(formProductOption.value?.value ?? 0)
-    if (isNewProduct.value) {
+    let productId = Number(snap.productOption?.value ?? 0)
+    if (snap.isNewProduct) {
       const newProduct = await productsApi.postProducts({
         eventId: Number(props.eventId),
         channelId: Number(props.shopId),
-        name: formNewProductName.value,
-        priceJpy: formNewProductPriceJpy.value ?? undefined,
-        exchangeRate: formNewProductExchangeRate.value ?? undefined,
-        priceTwd: formNewProductPriceTwd.value ?? undefined,
-        image: formNewProductImage.value,
+        name: snap.newProductName,
+        priceJpy: snap.newProductPriceJpy ?? undefined,
+        exchangeRate: snap.newProductExchangeRate ?? undefined,
+        priceTwd: snap.newProductPriceTwd ?? undefined,
+        image: snap.newProductImage,
       })
       productId = newProduct.id
     }
@@ -236,7 +242,7 @@ const isShowCloseConfirm = ref(false)
 
 /** 表單是否有非預設資料（顧客、商品已選取，或數量不為 1） */
 const isFormDirty = computed(
-  () => !!formCustomerOption.value || !!formProductOption.value || formQuantity.value !== 1,
+  () => !!form.customerOption || !!form.productOption || form.quantity !== 1,
 )
 
 function tryClose() {
@@ -274,11 +280,11 @@ const statusLabel: Record<QueueStatus, string> = {
         <div class="form-row">
           <!-- 顧客 -->
           <div class="text-input">
-            <template v-if="!isNewCustomer">
+            <template v-if="!form.isNewCustomer">
               <customer-select-component
                 required
-                :defaultValue="formCustomerOption"
-                @selectOption="formCustomerOption = $event"
+                :defaultValue="form.customerOption"
+                @selectOption="form.customerOption = $event"
               />
               <span v-if="formErrors.customer" class="field-error">{{ formErrors.customer }}</span>
               <div class="addLink" @click="clickAddCustomer">新增顧客</div>
@@ -286,31 +292,31 @@ const statusLabel: Record<QueueStatus, string> = {
             <template v-else>
               <div class="newForm">
                 <new-customer-form
-                  v-model:name="formNewCustomerName"
-                  v-model:source="formNewCustomerSource"
-                  v-model:hasMessagedOfficial="formHasMessagedOfficial"
-                  v-model:isDiscount="formIsDiscount"
-                  v-model:isBoss="formIsBoss"
-                  v-model:note="formNewCustomerNote"
+                  v-model:name="form.newCustomerName"
+                  v-model:source="form.newCustomerSource"
+                  v-model:hasMessagedOfficial="form.hasMessagedOfficial"
+                  v-model:isDiscount="form.isDiscount"
+                  v-model:isBoss="form.isBoss"
+                  v-model:note="form.newCustomerNote"
                   :errors="{
                     name: formErrors.newCustomerName || undefined,
                     source: formErrors.newCustomerSource || undefined,
                   }"
                 />
-                <div class="addLink" @click="isNewCustomer = false">返回選擇顧客</div>
+                <div class="addLink" @click="form.isNewCustomer = false">返回選擇顧客</div>
               </div>
             </template>
           </div>
 
           <!-- 商品 -->
           <div class="text-input">
-            <template v-if="!isNewProduct">
+            <template v-if="!form.isNewProduct">
               <product-select-component
                 required
                 :eventId="props.eventId"
                 :channelId="props.shopId"
-                :defaultValue="formProductOption"
-                @selectOption="formProductOption = $event"
+                :defaultValue="form.productOption"
+                @selectOption="form.productOption = $event"
                 @selectProduct="onSelectProduct"
               />
               <span v-if="formErrors.product" class="field-error">{{ formErrors.product }}</span>
@@ -319,29 +325,29 @@ const statusLabel: Record<QueueStatus, string> = {
             <template v-else>
               <div class="newForm">
                 <new-product-form
-                  v-model:name="formNewProductName"
-                  v-model:priceJpy="formNewProductPriceJpy"
-                  v-model:exchangeRate="formNewProductExchangeRate"
-                  v-model:priceTwd="formNewProductPriceTwd"
-                  v-model:image="formNewProductImage"
+                  v-model:name="form.newProductName"
+                  v-model:priceJpy="form.newProductPriceJpy"
+                  v-model:exchangeRate="form.newProductExchangeRate"
+                  v-model:priceTwd="form.newProductPriceTwd"
+                  v-model:image="form.newProductImage"
                   :errors="{ name: formErrors.newProductName || undefined }"
                 />
-                <div class="addLink" @click="isNewProduct = false">返回選擇商品</div>
+                <div class="addLink" @click="form.isNewProduct = false">返回選擇商品</div>
               </div>
             </template>
           </div>
           <div class="text-input">
             <text-input
               label="數量"
-              v-model:value="formQuantity"
+              v-model:value="form.quantity"
               required
               :error-message="formErrors.quantity"
             />
           </div>
         </div>
         <div class="form-row">
-          <checkbox-input label="固定匯率" v-model="formIsFixedRate" />
-          <checkbox-input label="非分潤對象" v-model="formNonCutTarget" />
+          <checkbox-input label="固定匯率" v-model="form.isFixedRate" />
+          <checkbox-input label="非分潤對象" v-model="form.nonCutTarget" />
         </div>
         <div class="add-btn-row">
           <div class="btn add-btn" @click="addAndSubmit">新增</div>

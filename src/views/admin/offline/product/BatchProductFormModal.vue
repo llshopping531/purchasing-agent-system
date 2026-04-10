@@ -4,7 +4,7 @@
  * 點擊 新增 立即送出 API（非同步，不需等待）
  * 關閉時若仍有送出中的項目，顯示等待畫面直到全部完成
  */
-import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, watch, computed, onMounted, onUnmounted } from 'vue'
 import MaskComponent from '@/components/MaskComponent.vue'
 import NewProductForm from '@/components/forms/NewProductForm.vue'
 import { productsApi } from '@/services/api/products/products-api'
@@ -47,12 +47,18 @@ const queue = ref<QueueItem[]>([])
 const hasSubmitting = computed(() => queue.value.some((i) => i.status === 'submitting'))
 const hasSuccess = computed(() => queue.value.some((i) => i.status === 'success'))
 
-// ── 商品欄位 ──────────────────────────────────────────────────
-const formName = ref('')
-const formPriceJpy = ref<number | null>(null)
-const formExchangeRate = ref<number | null>(props.defaultExchangeRate ?? null)
-const formPriceTwd = ref<number | null>(null)
-const formImage = ref('')
+// ── 表單狀態 ──────────────────────────────────────────────────
+const form = reactive({
+  name: '',
+  priceJpy: null as number | null,
+  exchangeRate: props.defaultExchangeRate ?? null as number | null,
+  priceTwd: null as number | null,
+  image: '',
+})
+
+function snapshotForm() {
+  return { ...form }
+}
 
 const formErrors = ref({ name: '' })
 
@@ -60,14 +66,16 @@ const formErrors = ref({ name: '' })
 async function addAndSubmit() {
   formErrors.value.name = ''
 
-  if (!formName.value.trim()) {
+  if (!form.name.trim()) {
     formErrors.value.name = '商品名稱為必填'
     return
   }
 
+  const snap = snapshotForm()
+
   const item: QueueItem = {
     id: `${Date.now()}-${Math.random()}`,
-    name: formName.value,
+    name: snap.name,
     status: 'submitting',
   }
   queue.value.push(item)
@@ -76,11 +84,11 @@ async function addAndSubmit() {
     await productsApi.postProducts({
       eventId: Number(props.eventId),
       channelId: Number(props.shopId),
-      name: formName.value,
-      priceJpy: formPriceJpy.value ?? undefined,
-      exchangeRate: formExchangeRate.value ?? undefined,
-      priceTwd: formPriceTwd.value ?? undefined,
-      image: formImage.value,
+      name: snap.name,
+      priceJpy: snap.priceJpy ?? undefined,
+      exchangeRate: snap.exchangeRate ?? undefined,
+      priceTwd: snap.priceTwd ?? undefined,
+      image: snap.image,
     })
   }
 
@@ -103,7 +111,7 @@ const isWaitingToClose = ref(false)
 const isShowCloseConfirm = ref(false)
 
 /** 表單是否有非預設資料 */
-const isFormDirty = computed(() => !!formName.value.trim())
+const isFormDirty = computed(() => !!form.name.trim())
 
 function tryClose() {
   if (hasSubmitting.value) {
@@ -145,11 +153,11 @@ const statusLabel: Record<QueueStatus, string> = {
       <!-- 表單區 -->
       <div class="form-area product">
         <new-product-form
-          v-model:name="formName"
-          v-model:priceJpy="formPriceJpy"
-          v-model:exchangeRate="formExchangeRate"
-          v-model:priceTwd="formPriceTwd"
-          v-model:image="formImage"
+          v-model:name="form.name"
+          v-model:priceJpy="form.priceJpy"
+          v-model:exchangeRate="form.exchangeRate"
+          v-model:priceTwd="form.priceTwd"
+          v-model:image="form.image"
           :errors="{ name: formErrors.name || undefined }"
         />
         <div class="add-btn-row">
