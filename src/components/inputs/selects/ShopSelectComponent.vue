@@ -6,7 +6,7 @@
 import { ref, watch } from 'vue'
 import type { Option } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
-import { channelApi } from '@/services/api/channel-api'
+import { channelApi } from '@/services/api/channels/channels-api'
 
 const pop = defineProps<{
   /** 目前選取的活動 ID（字串形式），變更時自動重新查詢通路 */
@@ -51,7 +51,7 @@ watch(
  * @param eventId - 活動 ID 字串
  */
 async function getChannelList(eventId: string) {
-  const channelAllRes = await channelApi.getChannelsAll(Number(eventId))
+  const channelAllRes = await channelApi.getChannelsAll({ eventId: Number(eventId) })
   if (channelAllRes.length !== 0) {
     shopList.value = channelAllRes.map((res) => ({
       name: res.name,

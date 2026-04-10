@@ -81,6 +81,11 @@ const router = createRouter({
               name: 'CustomerOrdersView',
               component: () => import('../views/admin/offline/customerOrders/index.vue'),
             },
+            {
+              path: 'channel',
+              name: 'ChannelView',
+              component: () => import('../views/admin/offline/channel/index.vue'),
+            },
           ],
         },
         {

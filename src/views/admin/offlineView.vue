@@ -10,6 +10,7 @@ import IconUsers from '@/components/icons/IconUsers.vue'
 import IconListCheck from '@/components/icons/IconListCheck.vue'
 import IconBars from '@/components/icons/IconBars.vue'
 import IconCartShopping from '@/components/icons/IconCartShopping.vue'
+import IconFlag from '@/components/icons/IconFlag.vue'
 
 const isCollapsed = ref(false)
 const isMobileOpen = ref(false)
@@ -21,6 +22,7 @@ const eventItem = { name: '活動管理', path: PATH.offlineEvent }
 const customerItem = { name: '顧客管理', path: PATH.offlineCustomer }
 const purchaseListItem = { name: '採購清單', path: PATH.offlinePurchaseList }
 const customerOrdersItem = { name: '個人購物清單', path: PATH.offlineCustomerOrders }
+const channelItem = { name: '通路管理', path: PATH.offlineChannel }
 
 router.afterEach(() => {
   isMobileOpen.value = false
@@ -60,6 +62,12 @@ router.afterEach(() => {
           <router-link :to="productItem.path" class="nav-item" :title="isCollapsed ? productItem.name : ''">
             <icon-box class="nav-icon" />
             <span class="nav-item-name">{{ productItem.name }}</span>
+          </router-link>
+
+          <!-- 通路管理 (FA6 flag) -->
+          <router-link :to="channelItem.path" class="nav-item" :title="isCollapsed ? channelItem.name : ''">
+            <icon-flag class="nav-icon" />
+            <span class="nav-item-name">{{ channelItem.name }}</span>
           </router-link>
 
           <!-- 活動管理 (FA6 calendar-days) -->

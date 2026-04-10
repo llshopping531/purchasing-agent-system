@@ -21,6 +21,8 @@ export const PATH = {
   offlineProduct: '/admin/offline/product',
   /** 場販－個人購物清單 */
   offlineCustomerOrders: '/admin/offline/customerOrders',
+  /** 場販－通路管理 */
+  offlineChannel: '/admin/offline/channel',
 
   /** 通販專區入口 */
   online: '/admin/online',
