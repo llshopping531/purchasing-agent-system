@@ -13,12 +13,15 @@ import OrderTableComponent from '@/components/tables/OrderTableComponent/index.v
 import ModalComponent from '@/components/ModalComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import OrderFormModal from './OrderFormModal.vue'
+import BatchOrderFormModal from './BatchOrderFormModal.vue'
 import type { OrderQueryContent } from '@/services/api/order/order-api-interfaces'
 
 /** OrderTableComponent 的 ref，用於呼叫 refresh 重新載入列表 */
 const orderTableRef = ref<InstanceType<typeof OrderTableComponent>>()
 /** OrderFormModal 的 ref，用於呼叫 createOrder / editOrder / deleteOrder */
 const orderFormModalRef = ref<InstanceType<typeof OrderFormModal>>()
+/** 是否顯示批次新增彈窗 */
+const isShowBatchModal = ref(false)
 
 /** 目前選取的活動 ID */
 const currentEventId = ref('')
@@ -121,7 +124,7 @@ function onConfirmed() {
       </div>
       <div class="btnBox">
         <div class="btn" v-if="isShowTotalBtn" @click="isShowTotalModal = true">顯示統計</div>
-        <div class="btn create" v-if="isTableQueried && !currentEventIsLocked" @click="orderFormModalRef?.createOrder()">
+        <div class="btn create" v-if="isTableQueried && !currentEventIsLocked" @click="isShowBatchModal = true">
           新增
         </div>
       </div>
@@ -151,6 +154,14 @@ function onConfirmed() {
         </div>
       </template>
     </modal-component>
+
+    <batch-order-form-modal
+      v-if="isShowBatchModal"
+      :eventId="currentEventId"
+      :shopId="currentShopId"
+      @confirmed="onConfirmed"
+      @close="isShowBatchModal = false"
+    />
 
     <order-form-modal
       ref="orderFormModalRef"

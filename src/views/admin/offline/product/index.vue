@@ -9,18 +9,21 @@ import ShopSelectComponent, { type ShopOption } from '@/components/inputs/select
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import PaginationComponent from '@/components/PaginationComponent.vue'
 import ProductFormModal from './ProductFormModal.vue'
+import BatchProductFormModal from './BatchProductFormModal.vue'
 import { productsApi } from '@/services/api/products/products-api'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 
-/** ProductFormModal 的 ref，用於呼叫 createProduct / editProduct / deleteProduct */
+/** ProductFormModal 的 ref，用於呼叫 editProduct / deleteProduct */
 const productFormModalRef = ref<InstanceType<typeof ProductFormModal>>()
+/** 是否顯示批次新增彈窗 */
+const isShowBatchModal = ref(false)
 
 /** 目前選取的活動 ID */
 const currentEventId = ref('')
 /** 目前選取的通路 ID */
 const currentShopId = ref('')
 /** 目前選取的通路預設匯率 */
-const currentShopExchangeRate = ref(0)
+const currentShopExchangeRate = ref<number | undefined>(undefined)
 /** 是否已執行過查詢（用於控制表格與新增按鈕的顯示） */
 const isTableQueried = ref(false)
 /** 是否顯示通路下拉 */
@@ -134,7 +137,7 @@ function onChangeSize(size: number) {
         />
       </div>
       <div class="btnBox">
-        <div class="btn" v-if="isTableQueried && !currentEventIsLocked" @click="productFormModalRef?.createProduct()">
+        <div class="btn" v-if="isTableQueried && !currentEventIsLocked" @click="isShowBatchModal = true">
           新增
         </div>
       </div>
@@ -162,11 +165,18 @@ function onChangeSize(size: number) {
       @changePage="onChangePage"
       @changeSize="onChangeSize"
     />
+    <batch-product-form-modal
+      v-if="isShowBatchModal"
+      :eventId="currentEventId"
+      :shopId="currentShopId"
+      :defaultExchangeRate="currentShopExchangeRate"
+      @confirmed="getProductList"
+      @close="isShowBatchModal = false"
+    />
     <product-form-modal
       ref="productFormModalRef"
       :eventId="currentEventId"
       :shopId="currentShopId"
-      :defaultExchangeRate="currentShopExchangeRate"
       @confirmed="getProductList"
     />
   </div>

@@ -25,14 +25,26 @@ const image = defineModel<string>('image', { default: '' })
 </script>
 
 <template>
-  <text-input label="商品名稱" v-model:value="name" required :error-message="errors?.name" />
-  <price-rate-input-component
-    v-model:priceJpy="priceJpy"
-    v-model:exchangeRate="exchangeRate"
-    v-model:priceTwd="priceTwd"
-    :priceJpyError="errors?.priceJpy"
-    :exchangeRateError="errors?.exchangeRate"
-    :priceTwdError="errors?.priceTwd"
-  />
-  <text-input label="商品圖片" v-model:value="image" :error-message="errors?.image" />
+  <div class="new-product-from">
+    <text-input label="商品名稱" v-model:value="name" required :error-message="errors?.name" />
+    <price-rate-input-component
+      v-model:priceJpy="priceJpy"
+      v-model:exchangeRate="exchangeRate"
+      v-model:priceTwd="priceTwd"
+      :priceJpyError="errors?.priceJpy"
+      :exchangeRateError="errors?.exchangeRate"
+      :priceTwdError="errors?.priceTwd"
+    />
+    <text-input label="商品圖片" v-model:value="image" :error-message="errors?.image" />
+  </div>
 </template>
+<style>
+.new-product-from {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  .label {
+    min-width: calc(50% - .5rem);
+  }
+}
+</style>
