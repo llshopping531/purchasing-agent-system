@@ -111,6 +111,14 @@ function onChangePage(page: number) {
 function onChangeSize(pageSize: number) {
   emit('changeSize', pageSize)
 }
+
+/**
+ * 將 null / undefined / 空字串 顯示為 "-"
+ */
+function displayValue(val: unknown): unknown {
+  if (val === null || val === undefined || val === '') return '-'
+  return val
+}
 </script>
 
 <template>
@@ -158,7 +166,7 @@ function onChangeSize(pageSize: number) {
             :data-label="header.name"
           >
             <slot :name="`col-${header.value}`" :row="dataRow">
-              {{ dataRow[header.value] }}
+              {{ displayValue(dataRow[header.value]) }}
             </slot>
           </div>
           <div

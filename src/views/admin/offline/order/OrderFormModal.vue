@@ -387,9 +387,9 @@ async function confirm() {
       eventId: Number(props.eventId),
       channelId: Number(props.shopId),
       name: formNewProductName.value,
-      priceJpy: formNewProductPriceJpy.value ?? 0,
-      exchangeRate: formNewProductExchangeRate.value ?? 0,
-      priceTwd: formNewProductPriceTwd.value ?? 0,
+      priceJpy: formNewProductPriceJpy.value ?? undefined,
+      exchangeRate: formNewProductExchangeRate.value ?? undefined,
+      priceTwd: formNewProductPriceTwd.value ?? undefined,
       image: formNewProductImage.value,
     })
     productId = newProduct.id

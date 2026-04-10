@@ -19,7 +19,7 @@ const isTableQueried = ref(false)
 const headerRow: HeaderRow[] = [
   { name: '通路名稱', value: 'name', sort: 0, width: '200px', mobileSpan: 2 },
   { name: '匯率', value: 'exchangeRate', sort: 0, width: '100px' },
-  { name: '日幣免稅門檻', value: 'thresholdJpy', sort: 0, width: '140px' },
+  { name: '日幣滿額門檻', value: 'thresholdJpy', sort: 0, width: '140px' },
 ]
 
 const tableData = ref<ChannelContent[]>([])

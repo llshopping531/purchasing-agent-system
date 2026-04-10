@@ -28,8 +28,8 @@ const currentName = ref('')
 
 const schema = yup.object({
   name: yup.string().required('通路名稱為必填'),
-  exchangeRate: yup.number().typeError('請輸入數字').positive('請輸入正數').required('匯率為必填'),
-  thresholdJpy: yup.number().typeError('請輸入數字').min(0, '請輸入非負數').required('日幣門檻為必填'),
+  exchangeRate: yup.number().transform((v, o) => (o === '' ? null : v)).typeError('請輸入數字').positive('請輸入正數').required('匯率為必填'),
+  thresholdJpy: yup.number().transform((v, o) => (o === '' ? null : v)).typeError('請輸入數字').min(0, '請輸入非負數').required('日幣滿額門檻為必填'),
 })
 
 const { defineField, errors, validate, resetForm } = useForm({
@@ -43,7 +43,7 @@ const [thresholdJpy] = defineField('thresholdJpy')
 
 function createChannel() {
   modalMode.value = 1
-  resetForm()
+  resetForm({ values: { name: '', exchangeRate: null, thresholdJpy: null } })
   isVisible.value = true
 }
 
@@ -78,8 +78,8 @@ async function confirm() {
     const req = {
       eventId: Number(props.eventId),
       name: name.value ?? '',
-      exchangeRate: exchangeRate.value ?? 0,
-      thresholdJpy: thresholdJpy.value ?? 0,
+      exchangeRate: exchangeRate.value ?? undefined,
+      thresholdJpy: thresholdJpy.value ?? undefined,
     }
     if (modalMode.value === 1) await channelApi.postChannels(req)
     if (modalMode.value === 2) await channelApi.patchChannels(currentId.value, req)
@@ -92,7 +92,7 @@ async function confirm() {
 function closeModal() {
   currentId.value = 0
   currentName.value = ''
-  resetForm()
+  resetForm({ values: { name: '', exchangeRate: null, thresholdJpy: null } })
   isVisible.value = false
 }
 
@@ -130,18 +130,28 @@ defineExpose({ createChannel, editChannel, deleteChannel })
           required
           :error-message="errors.exchangeRate"
         />
-        <text-input
-          label="日幣免稅門檻"
-          v-model:value="thresholdJpy"
-          required
-          :error-message="errors.thresholdJpy"
-        />
+        <div>
+          <text-input
+            label="日幣滿額門檻"
+            v-model:value="thresholdJpy"
+            required
+            :error-message="errors.thresholdJpy"
+          />
+          <span class="hint">若無滿額禮則填入 0</span>
+        </div>
       </div>
     </template>
   </confirm-modal-component>
 </template>
 
 <style scoped>
+.hint {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
 .formGrid {
   display: flex;
   gap: 1.5rem;

@@ -71,9 +71,9 @@ export interface ChannelReqBase {
   /** 通路名稱 */
   name: string
   /** 匯率 */
-  exchangeRate: number
-  /** 日幣免稅門檻 */
-  thresholdJpy: number
+  exchangeRate?: number
+  /** 日幣滿額門檻 */
+  thresholdJpy?: number
   /** 自定義欄位 */
   extraData?: ExtraData
 }
@@ -90,7 +90,7 @@ export interface ChannelResBase {
   name: string
   /** 匯率 */
   exchangeRate: number
-  /** 日幣免稅門檻 */
+  /** 日幣滿額門檻 */
   thresholdJpy: number
   /** 自定義欄位（物件格式） */
   extraData: ExtraData

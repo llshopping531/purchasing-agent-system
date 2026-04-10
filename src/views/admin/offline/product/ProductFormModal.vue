@@ -39,18 +39,21 @@ const schema = yup.object({
   name: yup.string().required('商品名稱為必填'),
   priceJpy: yup
     .number()
+    .transform((v, o) => (o === '' ? null : v))
     .typeError('請輸入數字')
     .positive('請輸入正數')
     .nullable()
     .optional(),
   exchangeRate: yup
     .number()
+    .transform((v, o) => (o === '' ? null : v))
     .typeError('請輸入數字')
     .positive('請輸入正數')
     .nullable()
     .optional(),
   priceTwd: yup
     .number()
+    .transform((v, o) => (o === '' ? null : v))
     .typeError('請輸入數字')
     .positive('請輸入正數')
     .nullable()
@@ -89,9 +92,9 @@ function editProduct(data: ProductsResBase) {
   resetForm({
     values: {
       name: data.name,
-      priceJpy: Number(data.priceJpy),
-      exchangeRate: Number(data.exchangeRate),
-      priceTwd: Number(data.priceTwd),
+      priceJpy: data.priceJpy ?? null,
+      exchangeRate: data.exchangeRate ?? null,
+      priceTwd: data.priceTwd ?? null,
     },
   })
   image.value = data.image
@@ -127,9 +130,9 @@ async function confirm() {
       eventId: Number(props.eventId),
       channelId: Number(props.shopId),
       name: name.value ?? '',
-      priceJpy: priceJpy.value ?? 0,
-      exchangeRate: exchangeRate.value ?? 0,
-      priceTwd: priceTwd.value ?? 0,
+      priceJpy: priceJpy.value ?? undefined,
+      exchangeRate: exchangeRate.value ?? undefined,
+      priceTwd: priceTwd.value ?? undefined,
       image: image.value,
     }
     if (modalMode.value === 1) await productsApi.postProducts(req)
