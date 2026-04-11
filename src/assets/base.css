@@ -48,6 +48,13 @@
   --color-danger: #e05c5c;
   --color-danger-dark: #c94a4a;
   --color-success: #10b981;
+  --color-warning: #d97706;
+
+  /* 第二主色 — 青色 Teal（用於盲抽標籤等） */
+  --color-secondary: #739578;
+  --color-secondary-dark: #406346;
+  --color-secondary-light: #a9c7ae;
+  --color-secondary-muted: #bac6bd;
 
   /* 圓角 */
   --radius-sm: 4px;
@@ -61,19 +68,8 @@
   --shadow-lg: 0 8px 24px rgba(124, 111, 224, 0.18), 0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: var(--vt-c-black);
-    --color-background-soft: var(--vt-c-black-soft);
-    --color-background-mute: var(--vt-c-black-mute);
-
-    --color-border: var(--vt-c-divider-dark-2);
-    --color-border-hover: var(--vt-c-divider-dark-1);
-
-    --color-heading: var(--vt-c-text-dark-1);
-    --color-text: var(--vt-c-text-dark-2);
-  }
-}
+/* ⚠️ 不啟用系統深色模式偵測，避免手機系統設定影響配色 */
+/* @media (prefers-color-scheme: dark) { ... } */
 
 *,
 *::before,

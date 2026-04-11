@@ -114,7 +114,7 @@ function cancel() {
     gap: 0.75rem;
     border-top: 1px solid var(--color-border);
     flex-shrink: 0;
-    background: #faf9ff;
+    background: var(--color-background-soft);
   }
 }
 </style>

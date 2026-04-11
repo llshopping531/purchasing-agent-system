@@ -365,13 +365,13 @@ async function purchaseCheck() {
   border-radius: 4px;
 
   &.blind {
-    background-color: var(--color-primary, #6366f1);
+    background-color: var(--color-secondary);
     color: #fff;
   }
 
   &.normal {
-    background-color: var(--color-border, #d1d5db);
-    color: #333;
+    background-color: var(--color-secondary-light);
+    color: var(--color-text);
   }
 }
 

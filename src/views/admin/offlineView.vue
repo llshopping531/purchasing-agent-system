@@ -227,15 +227,15 @@ router.afterEach(() => {
   overflow: hidden;
 
   &:hover {
-    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
-    color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-secondary) 12%, transparent);
+    color: var(--color-secondary-dark);
   }
 
   &.router-link-active {
-    background: color-mix(in srgb, var(--color-primary) 12%, transparent);
-    color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-secondary) 18%, transparent);
+    color: var(--color-secondary-dark);
     font-weight: 600;
-    border-right: 2.5px solid var(--color-primary);
+    border-right: 2.5px solid var(--color-secondary);
   }
 }
 
