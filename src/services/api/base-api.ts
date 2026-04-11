@@ -1,8 +1,24 @@
 import { useErrorStore } from '@/stores/error'
 import { useLoadingStore } from '@/stores/loading'
 import { useUserStore } from '@/stores/user'
-import type { AxiosInstance, AxiosResponse } from 'axios'
+import { useWarnStore } from '@/stores/warn'
+import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
 import axios from 'axios'
+
+// 重複請求偵測：記錄上一次的請求 key 與時間
+let lastRequestKey: string | null = null
+let lastRequestTime: number = 0
+/** 同一 key 在此毫秒內再次送出即視為重複（預設 2 秒） */
+const DUPLICATE_THRESHOLD_MS = 2000
+
+function getRequestKey(config: InternalAxiosRequestConfig): string {
+  return JSON.stringify({
+    method: config.method,
+    url: config.url,
+    params: config.params,
+    data: config.data,
+  })
+}
 
 /**
  * 後端統一回應格式
@@ -81,7 +97,7 @@ export const deleteApi = async <resT, paramsT>(url: string, params?: paramsT): P
   return res.data.data
 }
 
-// 請求攔截器：開啟 loading、自動附加 Authorization Token
+// 請求攔截器：開啟 loading、自動附加 Authorization Token、偵測重複請求
 api.interceptors.request.use(
   (config) => {
     useLoadingStore().open()
@@ -89,6 +105,16 @@ api.interceptors.request.use(
     if (userStore.isLogin) {
       config.headers.Authorization = `Bearer ${localStorage.getItem('token')}`
     }
+
+    // 偵測連續相同請求
+    const key = getRequestKey(config)
+    const now = Date.now()
+    if (key === lastRequestKey && now - lastRequestTime < DUPLICATE_THRESHOLD_MS) {
+      useWarnStore().show('偵測到連續送出相同的請求，請確認是否需要再次提交。')
+    }
+    lastRequestKey = key
+    lastRequestTime = now
+
     return config
   },
   (error) => Promise.reject(error),
