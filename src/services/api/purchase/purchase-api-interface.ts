@@ -20,6 +20,12 @@ export interface PurchaseListData {
   purchased: number
   /** 尚未購買數量（shouldBuy - purchased） */
   remaining: number
+  /** 是否為盲抽 */
+  isBlindBox: true
+  /** 盲抽已拆數量 */
+  blindBoxDrawn: number
+  /** 盲抽未拆數量 */
+  blindBoxNotDrawn: number
 }
 
 /**

@@ -11,7 +11,7 @@ import type {
   PurchaseListData,
   QueryPurchaseDetailReq,
 } from '@/services/api/purchase/purchase-api-interface'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { purchaseListApi } from '@/services/api/purchase/purchase-api'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
@@ -29,13 +29,54 @@ const pops = defineProps<{
   data: PurchaseListData[]
 }>()
 
-/** 主表格欄位定義 */
+/** 非盲抽表格欄位定義 */
 const headerRow = ref<HeaderRow[]>([
   { name: '商品名稱', value: 'productName', sort: 0, width: '200px', mobileSpan: 2 },
   { name: '應買數量', value: 'shouldBuy', sort: 0, width: '100px' },
   { name: '已買數量', value: 'purchased', sort: 0, width: '100px' },
   { name: '未買數量', value: 'remaining', sort: 0, width: '100px' },
 ])
+
+/** 盲抽表格欄位定義（含已拆／未拆欄位） */
+const blindHeaderRow = ref<HeaderRow[]>([
+  { name: '商品名稱', value: 'productName', sort: 0, width: '200px', mobileSpan: 2 },
+  { name: '應買數量', value: 'shouldBuy', sort: 0, width: '100px' },
+  { name: '已買數量', value: 'purchased', sort: 0, width: '100px' },
+  { name: '未買數量', value: 'remaining', sort: 0, width: '100px' },
+  { name: '盲抽已拆', value: 'blindBoxDrawn', sort: 0, width: '100px' },
+  { name: '盲抽未拆', value: 'blindBoxNotDrawn', sort: 0, width: '100px' },
+])
+
+/** 非盲抽商品 */
+const normalData = computed(() => pops.data.filter((item) => !item.isBlindBox))
+/** 盲抽商品 */
+const blindData = computed(() => pops.data.filter((item) => item.isBlindBox))
+
+/** 非盲抽各欄總計 */
+const normalTotal = computed(() =>
+  normalData.value.reduce(
+    (acc, item) => ({
+      shouldBuy: acc.shouldBuy + item.shouldBuy,
+      purchased: acc.purchased + item.purchased,
+      remaining: acc.remaining + item.remaining,
+    }),
+    { shouldBuy: 0, purchased: 0, remaining: 0 },
+  ),
+)
+
+/** 盲抽各欄總計 */
+const blindTotal = computed(() =>
+  blindData.value.reduce(
+    (acc, item) => ({
+      shouldBuy: acc.shouldBuy + item.shouldBuy,
+      purchased: acc.purchased + item.purchased,
+      remaining: acc.remaining + item.remaining,
+      blindBoxDrawn: acc.blindBoxDrawn + item.blindBoxDrawn,
+      blindBoxNotDrawn: acc.blindBoxNotDrawn + item.blindBoxNotDrawn,
+    }),
+    { shouldBuy: 0, purchased: 0, remaining: 0, blindBoxDrawn: 0, blindBoxNotDrawn: 0 },
+  ),
+)
 
 /** 明細彈窗表格欄位定義 */
 const detailHeaderRow = ref<HeaderRow[]>([
@@ -137,20 +178,75 @@ async function purchaseCheck() {
 
     <!-- 採購明細表格 -->
     <div v-if="isOpen">
-      <table-component
-        :headerRow="headerRow"
-        :tableData="data"
-        :is-edit="isOperate"
-        :is-delete="false"
-        @edit="openPurchaseCheck"
-      >
-        <!-- 商品名稱欄：可點擊開啟詳細彈窗 -->
-        <template #col-productName="{ row }">
-          <div class="product-name-cell" @click="oponDetail(row)">
-            {{ row.productName }}
+      <!-- 盲抽表格 -->
+      <template v-if="blindData.length > 0">
+        <div class="sub-title">
+          <div class="sub-label blind">盲　抽</div>
+          <div class="total-row">
+            <span class="total-label">總計</span>
+            <span
+              >應買 <b>{{ blindTotal.shouldBuy }}</b></span
+            >
+            <span
+              >已買 <b>{{ blindTotal.purchased }}</b></span
+            >
+            <span
+              >未買 <b>{{ blindTotal.remaining }}</b></span
+            >
+            <span
+              >已拆 <b>{{ blindTotal.blindBoxDrawn }}</b></span
+            >
+            <span
+              >未拆 <b>{{ blindTotal.blindBoxNotDrawn }}</b></span
+            >
           </div>
-        </template>
-      </table-component>
+        </div>
+        <table-component
+          :headerRow="blindHeaderRow"
+          :tableData="blindData"
+          :is-edit="isOperate"
+          :is-delete="false"
+          @edit="openPurchaseCheck"
+        >
+          <template #col-productName="{ row }">
+            <div class="product-name-cell" @click="oponDetail(row)">
+              {{ row.productName }}
+            </div>
+          </template>
+        </table-component>
+      </template>
+
+      <!-- 非盲抽表格 -->
+      <template v-if="normalData.length > 0">
+        <div class="sub-title">
+          <div class="sub-label normal">非盲抽</div>
+          <div class="total-row">
+            <span class="total-label">總計</span>
+            <span
+              >應買 <b>{{ normalTotal.shouldBuy }}</b></span
+            >
+            <span
+              >已買 <b>{{ normalTotal.purchased }}</b></span
+            >
+            <span
+              >未買 <b>{{ normalTotal.remaining }}</b></span
+            >
+          </div>
+        </div>
+        <table-component
+          :headerRow="headerRow"
+          :tableData="normalData"
+          :is-edit="isOperate"
+          :is-delete="false"
+          @edit="openPurchaseCheck"
+        >
+          <template #col-productName="{ row }">
+            <div class="product-name-cell" @click="oponDetail(row)">
+              {{ row.productName }}
+            </div>
+          </template>
+        </table-component>
+      </template>
     </div>
   </div>
 
@@ -251,6 +347,55 @@ async function purchaseCheck() {
       transform: translate(-50%, -65%) rotate(315deg);
     }
   }
+}
+
+.sub-title{
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+/* 盲抽／非盲抽 子標題 */
+.sub-label {
+  display: inline-block;
+  font-weight: bold;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.75rem;
+  border-radius: 4px;
+
+  &.blind {
+    background-color: var(--color-primary, #6366f1);
+    color: #fff;
+  }
+
+  &.normal {
+    background-color: var(--color-border, #d1d5db);
+    color: #333;
+  }
+}
+
+/* 數量總計列 */
+.total-row {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.5rem;
+  color: var(--color-text-secondary, #555);
+
+  .total-label {
+    font-weight: bold;
+    color: var(--color-text, #111);
+    margin-right: 0.25rem;
+  }
+
+  b {
+    color: var(--color-text, #111);
+  }
+}
+.table-box{
+  margin-bottom: 1rem;
 }
 
 /* 商品名稱欄：可點擊樣式 */
