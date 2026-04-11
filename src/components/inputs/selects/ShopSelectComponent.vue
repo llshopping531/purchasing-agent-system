@@ -6,7 +6,7 @@
 import { ref, watch } from 'vue'
 import type { Option } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
-import { channelApi } from '@/services/api/channels/channels-api'
+import { useMenuStore } from '@/stores/menu'
 import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
 
 export interface ShopOption {
@@ -30,6 +30,7 @@ const emit = defineEmits<{
   (e: 'selectOption', data: ShopOption): void
 }>()
 
+const menuStore = useMenuStore()
 /** 原始通路清單（保留完整資料以供 emit 使用） */
 const channelAllRes = ref<QueryChannelsAllRes[]>([])
 /** 轉換為 Option 格式的通路清單 */
@@ -59,7 +60,7 @@ watch(
  * @param eventId - 活動 ID 字串
  */
 async function getChannelList(eventId: string) {
-  channelAllRes.value = await channelApi.getChannelsAll({ eventId: Number(eventId) })
+  channelAllRes.value = await menuStore.fetchChannelsAll(Number(eventId))
   if (channelAllRes.value.length !== 0) {
     shopList.value = channelAllRes.value.map((res) => ({
       name: res.name,

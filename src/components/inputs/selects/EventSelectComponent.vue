@@ -3,7 +3,7 @@
  * 活動下拉選取元件
  * 掛載時自動從 API 載入所有活動，選取後 emit selectOption 事件
  */
-import { eventApi } from '@/services/api/events/events-api'
+import { useMenuStore } from '@/stores/menu'
 import { onMounted, ref } from 'vue'
 import type { Option } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
@@ -21,6 +21,7 @@ const emit = defineEmits<{
   /** 使用者選取活動時觸發，帶出活動對應的 Option */
   (e: 'selectOption', data: EventOption): void
 }>()
+const menuStore = useMenuStore()
 const eventsAllRes = ref<EventsResBase[]>([])
 const defaultValue = ref<Option>({ name: '請選擇場次', value: '請選擇場次' })
 
@@ -42,10 +43,10 @@ function selectEvent(data: Option) {
 }
 
 /**
- * 從 API 取得所有活動並轉換為 Option 清單
+ * 從 store 取得所有活動（第一次會呼叫 API，後續讀快取）
  */
 async function getEventList() {
-  eventsAllRes.value = await eventApi.getEventsAll()
+  eventsAllRes.value = await menuStore.fetchEventsAll()
   if (eventsAllRes.value.length !== 0) {
     eventList.value = [...eventsAllRes.value].map((res) => ({
       name: res.name,
