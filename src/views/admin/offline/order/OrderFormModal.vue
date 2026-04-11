@@ -6,8 +6,12 @@
  */
 import { ref, reactive, watch } from 'vue'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
+import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
+import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
+import type { Option } from '@/interfaces/common'
+import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 import { orderApi } from '@/services/api/order/order-api'
 import type { OrderQueryContent } from '@/services/api/order/order-api-interfaces'
 
@@ -29,14 +33,13 @@ const isVisible = ref(false)
 const modalMode = ref<2 | 3>(2)
 /** 目標訂單 ID */
 const currentOrderId = ref(0)
-/** 目標顧客 ID */
-const currentCustomerId = ref(0)
-/** 目標商品 ID */
-const currentProductId = ref(0)
 
-/** 編輯時顯示的顧客名稱 */
-const editCustomerName = ref('')
-/** 編輯時顯示的商品基本資訊 */
+// ── 顧客 / 商品選取 ────────────────────────────────────────────
+/** 選取的顧客 Option */
+const formCustomerOption = ref<Option | undefined>(undefined)
+/** 選取的商品 Option */
+const formProductOption = ref<Option | undefined>(undefined)
+/** 商品定價資訊（供顯示用） */
 const editProductInfo = ref<
   { name: string; priceJpy: number; priceTwd: number; exchangeRate: number } | undefined
 >(undefined)
@@ -63,10 +66,22 @@ const formNonCutTarget = ref(false)
 /** 是否已採購確認 */
 const formPurchaseConfirm = ref(false)
 
-const formErrors = reactive({ quantity: '' })
-watch(formQuantity, () => {
-  formErrors.quantity = ''
-})
+const formErrors = reactive({ customer: '', product: '', quantity: '' })
+watch(formCustomerOption, () => { formErrors.customer = '' })
+watch(formProductOption, () => { formErrors.product = '' })
+watch(formQuantity, () => { formErrors.quantity = '' })
+
+/**
+ * 選取商品後更新顯示資訊
+ */
+function onSelectProduct(product: ProductsResBase) {
+  editProductInfo.value = {
+    name: product.name,
+    priceJpy: product.priceJpy ?? 0,
+    priceTwd: product.priceTwd ?? 0,
+    exchangeRate: product.exchangeRate ?? 0,
+  }
+}
 
 /**
  * 開啟編輯訂單彈窗，並將現有資料填入表單
@@ -75,9 +90,8 @@ watch(formQuantity, () => {
 function editOrder(currentData: OrderQueryContent) {
   modalMode.value = 2
   currentOrderId.value = currentData.id
-  currentCustomerId.value = currentData.customerId
-  currentProductId.value = currentData.productId
-  editCustomerName.value = currentData.customerName
+  formCustomerOption.value = { value: currentData.customerId.toString(), name: currentData.customerName }
+  formProductOption.value = { value: currentData.productId.toString(), name: currentData.productName }
   editProductInfo.value = {
     name: currentData.productName,
     priceJpy: currentData.quantity > 0 ? currentData.subtotalJpy / currentData.quantity : 0,
@@ -112,16 +126,26 @@ function deleteOrder(currentData: OrderQueryContent) {
  */
 async function beforeConfirm(): Promise<boolean> {
   if (modalMode.value === 3) return true
+  formErrors.customer = ''
+  formErrors.product = ''
   formErrors.quantity = ''
+  let valid = true
+  if (!formCustomerOption.value) {
+    formErrors.customer = '請選擇顧客'
+    valid = false
+  }
+  if (!formProductOption.value) {
+    formErrors.product = '請選擇商品'
+    valid = false
+  }
   if (formQuantity.value === null || formQuantity.value === undefined) {
     formErrors.quantity = '數量為必填'
-    return false
-  }
-  if (formQuantity.value <= 0) {
+    valid = false
+  } else if (formQuantity.value <= 0) {
     formErrors.quantity = '數量不得為 0'
-    return false
+    valid = false
   }
-  return true
+  return valid
 }
 
 /**
@@ -132,8 +156,8 @@ async function confirm() {
     await orderApi.patchOrders(currentOrderId.value, {
       eventId: Number(props.eventId),
       channelId: Number(props.shopId),
-      customerId: currentCustomerId.value,
-      productId: currentProductId.value,
+      customerId: Number(formCustomerOption.value?.value ?? 0),
+      productId: Number(formProductOption.value?.value ?? 0),
       quantity: formQuantity.value ?? 0,
       exchangeRate: formExchangeRate.value ?? undefined,
       subtotalJpy: formSubtotalJpy.value ?? undefined,
@@ -158,9 +182,8 @@ async function confirm() {
  */
 function closeModal() {
   currentOrderId.value = 0
-  currentCustomerId.value = 0
-  currentProductId.value = 0
-  editCustomerName.value = ''
+  formCustomerOption.value = undefined
+  formProductOption.value = undefined
   editProductInfo.value = undefined
   formQuantity.value = null
   formExchangeRate.value = null
@@ -172,6 +195,8 @@ function closeModal() {
   formIsFixedRate.value = false
   formNonCutTarget.value = false
   formPurchaseConfirm.value = false
+  formErrors.customer = ''
+  formErrors.product = ''
   formErrors.quantity = ''
   isVisible.value = false
 }
@@ -191,15 +216,33 @@ defineExpose({ editOrder, deleteOrder })
     @confirm="confirm"
   >
     <template #content>
-      <div v-if="modalMode === 2 && editCustomerName && editProductInfo">
-        {{ editCustomerName }} - {{ editProductInfo.name }}
-        <span class="productInfo">
+      <div v-if="modalMode === 2" class="form">
+        <div class="row">
+          <div class="field">
+            <customer-select-component
+              required
+              :defaultValue="formCustomerOption"
+              @selectOption="formCustomerOption = $event"
+            />
+            <span v-if="formErrors.customer" class="field-error">{{ formErrors.customer }}</span>
+          </div>
+          <div class="field">
+            <product-select-component
+              required
+              :eventId="props.eventId"
+              :channelId="props.shopId"
+              :defaultValue="formProductOption"
+              @selectOption="formProductOption = $event"
+              @selectProduct="onSelectProduct"
+            />
+            <span v-if="formErrors.product" class="field-error">{{ formErrors.product }}</span>
+          </div>
+        </div>
+        <div v-if="editProductInfo" class="productInfo">
           <span>日幣定價：¥{{ editProductInfo.priceJpy }}</span>
           <span>台幣單價：NT${{ editProductInfo.priceTwd }}</span>
           <span>匯率：{{ editProductInfo.exchangeRate }}</span>
-        </span>
-      </div>
-      <div class="form">
+        </div>
         <div class="row">
           <div class="text-input">
             <text-input
@@ -228,7 +271,7 @@ defineExpose({ editOrder, deleteOrder })
   gap: 1.5rem;
   font-size: 0.8rem;
   color: #888;
-  margin-top: 0.25rem;
+  margin-bottom: 1rem;
 }
 .form {
   margin-top: 1rem;
@@ -246,6 +289,17 @@ defineExpose({ editOrder, deleteOrder })
     .text-input {
       width: calc(50% - 0.5rem);
     }
+    .field {
+      flex: 1;
+      min-width: 180px;
+    }
   }
+}
+.field-error {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-danger, #e53e3e);
+  margin-top: 0.25rem;
+  font-weight: 500;
 }
 </style>
