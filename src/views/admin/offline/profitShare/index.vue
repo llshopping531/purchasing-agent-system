@@ -23,7 +23,7 @@ const isShowChannelSelect = ref(false)
 
 const summary = ref<QueryStatsProfitShareSummaryRes | null>(null)
 const tableData = ref<ProfitShareItem[]>([])
-const currentPage = ref(1)
+const currentPage = ref(0)
 const pageSize = ref(20)
 const totalPages = ref(0)
 const totalElements = ref(0)
@@ -48,14 +48,14 @@ function selectEvent(data: EventOption) {
   isShowChannelSelect.value = true
   summary.value = null
   tableData.value = []
-  currentPage.value = 1
+  currentPage.value = 0
   fetchAll()
 }
 
 function selectShop(data: ShopOption) {
   currentChannelId.value = data.selectedData.value
   summary.value = null
-  currentPage.value = 1
+  currentPage.value = 0
   fetchAll()
 }
 
@@ -75,7 +75,7 @@ async function fetchDetail() {
   const res = await statsApi.getStatsProfitShare({
     eventId: Number(currentEventId.value),
     channelId: currentChannelId.value ? Number(currentChannelId.value) : undefined,
-    page: currentPage.value - 1,
+    page: currentPage.value,
     size: pageSize.value,
     sort: sortField.value,
     direction: sortDirection.value,
@@ -92,7 +92,7 @@ function onChangePage(page: number) {
 
 function onChangeSize(size: number) {
   pageSize.value = size
-  currentPage.value = 1
+  currentPage.value = 0
   fetchDetail()
 }
 
@@ -103,7 +103,7 @@ function onSort(field: string) {
     sortField.value = field
     sortDirection.value = 'ASC'
   }
-  currentPage.value = 1
+  currentPage.value = 0
   fetchDetail()
 }
 

@@ -28,7 +28,7 @@ const channelTotals = ref<{ totalJpy: number; totalTwd: number } | null>(null)
 
 /** 總覽表格資料 */
 const tableData = ref<StatsOverviewItem[]>([])
-const currentPage = ref(1)
+const currentPage = ref(0)
 const pageSize = ref(20)
 const totalPages = ref(0)
 const totalElements = ref(0)
@@ -53,14 +53,14 @@ function selectEvent(data: EventOption) {
   eventTotals.value = null
   channelTotals.value = null
   tableData.value = []
-  currentPage.value = 1
+  currentPage.value = 0
   fetchAll()
 }
 
 function selectShop(data: ShopOption) {
   currentChannelId.value = data.selectedData.value
   channelTotals.value = null
-  currentPage.value = 1
+  currentPage.value = 0
   fetchAll()
 }
 
@@ -88,7 +88,7 @@ async function fetchOverview() {
   const res = await statsApi.getStatsOverview({
     eventId: Number(currentEventId.value),
     channelId: currentChannelId.value ? Number(currentChannelId.value) : undefined,
-    page: currentPage.value - 1,
+    page: currentPage.value,
     size: pageSize.value,
     sort: sortField.value,
     direction: sortDirection.value,
@@ -106,7 +106,7 @@ function onChangePage(page: number) {
 
 function onChangeSize(size: number) {
   pageSize.value = size
-  currentPage.value = 1
+  currentPage.value = 0
   fetchOverview()
 }
 
@@ -117,7 +117,7 @@ function onSort(field: string) {
     sortField.value = field
     sortDirection.value = 'ASC'
   }
-  currentPage.value = 1
+  currentPage.value = 0
   fetchOverview()
 }
 
