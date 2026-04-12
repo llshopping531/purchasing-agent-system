@@ -91,6 +91,11 @@ const router = createRouter({
               name: 'StatsView',
               component: () => import('../views/admin/offline/stats/index.vue'),
             },
+            {
+              path: 'profitShare',
+              name: 'ProfitShareView',
+              component: () => import('../views/admin/offline/profitShare/index.vue'),
+            },
           ],
         },
         {

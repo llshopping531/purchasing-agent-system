@@ -90,3 +90,82 @@ export interface QueryStatsChannelTotalsRes {
   /** 台幣總計 */
   totalTwd: number
 }
+
+/**
+ * 查詢分潤總計 request
+ */
+export interface QueryStatsProfitShareSummaryReq {
+  /** 活動 ID */
+  eventId: number
+  /** 通路 ID（可選） */
+  channelId?: number
+}
+
+/**
+ * 查詢分潤總計 response
+ */
+export interface QueryStatsProfitShareSummaryRes {
+  /** 台幣總額 */
+  totalTwd: number
+  /** 獲利金額 */
+  totalProfit: number
+  /** 分潤金額 */
+  totalProfitShare: number
+  /** 分潤比例 */
+  ratio: number
+  /** 成本匯率 */
+  costRate: number
+}
+
+/**
+ * 查詢分潤明細 request
+ */
+export interface QueryStatsProfitShareReq {
+  /** 活動 ID */
+  eventId: number
+  /** 通路 ID（可選） */
+  channelId?: number
+  /** 第幾頁 */
+  page?: number
+  /** 一頁有幾筆資料 */
+  size?: number
+  /** 排序欄位 */
+  sort?: string
+  /** 排序方向 */
+  direction?: 'ASC' | 'DESC'
+}
+
+/**
+ * 查詢分潤明細 response
+ */
+export interface QueryStatsProfitShareRes {
+  content: ProfitShareItem[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
+/** 分潤明細單筆資料 */
+export interface ProfitShareItem {
+  /** 訂單 ID */
+  id: number
+  /** 顧客名稱 */
+  customerName: string
+  /** 採購者名稱 */
+  purchaserName: string
+  /** 通路名稱 */
+  channelName: string
+  /** 商品名稱 */
+  productName: string
+  /** 數量 */
+  quantity: number
+  /** 台幣小計 */
+  subtotalTwd: number
+  /** 獲利金額 */
+  profit: number
+  /** 分潤金額 */
+  profitShare: number
+  /** 訂單狀態名稱 */
+  orderStatusName: string
+}

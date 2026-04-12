@@ -13,6 +13,7 @@ import IconCartShopping from '@/components/icons/IconCartShopping.vue'
 import IconFlag from '@/components/icons/IconFlag.vue'
 import IconHouse from '@/components/icons/IconHouse.vue'
 import IconChartSimple from '@/components/icons/IconChartSimple.vue'
+import IconMoneyBill from '@/components/icons/IconMoneyBill.vue'
 
 const isCollapsed = ref(false)
 const uiStore = useUiStore()
@@ -26,6 +27,7 @@ const purchaseListItem = { name: '採購清單', path: PATH.offlinePurchaseList 
 const customerOrdersItem = { name: '個人購物清單', path: PATH.offlineCustomerOrders }
 const channelItem = { name: '通路管理', path: PATH.offlineChannel }
 const statsItem = { name: '訂單總覽', path: PATH.offlineStats }
+const profitShareItem = { name: '分潤查詢', path: PATH.offlineProfitShare }
 
 router.afterEach(() => {
   uiStore.closeSidebar()
@@ -104,6 +106,12 @@ router.afterEach(() => {
           <router-link :to="statsItem.path" class="nav-item" :title="isCollapsed ? statsItem.name : ''">
             <icon-chart-simple class="nav-icon" />
             <span class="nav-item-name">{{ statsItem.name }}</span>
+          </router-link>
+
+          <!-- 分潤查詢 (FA6 money-bill) -->
+          <router-link :to="profitShareItem.path" class="nav-item" :title="isCollapsed ? profitShareItem.name : ''">
+            <icon-money-bill class="nav-icon" />
+            <span class="nav-item-name">{{ profitShareItem.name }}</span>
           </router-link>
         </div>
 

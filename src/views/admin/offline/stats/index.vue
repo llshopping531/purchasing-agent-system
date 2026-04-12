@@ -146,6 +146,7 @@ function formatTwd(val: number | null) {
           v-if="isShowChannelSelect"
           :key="currentEventId"
           :eventId="currentEventId"
+          :isShowAll="true"
           @selectOption="selectShop"
         />
       </div>

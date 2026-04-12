@@ -6,6 +6,10 @@ import type {
   QueryStatsOverviewRes,
   QueryStatsTotalsReq,
   QueryStatsTotalsRes,
+  QueryStatsProfitShareSummaryReq,
+  QueryStatsProfitShareSummaryRes,
+  QueryStatsProfitShareReq,
+  QueryStatsProfitShareRes,
 } from './stats-api-interfaces'
 
 /** 統計相關 API 集合 */
@@ -29,5 +33,19 @@ export const statsApi = {
    */
   getStatsChannelTotals: async (req: QueryStatsChannelTotalsReq): Promise<QueryStatsChannelTotalsRes> => {
     return await getApi('/stats/channel-totals', req)
+  },
+
+  /**
+   * 查詢分潤總計（台幣總額、獲利、分潤金額、比率）
+   */
+  getStatsProfitShareSummary: async (req: QueryStatsProfitShareSummaryReq): Promise<QueryStatsProfitShareSummaryRes> => {
+    return await getApi('/stats/profit-share/summary', req)
+  },
+
+  /**
+   * 查詢分潤明細（已購買且計入分潤的訂單），可選 channelId 篩選
+   */
+  getStatsProfitShare: async (req: QueryStatsProfitShareReq): Promise<QueryStatsProfitShareRes> => {
+    return await getApi('/stats/profit-share', req)
   },
 }

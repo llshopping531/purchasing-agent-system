@@ -25,6 +25,8 @@ export const PATH = {
   offlineChannel: '/admin/offline/channel',
   /** 場販－訂單總覽 */
   offlineStats: '/admin/offline/stats',
+  /** 場販－分潤查詢 */
+  offlineProfitShare: '/admin/offline/profitShare',
 
   /** 通販專區入口 */
   online: '/admin/online',
