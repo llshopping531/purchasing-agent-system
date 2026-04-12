@@ -125,7 +125,6 @@ function onChangeSize(size: number) {
 <template>
   <div class="product">
     <h3>商品管理</h3>
-    <p>請選擇場販場次、通路</p>
     <div class="productHeader">
       <div class="selectBox">
         <event-select-component @selectOption="selectEvent" />

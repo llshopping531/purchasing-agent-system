@@ -27,7 +27,6 @@ const shopList: EventItem[] = [
 <template>
   <div class="offline">
     <h1>通販專區</h1>
-    <p>請選擇場販場次</p>
     <div class="shopList">
       <select name="event" id="event" class="shopSelect">
         <option :value="eventItem.id" v-for="eventItem in eventList" :key="eventItem.id">

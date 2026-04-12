@@ -2,18 +2,19 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { PATH } from '@/router/route-constant'
+import { useUiStore } from '@/stores/ui'
 import IconChevronLeft from '@/components/icons/IconChevronLeft.vue'
 import IconReceipt from '@/components/icons/IconReceipt.vue'
 import IconBox from '@/components/icons/IconBox.vue'
 import IconCalendarDays from '@/components/icons/IconCalendarDays.vue'
 import IconUsers from '@/components/icons/IconUsers.vue'
 import IconListCheck from '@/components/icons/IconListCheck.vue'
-import IconBars from '@/components/icons/IconBars.vue'
 import IconCartShopping from '@/components/icons/IconCartShopping.vue'
 import IconFlag from '@/components/icons/IconFlag.vue'
+import IconHouse from '@/components/icons/IconHouse.vue'
 
 const isCollapsed = ref(false)
-const isMobileOpen = ref(false)
+const uiStore = useUiStore()
 const router = useRouter()
 
 const orderItem = { name: '訂單管理', path: PATH.offlineOrder }
@@ -25,7 +26,7 @@ const customerOrdersItem = { name: '個人購物清單', path: PATH.offlineCusto
 const channelItem = { name: '通路管理', path: PATH.offlineChannel }
 
 router.afterEach(() => {
-  isMobileOpen.value = false
+  uiStore.closeSidebar()
 })
 </script>
 
@@ -33,11 +34,11 @@ router.afterEach(() => {
   <div class="offline-layout">
     <!-- 手機版遮罩 -->
     <transition name="fade">
-      <div v-if="isMobileOpen" class="mobile-backdrop" @click="isMobileOpen = false" />
+      <div v-if="uiStore.isSidebarOpen" class="mobile-backdrop" @click="uiStore.closeSidebar()" />
     </transition>
 
     <!-- 側選單 -->
-    <aside class="sidebar" :class="{ collapsed: isCollapsed, 'mobile-open': isMobileOpen }">
+    <aside class="sidebar" :class="{ collapsed: isCollapsed, 'mobile-open': uiStore.isSidebarOpen }">
       <!-- 桌面版收合按鈕 (FA6 chevron-left) -->
       <button
         class="toggle-btn"
@@ -46,6 +47,21 @@ router.afterEach(() => {
       >
         <icon-chevron-left class="toggle-icon" />
       </button>
+
+      <!-- 區域切換器（頂層） -->
+      <div class="zone-switcher">
+        <div class="zone-label">切換區域</div>
+        <div class="zone-tabs">
+          <router-link to="/admin/online" class="zone-tab" title="通販專區">
+            <icon-house class="zone-icon" />
+            <span class="zone-tab-name">通販專區</span>
+          </router-link>
+          <router-link to="/admin/offline" class="zone-tab" title="場販專區">
+            <icon-flag class="zone-icon" />
+            <span class="zone-tab-name">場販專區</span>
+          </router-link>
+        </div>
+      </div>
 
       <nav class="sidebar-nav">
         <!-- 後台管理 -->
@@ -104,12 +120,6 @@ router.afterEach(() => {
 
     <!-- 主內容區 -->
     <main class="main-content">
-      <!-- 手機版選單觸發按鈕 (FA6 bars) -->
-      <button class="mobile-menu-btn" @click="isMobileOpen = true" title="開啟選單">
-        <icon-bars />
-        <span>選單</span>
-      </button>
-
       <router-view></router-view>
     </main>
   </div>
@@ -175,6 +185,82 @@ router.afterEach(() => {
   transform: rotate(180deg);
 }
 
+/* ── 區域切換器 ── */
+.zone-switcher {
+  padding: 2.5rem 10px 12px;
+  border-bottom: 1.5px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.zone-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  padding: 0 4px;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar.collapsed .zone-label {
+  opacity: 0;
+}
+
+.zone-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.zone-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.4rem 8px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  border: 1.5px solid transparent;
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    color: var(--color-primary-dark);
+  }
+
+  &.router-link-active {
+    background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+    color: var(--color-primary-dark);
+    font-weight: 700;
+    border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  }
+}
+
+.zone-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.zone-tab-name {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar.collapsed .zone-tab-name {
+  opacity: 0;
+}
+
 /* ── 導覽 icon ── */
 .nav-icon {
   width: 15px;
@@ -184,7 +270,7 @@ router.afterEach(() => {
 
 /* ── 導覽選項 ── */
 .sidebar-nav {
-  padding: 2.5rem 0 1rem;
+  padding: 1rem 0;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -248,6 +334,16 @@ router.afterEach(() => {
   opacity: 0;
 }
 
+.sidebar.collapsed .zone-switcher {
+  padding: 2.5rem 6px 10px;
+}
+
+.sidebar.collapsed .zone-tab {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
 /* ── 主內容 ── */
 .main-content {
   flex: 1;
@@ -294,8 +390,20 @@ router.afterEach(() => {
     opacity: 1 !important;
   }
 
+  .sidebar .zone-label {
+    opacity: 1 !important;
+  }
+
+  .sidebar .zone-tab-name {
+    opacity: 1 !important;
+  }
+
+  .zone-switcher {
+    padding-top: 1.25rem;
+  }
+
   .sidebar-nav {
-    padding-top: 1.5rem;
+    padding-top: 0.5rem;
   }
 
   /* 手機版選單按鈕顯示 */

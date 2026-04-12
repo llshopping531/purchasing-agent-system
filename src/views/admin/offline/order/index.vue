@@ -111,7 +111,6 @@ function onConfirmed() {
 <template>
   <div class="order">
     <h3>訂單管理</h3>
-    <p>請選擇場販場次、通路</p>
     <div class="orderHeader">
       <div class="selectBox">
         <event-select-component @selectOption="selectEvent" />

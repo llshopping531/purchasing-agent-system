@@ -76,7 +76,6 @@ function selectChannel(option: ShopOption) {
 <template>
   <div class="purchase">
     <h3>採購清單</h3>
-    <p>請選擇場販場次、通路</p>
     <div class="selectBox">
       <event-select-component @select-option="selectEvent"></event-select-component>
       <shop-select-component
