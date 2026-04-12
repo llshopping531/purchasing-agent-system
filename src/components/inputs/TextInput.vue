@@ -87,6 +87,9 @@ const value = defineModel('value')
       border-color: var(--color-danger, #e53e3e);
       box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
     }
+    @media (max-width: 768px) {
+      font-size: 1rem;
+    }
   }
 }
 

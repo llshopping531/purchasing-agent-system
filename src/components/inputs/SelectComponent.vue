@@ -135,6 +135,9 @@ function filter() {
   &:focus-visible {
     outline: none;
   }
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
 }
 
 .optionList {

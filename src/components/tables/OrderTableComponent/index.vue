@@ -265,7 +265,7 @@ async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
           </div>
           <div
             class="draws-btn more-btn"
-            v-if="row.isBlindBox"
+            v-if="row.isBlindBox && row.orderStatus !== '1'"
             @click="openDraws(row)"
             title="查看盲抽結果"
           >
