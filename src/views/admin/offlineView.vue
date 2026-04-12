@@ -12,6 +12,7 @@ import IconListCheck from '@/components/icons/IconListCheck.vue'
 import IconCartShopping from '@/components/icons/IconCartShopping.vue'
 import IconFlag from '@/components/icons/IconFlag.vue'
 import IconHouse from '@/components/icons/IconHouse.vue'
+import IconChartSimple from '@/components/icons/IconChartSimple.vue'
 
 const isCollapsed = ref(false)
 const uiStore = useUiStore()
@@ -24,6 +25,7 @@ const customerItem = { name: '顧客管理', path: PATH.offlineCustomer }
 const purchaseListItem = { name: '採購清單', path: PATH.offlinePurchaseList }
 const customerOrdersItem = { name: '個人購物清單', path: PATH.offlineCustomerOrders }
 const channelItem = { name: '通路管理', path: PATH.offlineChannel }
+const statsItem = { name: '訂單總覽', path: PATH.offlineStats }
 
 router.afterEach(() => {
   uiStore.closeSidebar()
@@ -96,6 +98,12 @@ router.afterEach(() => {
           <router-link :to="customerItem.path" class="nav-item" :title="isCollapsed ? customerItem.name : ''">
             <icon-users class="nav-icon" />
             <span class="nav-item-name">{{ customerItem.name }}</span>
+          </router-link>
+
+          <!-- 訂單總覽 (FA6 chart-simple) -->
+          <router-link :to="statsItem.path" class="nav-item" :title="isCollapsed ? statsItem.name : ''">
+            <icon-chart-simple class="nav-icon" />
+            <span class="nav-item-name">{{ statsItem.name }}</span>
           </router-link>
         </div>
 

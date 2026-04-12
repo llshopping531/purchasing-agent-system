@@ -86,6 +86,11 @@ const router = createRouter({
               name: 'ChannelView',
               component: () => import('../views/admin/offline/channel/index.vue'),
             },
+            {
+              path: 'stats',
+              name: 'StatsView',
+              component: () => import('../views/admin/offline/stats/index.vue'),
+            },
           ],
         },
         {
