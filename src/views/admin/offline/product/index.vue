@@ -10,6 +10,7 @@ import TableComponent, { type HeaderRow } from '@/components/tables/TableCompone
 import PaginationComponent from '@/components/PaginationComponent.vue'
 import ProductFormModal from './ProductFormModal.vue'
 import BatchProductFormModal from './BatchProductFormModal.vue'
+import SocialPostModal from './SocialPostModal.vue'
 import { productsApi } from '@/services/api/products/products-api'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 
@@ -17,13 +18,21 @@ import type { ProductsResBase } from '@/services/api/products/products-api-inter
 const productFormModalRef = ref<InstanceType<typeof ProductFormModal>>()
 /** 是否顯示批次新增彈窗 */
 const isShowBatchModal = ref(false)
+/** 是否顯示社群貼文彈窗 */
+const isShowSocialModal = ref(false)
 
 /** 目前選取的活動 ID */
 const currentEventId = ref('')
+/** 目前選取的活動名稱 */
+const currentEventName = ref('')
 /** 目前選取的通路 ID */
 const currentShopId = ref('')
+/** 目前選取的通路名稱 */
+const currentChannelName = ref('')
 /** 目前選取的通路預設匯率 */
 const currentShopExchangeRate = ref<number | undefined>(undefined)
+/** 目前選取的通路日幣滿額 */
+const currentMinJpy = ref('')
 /** 是否已執行過查詢（用於控制表格與新增按鈕的顯示） */
 const isTableQueried = ref(false)
 /** 是否顯示通路下拉 */
@@ -58,8 +67,10 @@ const currentEventIsLocked = ref(true)
  */
 function selectEvent(data: EventOption) {
   currentEventId.value = data.selectedData.value
+  currentEventName.value = data.selectedData.name
   currentEventIsLocked.value = data.isLocked
   currentShopId.value = ''
+  currentChannelName.value = ''
   isShowChannelSelect.value = true
   resetTable()
 }
@@ -70,7 +81,9 @@ function selectEvent(data: EventOption) {
  */
 function selectShop(data: ShopOption) {
   currentShopId.value = data.selectedData.value
+  currentChannelName.value = data.selectedData.name
   currentShopExchangeRate.value = data.exchangeRate
+  currentMinJpy.value = data.thresholdJpy ? data.thresholdJpy.toLocaleString() : ''
   resetTable()
 }
 
@@ -137,6 +150,9 @@ function onChangeSize(size: number) {
         />
       </div>
       <div class="btnBox">
+        <div class="btn btn-social" v-if="isTableQueried" @click="isShowSocialModal = true">
+          社群貼文
+        </div>
         <div class="btn" v-if="isTableQueried && !currentEventIsLocked" @click="isShowBatchModal = true">
           新增
         </div>
@@ -183,6 +199,15 @@ function onChangeSize(size: number) {
       :shopId="currentShopId"
       @confirmed="getProductList"
     />
+    <social-post-modal
+      v-if="isShowSocialModal"
+      :eventId="currentEventId"
+      :eventName="currentEventName"
+      :shopId="currentShopId"
+      :channelName="currentChannelName"
+      :minJpy="currentMinJpy"
+      @close="isShowSocialModal = false"
+    />
   </div>
 </template>
 
@@ -202,7 +227,13 @@ function onChangeSize(size: number) {
 
     .btnBox {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
+    }
+    .btn-social {
+      background: color-mix(in srgb, var(--color-secondary-dark) 90%, transparent);
+      &:hover {
+        background: var(--color-secondary-dark);
+      }
     }
   }
   .imageLink {

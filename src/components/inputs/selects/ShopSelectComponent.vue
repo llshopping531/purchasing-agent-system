@@ -12,6 +12,7 @@ import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-i
 export interface ShopOption {
   selectedData: Option
   exchangeRate: number
+  thresholdJpy: number
 }
 
 const pop = defineProps<{
@@ -42,7 +43,7 @@ const shopList = ref<Option[]>([{ name: '請選擇通路', value: '' }])
  */
 function selectShop(data: Option) {
   const channel = channelAllRes.value.find((c) => c.id === Number(data.value))
-  emit('selectOption', { selectedData: data, exchangeRate: channel?.exchangeRate ?? 0 })
+  emit('selectOption', { selectedData: data, exchangeRate: channel?.exchangeRate ?? 0, thresholdJpy: channel?.thresholdJpy ?? 0 })
 }
 
 // 當活動 ID 改變時，重新載入該活動的通路清單；immediate 確保掛載時也會執行
