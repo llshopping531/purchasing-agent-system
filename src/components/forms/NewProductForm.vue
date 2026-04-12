@@ -6,6 +6,7 @@
  */
 import TextInput from '@/components/inputs/TextInput.vue'
 import PriceRateInputComponent from '@/components/inputs/PriceRateInputComponent.vue'
+import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
 
 defineProps<{
   /** 欄位驗證錯誤訊息 */
@@ -22,6 +23,8 @@ const exchangeRate = defineModel<number | null>('exchangeRate')
 const priceTwd = defineModel<number | null>('priceTwd')
 /** 商品圖片 URL */
 const image = defineModel<string>('image', { default: '' })
+/** 是否為盲抽 */
+const isBlindBox = defineModel<boolean>('isBlindBox', { default: false })
 </script>
 
 <template>
@@ -36,6 +39,7 @@ const image = defineModel<string>('image', { default: '' })
       :priceTwdError="errors?.priceTwd"
     />
     <text-input label="商品圖片" v-model:value="image" :error-message="errors?.image" />
+    <checkbox-input label="盲抽商品" v-model="isBlindBox" />
   </div>
 </template>
 <style>

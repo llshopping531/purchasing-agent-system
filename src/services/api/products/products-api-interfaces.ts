@@ -94,6 +94,8 @@ export interface ProductsReqBase {
   priceTwd?: number
   /** 商品圖片 */
   image?: string
+  /** 是否為盲抽 */
+  isBlindBox?: boolean
   /** 自定義欄位 */
   extraData?: ExtraData
 }
@@ -118,6 +120,8 @@ export interface ProductsResBase {
   priceTwd: number
   /** 商品圖片 */
   image: string
+  /** 是否為盲抽 */
+  isBlindBox: boolean
   /** 自定義欄位 */
   extraData: ExtraData
   /** 自定義欄位 (JSON 字串) */

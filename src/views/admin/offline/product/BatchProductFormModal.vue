@@ -54,6 +54,7 @@ const form = reactive({
   exchangeRate: props.defaultExchangeRate ?? null as number | null,
   priceTwd: null as number | null,
   image: '',
+  isBlindBox: false,
 })
 
 function snapshotForm() {
@@ -89,6 +90,7 @@ async function addAndSubmit() {
       exchangeRate: snap.exchangeRate ?? undefined,
       priceTwd: snap.priceTwd ?? undefined,
       image: snap.image,
+      isBlindBox: snap.isBlindBox,
     })
   }
 
@@ -158,6 +160,7 @@ const statusLabel: Record<QueueStatus, string> = {
           v-model:exchangeRate="form.exchangeRate"
           v-model:priceTwd="form.priceTwd"
           v-model:image="form.image"
+          v-model:isBlindBox="form.isBlindBox"
           :errors="{ name: formErrors.name || undefined }"
         />
         <div class="add-btn-row">

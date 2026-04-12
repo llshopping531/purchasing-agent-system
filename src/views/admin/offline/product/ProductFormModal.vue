@@ -70,6 +70,8 @@ const [priceTwd] = defineField('priceTwd')
 
 /** 表單欄位：商品圖片 URL */
 const image = ref('')
+/** 表單欄位：是否為盲抽 */
+const isBlindBox = ref(false)
 
 /**
  * 開啟編輯商品彈窗，並將現有資料填入表單
@@ -87,6 +89,7 @@ function editProduct(data: ProductsResBase) {
     },
   })
   image.value = data.image
+  isBlindBox.value = data.isBlindBox
   isVisible.value = true
 }
 
@@ -123,6 +126,7 @@ async function confirm() {
       exchangeRate: exchangeRate.value ?? undefined,
       priceTwd: priceTwd.value ?? undefined,
       image: image.value,
+      isBlindBox: isBlindBox.value,
     })
   }
   if (modalMode.value === 3) await productsApi.deleteProducts(currentId.value)
@@ -138,6 +142,7 @@ function closeModal() {
   currentName.value = ''
   resetForm()
   image.value = ''
+  isBlindBox.value = false
   isVisible.value = false
 }
 
@@ -167,6 +172,7 @@ defineExpose({ editProduct, deleteProduct })
           v-model:exchangeRate="exchangeRate"
           v-model:priceTwd="priceTwd"
           v-model:image="image"
+          v-model:isBlindBox="isBlindBox"
           :errors="errors"
         />
       </div>

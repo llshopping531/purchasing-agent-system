@@ -32,10 +32,11 @@ const isShowChannelSelect = ref(false)
 /** 表格欄位定義 */
 const headerRow: HeaderRow[] = [
   { name: '商品名稱', value: 'name', sort: 0, width: '250px', mobileSpan: 2 },
-  { name: '日幣定價', value: 'priceJpy', sort: 0, width: '100px' },
-  { name: '台幣定價', value: 'priceTwd', sort: 0, width: '100px' },
-  { name: '匯率', value: 'exchangeRate', sort: 0, width: '80px' },
-  { name: '圖片', value: 'image', sort: 0 },
+  { name: '日幣定價', value: 'priceJpy', sort: 1, width: '100px' },
+  { name: '台幣定價', value: 'priceTwd', sort: 2, width: '100px' },
+  { name: '匯率', value: 'exchangeRate', sort: 3, width: '80px' },
+  { name: '盲抽', value: 'isBlindBox', sort: 4, width: '70px' },
+  { name: '圖片', value: 'image', sort: 5 },
 ]
 
 /** 當前頁的商品資料 */
@@ -150,6 +151,10 @@ function onChangeSize(size: number) {
       @edit="productFormModalRef?.editProduct($event)"
       @delete="productFormModalRef?.deleteProduct($event)"
     >
+      <template #col-isBlindBox="{ row }">
+        <span v-if="row.isBlindBox" class="blind-badge">盲抽</span>
+        <span v-else class="noImage">－</span>
+      </template>
       <template #col-image="{ row }">
         <a v-if="row.image" :href="row.image" target="_blank" class="imageLink">檢視圖片</a>
         <span v-else class="noImage">－</span>
@@ -210,6 +215,15 @@ function onChangeSize(size: number) {
   .noImage {
     color: #bbb;
     font-size: 0.85rem;
+  }
+  .blind-badge {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border-radius: var(--radius-xl);
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: color-mix(in srgb, var(--color-secondary) 15%, transparent);
+    color: var(--color-secondary-dark);
   }
 }
 </style>
