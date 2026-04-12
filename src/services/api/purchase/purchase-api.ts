@@ -14,7 +14,7 @@ export const purchaseListApi = {
    * @returns 以通路名稱為 key 的採購統計物件
    */
   getPurchaseListsAll: async (id: number): Promise<PurchaseListAllRes> => {
-    return await getApi('/stats/purchase-stats', { eventId: id })
+    return await getApi('/purchase/stats', { eventId: id })
   },
 
   /**
@@ -23,7 +23,7 @@ export const purchaseListApi = {
    * @returns 以通路名稱為 key 的採購統計物件
    */
   getPurchassDetail: async (req: QueryPurchaseDetailReq): Promise<QueryPurchaseDetailRes> => {
-    return await getApi('/stats/purchase-stats/detail', req)
+    return await getApi('/purchase/stats/detail', req)
   },
 
   /**
@@ -31,6 +31,6 @@ export const purchaseListApi = {
    * @param req - 包含 商品 ID、採購數量 的查詢參數
    */
   purchaseCheck: async (req: PurchaseCheckReq): Promise<void> => {
-    return await postApi(`/orders/purchase`, req)
+    return await postApi(`/purchase/process`, req)
   },
 }

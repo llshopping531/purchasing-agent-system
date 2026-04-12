@@ -351,9 +351,9 @@ async function purchaseCheck() {
 
 .sub-title{
   display: flex;
-  gap: 1rem;
   margin-bottom: 1rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 /* 盲抽／非盲抽 子標題 */
 .sub-label {
