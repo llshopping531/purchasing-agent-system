@@ -4,7 +4,7 @@
  * 提供可自訂模板語法，將活動名稱、通路名稱、商品列表自動填入，
  * 含商品行的模板列會依全部商品逐筆展開輸出，最後一鍵複製
  */
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import MaskComponent from '@/components/MaskComponent.vue'
 import { productsApi } from '@/services/api/products/products-api'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
@@ -70,8 +70,31 @@ const defaultTemplate = `#場販 #\${EventName} \${channelName}
 `
 
 
-const template = ref(defaultTemplate)
+// ── LocalStorage ────────────────────────────────────────────
+const storageKey = `social-template-channel-${props.shopId}`
+
+const hasSavedTemplate = ref(localStorage.getItem(storageKey) !== null)
+
+function loadTemplate() {
+  const saved = localStorage.getItem(storageKey)
+  return saved ?? defaultTemplate
+}
+
+function saveTemplate(val: string) {
+  localStorage.setItem(storageKey, val)
+  hasSavedTemplate.value = true
+}
+
+function resetToDefault() {
+  template.value = defaultTemplate
+  localStorage.removeItem(storageKey)
+  hasSavedTemplate.value = false
+}
+
+const template = ref(loadTemplate())
 const textareaRef = ref<HTMLTextAreaElement>()
+
+watch(template, (val) => saveTemplate(val))
 
 /** 可用參數清單 */
 const params = [
@@ -189,7 +212,11 @@ async function copyAndClose() {
       <div class="editor-preview">
         <!-- 編輯區 -->
         <div class="panel">
-          <div class="panel-label">模板編輯</div>
+          <div class="panel-label">
+            模板編輯
+            <span v-if="hasSavedTemplate" class="saved-hint">已套用上次儲存的模板</span>
+            <button class="re-render-btn" @click="resetToDefault">↩ 回到預設</button>
+          </div>
           <textarea
             ref="textareaRef"
             class="template-area"
@@ -342,6 +369,16 @@ async function copyAndClose() {
 .params-hint {
   font-size: 0.75rem;
   color: var(--color-text-muted);
+}
+
+.saved-hint {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--color-secondary-dark);
+  background: color-mix(in srgb, var(--color-secondary) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-secondary) 30%, transparent);
+  border-radius: var(--radius-xl);
+  padding: 0.1rem 0.5rem;
 }
 
 .global-inputs {
