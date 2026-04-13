@@ -69,14 +69,15 @@ onMounted(async () => {
     isShowChannelSelect.value = true
     const events = await menuStore.fetchEventsAll()
     const matched = events.find((e) => e.id.toString() === prev.eventId)
-    if (matched) currentEventIsLocked.value = matched.isLocked ?? true
+    if (matched) currentEventIsLocked.value = matched.isLocked
     await fetchPurchaseList()
   }
 })
 
 async function selectEvent(data: SelectOption<EventsResBase | null>) {
-  currentEventId.value = data.value?.id ?? 0
-  currentEventIsLocked.value = data.value?.isLocked ?? true
+  if (!data.value) return
+  currentEventId.value = data.value.id
+  currentEventIsLocked.value = data.value.isLocked
   currentChannelFilter.value = null
   searchStore.setSearchStore({ name: 'PURCHASE_LIST', condition: { eventId: currentEventId.value.toString(), channelId: null } })
   await fetchPurchaseList()

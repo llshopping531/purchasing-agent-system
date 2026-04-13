@@ -62,7 +62,7 @@ onMounted(async () => {
     isShowChannelSelect.value = true
     const events = await menuStore.fetchEventsAll()
     const matched = events.find((e) => e.id.toString() === prevSearchCondition.eventId)
-    if (matched) currentEventIsLocked.value = matched.isLocked ?? true
+    if (matched) currentEventIsLocked.value = matched.isLocked
   }
 })
 
@@ -71,8 +71,9 @@ onMounted(async () => {
  * @param data - 選取的活動 Option
  */
 function selectEvent(data: SelectOption<EventsResBase | null>) {
-  currentEventId.value = data.value?.id.toString() ?? ''
-  currentEventIsLocked.value = data.value?.isLocked ?? true
+  if(!data.value) return
+  currentEventId.value = data.value.id.toString() ?? ''
+  currentEventIsLocked.value = data.value.isLocked
   isShowChannelSelect.value = true
   currentShopId.value = ''
   isShowTotalBtn.value = false

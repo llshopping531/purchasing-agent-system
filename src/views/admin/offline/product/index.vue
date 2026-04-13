@@ -82,7 +82,7 @@ onMounted(async () => {
     const event = events.find((e) => e.id.toString() === prev.eventId)
     if (event) {
       currentEventName.value = event.name
-      currentEventIsLocked.value = event.isLocked ?? true
+      currentEventIsLocked.value = event.isLocked
     }
     if (prev.channelId) {
       const channel = channels.find((c) => c.id.toString() === prev.channelId)
@@ -101,9 +101,10 @@ onMounted(async () => {
  * @param data - 選取的活動 Option
  */
 function selectEvent(data: SelectOption<EventsResBase | null>) {
-  currentEventId.value = data.value?.id.toString() ?? ''
+  if (!data.value) return
+  currentEventId.value = data.value.id.toString()
   currentEventName.value = data.name
-  currentEventIsLocked.value = data.value?.isLocked ?? true
+  currentEventIsLocked.value = data.value.isLocked
   currentShopId.value = ''
   currentChannelName.value = ''
   isShowChannelSelect.value = true
