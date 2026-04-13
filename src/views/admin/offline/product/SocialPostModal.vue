@@ -9,6 +9,7 @@ import MaskComponent from '@/components/MaskComponent.vue'
 import { productsApi } from '@/services/api/products/products-api'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 import { useModalLayer } from '@/composables/useModalLayer'
+import { SOCIAL_DEFAULT_TEMPLATE } from '@/constants/common.constant'
 
 const props = defineProps<{
   eventId: string
@@ -49,25 +50,7 @@ async function fetchAllProducts() {
 }
 
 // ── 模板 ───────────────────────────────────────────────────
-const defaultTemplate = `#場販 #\${EventName} \${channelName}
-4/22-4/28連線
-
-(emoji)商品(emoji)
-\${productName} \${productPrice}
-
-(pizza)記事本喊單，商品若有限購按照喊單順序(pizza)
-
-單次喊單滿日幣\${minJpy}可獲得隨機特典一枚
-(emoji) 發完為止，若數量不足以消費金額較高者優先
-
-∞----------------------------𓏲𓎨ෆ -
-(emoji) 喊單前請先私訊官方帳號回報社群名稱
-✿ 依照留言順序，確認購買會按貼圖
-✿ 盲抽可代拆，留言時請備註代拆，且默認廠損
-✿ 結單後不接受取消，喊單前請慎重考慮
-✿ 依現場貨量為主，有可能缺貨，無缺A pass B
-✿ 若有任何問題歡迎私訊官方
-`
+const defaultTemplate = SOCIAL_DEFAULT_TEMPLATE
 
 
 // ── LocalStorage ────────────────────────────────────────────
@@ -136,7 +119,7 @@ function renderProduct(line: string, product: ProductsResBase): string {
     .replace(/\$\{productName\}/g, product.name)
     .replace(/\$\{productPrice\}/g, product.priceTwd ? `$${product.priceTwd.toLocaleString()}` : '—')
     .replace(/\$\{productPriceJpy\}/g, product.priceJpy ? `¥${product.priceJpy.toLocaleString()}` : '—')
-    .replace(/\$\{isBlindBox\}/g, product.isBlindBox ? '【盲抽】' : '')
+    .replace(/\$\{isBlindBox\}/g, product.isBlindBox ? '_盲抽' : '')
 }
 
 function renderGlobal(line: string): string {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { PATH } from '@/router/route-constant'
+import { PATH } from '@/constants/route.constant'
 import { useUiStore } from '@/stores/ui'
 import IconChevronLeft from '@/components/icons/IconChevronLeft.vue'
 import IconReceipt from '@/components/icons/IconReceipt.vue'

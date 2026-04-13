@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PATH } from "@/router/route-constant";
+import { PATH } from "@/constants/route.constant";
 import AppGreetings from "../components/AppGreetings.vue";
 </script>
 
