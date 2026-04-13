@@ -5,9 +5,7 @@
  */
 import { ref, computed, onMounted } from 'vue'
 import IconFlag from '@/components/icons/IconFlag.vue'
-import EventSelectComponent, {
-  type EventOption,
-} from '@/components/inputs/selects/EventSelectComponent.vue'
+import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { customerOrdersApi } from '@/services/api/customer-orders/customer-orders-api'

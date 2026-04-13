@@ -69,7 +69,7 @@ function selectOption(selectedOption: SelectOption<T>) {
 /** 依輸入框文字即時篩選選項清單 */
 function filter() {
   currentOptionList.value = pop.optionList.filter((option) =>
-    option.name.includes(inputValue.value ?? ''),
+    option.name.toUpperCase().includes((inputValue.value ?? '').toUpperCase()),
   )
 }
 </script>
