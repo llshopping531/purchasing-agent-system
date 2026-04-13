@@ -1,29 +1,29 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T">
 /**
  * 通用下拉選取元件
  * 支援輸入關鍵字即時篩選選項，選取後 emit selectOption 事件
  */
-import { ref, watch } from 'vue'
-import type { Option } from '../../interfaces/common'
+import { ref, shallowRef, watch } from 'vue'
+import type { SelectOption } from '../../interfaces/common'
 
 const pop = defineProps<{
   /** 選單標籤文字 */
   label: string
   /** 預設選取值 */
-  defaultValue: Option | undefined
+  defaultValue: SelectOption<T> | undefined
   /** 完整選項清單 */
-  optionList: Option[]
+  optionList: SelectOption<T>[]
   /** 是否為必填欄位（顯示紅色星號） */
   required?: boolean
 }>()
 
 const emit = defineEmits<{
   /** 使用者選取選項時觸發，帶出選取的 Option */
-  (e: 'selectOption', data: Option): void
+  (e: 'selectOption', data: SelectOption<T>): void
 }>()
 
 /** 目前顯示的選項清單（經篩選後的結果） */
-const currentOptionList = ref([...pop.optionList])
+const currentOptionList = shallowRef<SelectOption<T>[]>([...pop.optionList])
 /** 下拉清單是否展開 */
 const isOpenOption = ref(false)
 /** 輸入框顯示的文字（選取後更新為選項名稱） */
@@ -59,7 +59,7 @@ function closeOptionList() {
  * 選取某個選項，收起清單並 emit 事件
  * @param selectedOption - 使用者點選的選項
  */
-function selectOption(selectedOption: Option) {
+function selectOption(selectedOption: SelectOption<T>) {
   isOpenOption.value = false
   inputValue.value = selectedOption.name
   currentOptionList.value = pop.optionList
@@ -91,7 +91,7 @@ function filter() {
       <div
         class="optionItem"
         v-for="option in currentOptionList"
-        :key="option.value"
+        :key="option.name"
         @mousedown="selectOption(option)"
       >
         {{ option.name }}

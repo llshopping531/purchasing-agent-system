@@ -4,8 +4,8 @@
  * 選取活動與通路後顯示分頁商品列表，並透過 ProductFormModal ref 處理新增／編輯／刪除操作
  */
 import { ref } from 'vue'
-import EventSelectComponent, { type EventOption } from '@/components/inputs/selects/EventSelectComponent.vue'
-import ShopSelectComponent, { type ShopOption } from '@/components/inputs/selects/ShopSelectComponent.vue'
+import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
+import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import PaginationComponent from '@/components/PaginationComponent.vue'
 import ProductFormModal from './ProductFormModal.vue'
@@ -13,6 +13,9 @@ import BatchProductFormModal from './BatchProductFormModal.vue'
 import SocialPostModal from './SocialPostModal.vue'
 import { productsApi } from '@/services/api/products/products-api'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
+import type { SelectOption } from '@/interfaces/common'
+import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
+import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
 
 /** ProductFormModal 的 ref，用於呼叫 editProduct / deleteProduct */
 const productFormModalRef = ref<InstanceType<typeof ProductFormModal>>()
@@ -65,10 +68,10 @@ const currentEventIsLocked = ref(true)
  * 選取活動，重置表格並重新查詢
  * @param data - 選取的活動 Option
  */
-function selectEvent(data: EventOption) {
-  currentEventId.value = data.selectedData.value
-  currentEventName.value = data.selectedData.name
-  currentEventIsLocked.value = data.isLocked
+function selectEvent(data: SelectOption<EventsResBase | null>) {
+  currentEventId.value = data.value?.id.toString() ?? ''
+  currentEventName.value = data.name
+  currentEventIsLocked.value = data.value?.isLocked ?? true
   currentShopId.value = ''
   currentChannelName.value = ''
   isShowChannelSelect.value = true
@@ -79,11 +82,11 @@ function selectEvent(data: EventOption) {
  * 選取通路，重置表格並重新查詢
  * @param data - 選取的通路 Option
  */
-function selectShop(data: ShopOption) {
-  currentShopId.value = data.selectedData.value
-  currentChannelName.value = data.selectedData.name
-  currentShopExchangeRate.value = data.exchangeRate
-  currentMinJpy.value = data.thresholdJpy ? data.thresholdJpy.toLocaleString() : ''
+function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
+  currentShopId.value = data.value?.id.toString() ?? ''
+  currentChannelName.value = data.name
+  currentShopExchangeRate.value = data.value?.exchangeRate ?? 0
+  currentMinJpy.value = data.value?.thresholdJpy ? data.value?.thresholdJpy.toLocaleString() : ''
   resetTable()
 }
 
@@ -92,7 +95,7 @@ function selectShop(data: ShopOption) {
  */
 function resetTable() {
   currentPage.value = 0
-  tableData.value =[]
+  tableData.value = []
   if (currentEventId.value && currentShopId.value) {
     getProductList()
   }
@@ -153,7 +156,11 @@ function onChangeSize(size: number) {
         <div class="btn btn-social" v-if="isTableQueried" @click="isShowSocialModal = true">
           社群貼文
         </div>
-        <div class="btn" v-if="isTableQueried && !currentEventIsLocked" @click="isShowBatchModal = true">
+        <div
+          class="btn"
+          v-if="isTableQueried && !currentEventIsLocked"
+          @click="isShowBatchModal = true"
+        >
           新增
         </div>
       </div>

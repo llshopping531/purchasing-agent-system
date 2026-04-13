@@ -12,8 +12,9 @@ import NewCustomerForm from '@/components/forms/NewCustomerForm.vue'
 import NewProductForm from '@/components/forms/NewProductForm.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
-import type { Option } from '@/interfaces/common'
+import type { SelectOption } from '@/interfaces/common'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
+import type { CustomersResBase } from '@/services/api/customers/customers-api-interfaces'
 import { orderApi } from '@/services/api/order/order-api'
 import { customersApi } from '@/services/api/customers/customers-api'
 import { productsApi } from '@/services/api/products/products-api'
@@ -46,8 +47,8 @@ type QueueStatus = 'submitting' | 'success' | 'error'
 
 interface QueueItem {
   id: string
-  customerOption: Option
-  productOption: Option
+  customerOption: SelectOption<CustomersResBase>
+  productOption: SelectOption<ProductsResBase>
   quantity: number
   isFixedRate: boolean
   nonCutTarget: boolean
@@ -64,7 +65,7 @@ const hasSuccess = computed(() => queue.value.some((i) => i.status === 'success'
 const form = reactive({
   // 顧客
   isNewCustomer: false,
-  customerOption: undefined as Option | undefined,
+  customerOption: undefined as SelectOption<CustomersResBase> | undefined,
   newCustomerName: '',
   newCustomerSource: '',
   hasMessagedOfficial: false,
@@ -73,7 +74,7 @@ const form = reactive({
   newCustomerNote: '',
   // 商品
   isNewProduct: false,
-  productOption: undefined as Option | undefined,
+  productOption: undefined as SelectOption<ProductsResBase> | undefined,
   product: undefined as ProductsResBase | undefined,
   newProductName: '',
   newProductPriceJpy: null as number | null,
@@ -169,8 +170,8 @@ async function addAndSubmit() {
 
   const item: QueueItem = {
     id: `${Date.now()}-${Math.random()}`,
-    customerOption: { value: '', name: customerLabel },
-    productOption: { value: '', name: productLabel },
+    customerOption: { value: { id: 0, name: customerLabel } as CustomersResBase, name: customerLabel },
+    productOption: { value: { id: 0, name: productLabel } as ProductsResBase, name: productLabel },
     quantity: snap.quantity!,
     isFixedRate: snap.isFixedRate,
     nonCutTarget: snap.nonCutTarget,
@@ -180,7 +181,7 @@ async function addAndSubmit() {
 
   // 建立顧客 / 商品後送出訂單，不等待
   const submit = async () => {
-    let customerId = Number(snap.customerOption?.value ?? 0)
+    let customerId = snap.customerOption?.value.id ?? 0
     if (snap.isNewCustomer) {
       const newCustomer = await customersApi.postCustomers({
         name: snap.newCustomerName,
@@ -193,7 +194,7 @@ async function addAndSubmit() {
       customerId = newCustomer.id
     }
 
-    let productId = Number(snap.productOption?.value ?? 0)
+    let productId = snap.productOption?.value.id ?? 0
     if (snap.isNewProduct) {
       const newProduct = await productsApi.postProducts({
         eventId: Number(props.eventId),

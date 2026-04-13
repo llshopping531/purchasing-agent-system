@@ -10,8 +10,9 @@ import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectC
 import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
-import type { Option } from '@/interfaces/common'
+import type { SelectOption } from '@/interfaces/common'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
+import type { CustomersResBase } from '@/services/api/customers/customers-api-interfaces'
 import { orderApi } from '@/services/api/order/order-api'
 import type { OrderQueryContent } from '@/services/api/order/order-api-interfaces'
 
@@ -36,9 +37,9 @@ const currentOrderId = ref(0)
 
 // ── 顧客 / 商品選取 ────────────────────────────────────────────
 /** 選取的顧客 Option */
-const formCustomerOption = ref<Option | undefined>(undefined)
+const formCustomerOption = ref<SelectOption<CustomersResBase> | undefined>(undefined)
 /** 選取的商品 Option */
-const formProductOption = ref<Option | undefined>(undefined)
+const formProductOption = ref<SelectOption<ProductsResBase> | undefined>(undefined)
 /** 商品定價資訊（供顯示用） */
 const editProductInfo = ref<
   { name: string; priceJpy: number; priceTwd: number; exchangeRate: number } | undefined
@@ -90,8 +91,8 @@ function onSelectProduct(product: ProductsResBase) {
 function editOrder(currentData: OrderQueryContent) {
   modalMode.value = 2
   currentOrderId.value = currentData.id
-  formCustomerOption.value = { value: currentData.customerId.toString(), name: currentData.customerName }
-  formProductOption.value = { value: currentData.productId.toString(), name: currentData.productName }
+  formCustomerOption.value = { value: { id: currentData.customerId, name: currentData.customerName } as CustomersResBase, name: currentData.customerName }
+  formProductOption.value = { value: { id: currentData.productId, name: currentData.productName } as ProductsResBase, name: currentData.productName }
   editProductInfo.value = {
     name: currentData.productName,
     priceJpy: currentData.quantity > 0 ? currentData.subtotalJpy / currentData.quantity : 0,
@@ -156,8 +157,8 @@ async function confirm() {
     await orderApi.patchOrders(currentOrderId.value, {
       eventId: Number(props.eventId),
       channelId: Number(props.shopId),
-      customerId: Number(formCustomerOption.value?.value ?? 0),
-      productId: Number(formProductOption.value?.value ?? 0),
+      customerId: formCustomerOption.value?.value.id ?? 0,
+      productId: formProductOption.value?.value.id ?? 0,
       quantity: formQuantity.value ?? 0,
       exchangeRate: formExchangeRate.value ?? undefined,
       subtotalJpy: formSubtotalJpy.value ?? undefined,

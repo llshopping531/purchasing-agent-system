@@ -4,11 +4,13 @@
  * 選取活動後顯示分頁通路列表，並透過 ChannelFormModal ref 處理新增／編輯／刪除操作
  */
 import { ref } from 'vue'
-import EventSelectComponent, { type EventOption } from '@/components/inputs/selects/EventSelectComponent.vue'
+import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import PaginationComponent from '@/components/PaginationComponent.vue'
 import ChannelFormModal from './ChannelFormModal.vue'
 import { channelApi, type ChannelContent } from '@/services/api/channels/channels-api'
+import type { SelectOption } from '@/interfaces/common'
+import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 
 const channelFormModalRef = ref<InstanceType<typeof ChannelFormModal>>()
 
@@ -28,9 +30,9 @@ const pageSize = ref(20)
 const totalPages = ref(0)
 const totalElements = ref(0)
 
-function selectEvent(data: EventOption) {
-  currentEventId.value = data.selectedData.value
-  currentEventIsLocked.value = data.isLocked
+function selectEvent(data: SelectOption<EventsResBase | null>) {
+  currentEventId.value = data.value?.id.toString() ?? ''
+  currentEventIsLocked.value = data.value?.isLocked ?? true
   currentPage.value = 0
   getChannelList()
 }
@@ -68,7 +70,11 @@ function onChangeSize(size: number) {
         <event-select-component @selectOption="selectEvent" />
       </div>
       <div class="btnBox">
-        <div class="btn" v-if="isTableQueried && !currentEventIsLocked" @click="channelFormModalRef?.createChannel()">
+        <div
+          class="btn"
+          v-if="isTableQueried && !currentEventIsLocked"
+          @click="channelFormModalRef?.createChannel()"
+        >
           新增
         </div>
       </div>

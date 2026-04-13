@@ -10,7 +10,8 @@ import TextInput from '@/components/inputs/TextInput.vue'
 import { orderApi } from '@/services/api/order/order-api'
 import type { DrawsData, DrawsTransferReq } from '@/services/api/order/order-api-interfaces'
 import type { OrderAllContent } from '@/services/api/order/order-api'
-import type { Option } from '@/interfaces/common'
+import type { SelectOption } from '@/interfaces/common'
+import type { CustomersResBase } from '@/services/api/customers/customers-api-interfaces'
 import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
 
@@ -41,7 +42,7 @@ const transformFormNote = ref('')
 const formResultError = ref('')
 
 /** 選取的現有顧客 Option */
-const formCustomerOption = ref<Option | undefined>(undefined)
+const formCustomerOption = ref<SelectOption<CustomersResBase> | undefined>(undefined)
 /** 選取的抽取結果 id 陣列 */
 const selectedItem = ref<string[]>([])
 
@@ -136,7 +137,7 @@ async function confirmInner() {
     if(!formCustomerOption.value) return
     const drawIds = [...selectedItem.value].map(item => Number(item))
     const req: DrawsTransferReq = {
-      targetCustomerId: Number(formCustomerOption.value.value),
+      targetCustomerId: formCustomerOption.value.value.id,
       quantity: drawIds.length,
       remark: transformFormNote.value,
       drawIds: drawIds

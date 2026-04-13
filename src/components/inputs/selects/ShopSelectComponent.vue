@@ -4,16 +4,10 @@
  * 監聽 eventId prop 的變化，自動重新載入對應活動的通路清單
  */
 import { ref, watch } from 'vue'
-import type { Option } from '@/interfaces/common'
+import type { SelectOption } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { useMenuStore } from '@/stores/menu'
 import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
-
-export interface ShopOption {
-  selectedData: Option
-  exchangeRate: number
-  thresholdJpy: number
-}
 
 const pop = defineProps<{
   /** 目前選取的活動 ID（字串形式），變更時自動重新查詢通路 */
@@ -24,26 +18,23 @@ const pop = defineProps<{
   required?: boolean
 }>()
 
-const defaultValue = ref<Option>({ name: '請選擇通路', value: '' })
+const defaultValue = ref<SelectOption<QueryChannelsAllRes | null>>({ name: '請選擇通路', value: null })
 
 const emit = defineEmits<{
   /** 使用者選取通路時觸發，帶出通路對應的 ShopOption */
-  (e: 'selectOption', data: ShopOption): void
+  (e: 'selectOption', data: SelectOption<QueryChannelsAllRes | null>): void
 }>()
 
 const menuStore = useMenuStore()
-/** 原始通路清單（保留完整資料以供 emit 使用） */
-const channelAllRes = ref<QueryChannelsAllRes[]>([])
 /** 轉換為 Option 格式的通路清單 */
-const shopList = ref<Option[]>([{ name: '請選擇通路', value: '' }])
+const shopList = ref<SelectOption<QueryChannelsAllRes | null>[]>([{ name: '請選擇通路', value: null }])
 
 /**
  * 將選取的通路向上 emit（附帶匯率）
  * @param data - 選取的 Option
  */
-function selectShop(data: Option) {
-  const channel = channelAllRes.value.find((c) => c.id === Number(data.value))
-  emit('selectOption', { selectedData: data, exchangeRate: channel?.exchangeRate ?? 0, thresholdJpy: channel?.thresholdJpy ?? 0 })
+function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
+  emit('selectOption', data)
 }
 
 // 當活動 ID 改變時，重新載入該活動的通路清單；immediate 確保掛載時也會執行
@@ -51,7 +42,7 @@ watch(
   () => pop.eventId,
   (newId) => {
     getChannelList(newId)
-    if (pop.isShowAll) defaultValue.value = { name: '全部', value: '' }
+    if (pop.isShowAll) defaultValue.value = { name: '全部', value: null }
   },
   { immediate: true },
 )
@@ -61,14 +52,14 @@ watch(
  * @param eventId - 活動 ID 字串
  */
 async function getChannelList(eventId: string) {
-  channelAllRes.value = await menuStore.fetchChannelsAll(Number(eventId))
-  if (channelAllRes.value.length !== 0) {
-    shopList.value = channelAllRes.value.map((res) => ({
+  const channelAllRes = await menuStore.fetchChannelsAll(Number(eventId))
+  if (channelAllRes.length !== 0) {
+    shopList.value = channelAllRes.map((res) => ({
       name: res.name,
-      value: res.id.toString(),
+      value: res,
     }))
     if (pop.isShowAll) {
-      shopList.value.unshift({ name: '全部', value: '' })
+      shopList.value.unshift({ name: '全部', value: null })
     }
   }
 }

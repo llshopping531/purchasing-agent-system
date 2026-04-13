@@ -4,18 +4,17 @@
  * 依活動（與可選通路）查詢分潤總計與分潤明細列表
  */
 import { ref } from 'vue'
-import EventSelectComponent, {
-  type EventOption,
-} from '@/components/inputs/selects/EventSelectComponent.vue'
-import ShopSelectComponent, {
-  type ShopOption,
-} from '@/components/inputs/selects/ShopSelectComponent.vue'
+import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
+import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import { statsApi } from '@/services/api/stats/stats-api'
 import type {
   ProfitShareItem,
   QueryStatsProfitShareSummaryRes,
 } from '@/services/api/stats/stats-api-interfaces'
+import type { SelectOption } from '@/interfaces/common'
+import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
+import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
 
 const currentEventId = ref('')
 const currentChannelId = ref('')
@@ -42,8 +41,8 @@ const headerRow: HeaderRow[] = [
   { name: '採購者', value: 'purchaserName', sort: 8, width: '100px' },
 ]
 
-function selectEvent(data: EventOption) {
-  currentEventId.value = data.selectedData.value
+function selectEvent(data: SelectOption<EventsResBase | null>) {
+  currentEventId.value = data.value?.id.toString() ?? ''
   currentChannelId.value = ''
   isShowChannelSelect.value = true
   summary.value = null
@@ -52,8 +51,8 @@ function selectEvent(data: EventOption) {
   fetchAll()
 }
 
-function selectShop(data: ShopOption) {
-  currentChannelId.value = data.selectedData.value
+function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
+  currentChannelId.value = data.value?.id.toString() ?? ''
   summary.value = null
   currentPage.value = 0
   fetchAll()

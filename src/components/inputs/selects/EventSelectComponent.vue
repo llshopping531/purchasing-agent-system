@@ -5,13 +5,10 @@
  */
 import { useMenuStore } from '@/stores/menu'
 import { onMounted, ref } from 'vue'
-import type { Option } from '@/interfaces/common'
+import type { SelectOption } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
-export interface EventOption {
-  selectedData: Option
-  isLocked: boolean
-}
+
 defineProps<{
   /** 是否為必填欄位 */
   required?: boolean
@@ -19,14 +16,13 @@ defineProps<{
 
 const emit = defineEmits<{
   /** 使用者選取活動時觸發，帶出活動對應的 Option */
-  (e: 'selectOption', data: EventOption): void
+  (e: 'selectOption', data: SelectOption<EventsResBase | null>): void
 }>()
 const menuStore = useMenuStore()
-const eventsAllRes = ref<EventsResBase[]>([])
-const defaultValue = ref<Option>({ name: '請選擇場次', value: '請選擇場次' })
+const defaultValue = ref<SelectOption<EventsResBase | null>>({ name: '請選擇場次', value: null })
 
 /** 轉換為 Option 格式的活動清單 */
-const eventList = ref<Option[]>([{ name: '請選擇場次', value: '請選擇場次' }])
+const eventList = ref<SelectOption<EventsResBase | null>[]>([{ name: '請選擇場次', value: null }])
 
 onMounted(() => {
   getEventList()
@@ -36,21 +32,20 @@ onMounted(() => {
  * 將選取的活動向上 emit
  * @param data - 選取的 Option
  */
-function selectEvent(data: Option) {
-  const filtedData = eventsAllRes.value.filter((item) => item.id === Number(data.value))[0]
-  if (!filtedData) return
-  emit('selectOption', { selectedData: data, isLocked: filtedData.isLocked })
+function selectEvent(data: SelectOption<EventsResBase | null>) {
+  if (!data.value) return
+  emit('selectOption', data)
 }
 
 /**
  * 從 store 取得所有活動（第一次會呼叫 API，後續讀快取）
  */
 async function getEventList() {
-  eventsAllRes.value = await menuStore.fetchEventsAll()
-  if (eventsAllRes.value.length !== 0) {
-    eventList.value = [...eventsAllRes.value].map((res) => ({
+  const eventsAllRes = await menuStore.fetchEventsAll()
+  if (eventsAllRes.length !== 0) {
+    eventList.value = [...eventsAllRes].map((res) => ({
       name: res.name,
-      value: res.id.toString(),
+      value: res,
     }))
   }
 }

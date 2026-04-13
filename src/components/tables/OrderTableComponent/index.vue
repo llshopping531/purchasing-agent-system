@@ -10,9 +10,9 @@ import { orderApi, type OrderAllContent } from '@/services/api/order/order-api'
 import { onMounted, ref, watch } from 'vue'
 import OrderDetailModal from './OrderDetailModal.vue'
 import DrawsResultModal from './DrawsResultModal.vue'
-import type { Option } from '@/interfaces/common'
+import type { SelectOption } from '@/interfaces/common'
 
-const orderStatusOptions: Option[] = [
+const orderStatusOptions: SelectOption<string>[] = [
   { value: '1', name: '已喊單' },
   { value: '2', name: '已購買' },
   { value: '3', name: '已取消' },

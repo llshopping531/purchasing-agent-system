@@ -5,10 +5,10 @@
  * 選取商品後除了 emit Option，也 emit 完整的 ProductsResBase 物件供父層取得商品詳細資訊
  */
 import { ref, watch } from 'vue'
-import type { Option } from '@/interfaces/common'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { productsApi } from '@/services/api/products/products-api'
+import type { SelectOption } from '@/interfaces/common';
 
 const props = defineProps<{
   /** 目前選取的活動 ID（字串形式） */
@@ -16,22 +16,18 @@ const props = defineProps<{
   /** 目前選取的通路 ID（字串形式） */
   channelId: string
   /** 預設選取的商品 Option */
-  defaultValue?: Option
+  defaultValue?: SelectOption<ProductsResBase>
   /** 是否為必填欄位 */
   required?: boolean
 }>()
 
 const emit = defineEmits<{
   /** 使用者選取商品時觸發，帶出商品對應的 Option */
-  (e: 'selectOption', data: Option): void
-  /** 使用者選取商品時觸發，帶出商品完整資料（供父層取得定價等資訊） */
-  (e: 'selectProduct', data: ProductsResBase): void
+  (e: 'onSelectProduct', data: SelectOption<ProductsResBase>): void
 }>()
 
-/** 完整商品資料陣列（用於選取後查找完整物件） */
-const fullProductList = ref<ProductsResBase[]>([])
 /** 轉換為 Option 格式的商品清單 */
-const productOptions = ref<Option[]>([])
+const productOptions = ref<SelectOption<ProductsResBase>[]>([])
 
 // 當活動或通路變更時，重新載入商品清單
 watch(
@@ -54,10 +50,9 @@ async function getProductList(eventId: string, channelId: string) {
     eventId: Number(eventId),
     channelId: Number(channelId),
   })
-  fullProductList.value = res
   productOptions.value = res.map((p) => ({
     name: p.name,
-    value: p.id.toString(),
+    value: p,
   }))
 }
 
@@ -65,10 +60,8 @@ async function getProductList(eventId: string, channelId: string) {
  * 使用者選取商品後，emit Option 及完整商品物件
  * @param option - 選取的商品 Option
  */
-function onSelect(option: Option) {
-  emit('selectOption', option)
-  const product = fullProductList.value.find((p) => p.id.toString() === option.value)
-  if (product) emit('selectProduct', product)
+function onSelect(option: SelectOption<ProductsResBase>) {
+  emit('onSelectProduct', option)
 }
 </script>
 

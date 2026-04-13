@@ -3,9 +3,9 @@ import { ref } from 'vue'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import ShippingTable, { type ShippingRow } from '@/components/tables/ShippingTable.vue'
-import type { Option } from '@/interfaces/common'
+import type { SelectOption } from '@/interfaces/common'
 
-const monthList: Option[] = [
+const monthList: SelectOption<string>[] = [
   { value: '1', name: '1月' },
   { value: '2', name: '2月' },
   { value: '3', name: '3月' },
@@ -20,7 +20,7 @@ const monthList: Option[] = [
   { value: '12', name: '12月' },
 ]
 
-const selectedMonth = ref<Option | undefined>(undefined)
+const selectedMonth = ref<SelectOption<string> | undefined>(undefined)
 const customerFilter = ref('')
 
 const tableData = ref<ShippingRow[]>([
@@ -70,7 +70,7 @@ const tableData = ref<ShippingRow[]>([
   },
 ])
 
-function selectMonth(option: Option) {
+function selectMonth(option: SelectOption<string>) {
   selectedMonth.value = option
 }
 </script>

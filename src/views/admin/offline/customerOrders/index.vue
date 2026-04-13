@@ -11,12 +11,13 @@ import EventSelectComponent, {
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { customerOrdersApi } from '@/services/api/customer-orders/customer-orders-api'
-import type { Option } from '@/interfaces/common'
+import type { SelectOption } from '@/interfaces/common'
 import type {
   CustomerOrdersCustomer,
   CustomerOrder,
   ChannelBonus,
 } from '@/services/api/customer-orders/customer-orders-api-interfaces'
+import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 
 /** 目前選取的活動 ID */
 const currentEventId = ref<number | null>(null)
@@ -92,14 +93,18 @@ const filteredCustomerList = computed(() => {
 })
 
 /** 可選通路清單（從訂單資料中萃取，符合 Option 格式） */
-const channelOptions = computed<Option[]>(() => {
+const channelOptions = computed<SelectOption<string>[]>(() => {
   const names = [...new Set(orderList.value.map((o) => o.channelName))]
   return [{ value: '', name: '全部通路' }, ...names.map((n) => ({ value: n, name: n }))]
 })
 
 /** 目前通路篩選的 Option（供 SelectComponent defaultValue 使用） */
-const selectedChannelOption = computed<Option>(() =>
-  channelOptions.value.find((o) => o.value === filterChannel.value) ?? { value: '', name: '全部通路' },
+const selectedChannelOption = computed<SelectOption<string>>(
+  () =>
+    channelOptions.value.find((o) => o.value === filterChannel.value) ?? {
+      value: '',
+      name: '全部通路',
+    },
 )
 
 /** 篩選後的訂單清單 */
@@ -142,12 +147,14 @@ const isInactive = (row: CustomerOrder) =>
 /**
  * 選取活動，重新載入有訂單的客戶清單
  */
-async function selectEvent(data: EventOption) {
-  currentEventId.value = Number(data.selectedData.value)
+async function selectEvent(data: SelectOption<EventsResBase | null>) {
+  if (!data.value) return
+  currentEventId.value = data.value.id
   selectedCustomer.value = null
   orderList.value = []
   searchKeyword.value = ''
   loadMarks()
+
   const res = await customerOrdersApi.getCustomers({ eventId: currentEventId.value })
   customerList.value = res
 }
@@ -182,7 +189,11 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
     <div v-if="currentEventId" class="content">
       <!-- 手機版遮罩 -->
       <transition name="fade">
-        <div v-if="isCustomerPanelOpen" class="mobile-backdrop" @click="isCustomerPanelOpen = false" />
+        <div
+          v-if="isCustomerPanelOpen"
+          class="mobile-backdrop"
+          @click="isCustomerPanelOpen = false"
+        />
       </transition>
 
       <!-- 客戶清單 -->
@@ -228,15 +239,24 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
               <div class="bonus-progress-wrap">
                 <div
                   class="bonus-progress-bar"
-                  :style="{ width: Math.min((bonus.totalJpy / bonus.thresholdJpy) * 100, 100) + '%' }"
+                  :style="{
+                    width: Math.min((bonus.totalJpy / bonus.thresholdJpy) * 100, 100) + '%',
+                  }"
                 />
               </div>
               <div class="bonus-info">
-                <span>¥{{ bonus.totalJpy.toLocaleString() }} / ¥{{ bonus.thresholdJpy.toLocaleString() }}</span>
+                <span
+                  >¥{{ bonus.totalJpy.toLocaleString() }} / ¥{{
+                    bonus.thresholdJpy.toLocaleString()
+                  }}</span
+                >
                 <span class="bonus-count">已滿額 {{ bonus.bonusCount }} 次</span>
               </div>
               <div class="bonus-remaining">
-                還差 ¥{{ ((bonus.bonusCount + 1) * bonus.thresholdJpy - bonus.totalJpy).toLocaleString() }} 達下次滿額
+                還差 ¥{{
+                  ((bonus.bonusCount + 1) * bonus.thresholdJpy - bonus.totalJpy).toLocaleString()
+                }}
+                達下次滿額
               </div>
             </div>
           </div>
@@ -252,7 +272,9 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
             <input v-model="filterProduct" class="filter-input" placeholder="搜尋商品名稱..." />
             <div class="total-inline">
               <span class="total-label">已購買總金額</span>
-              <span class="total-value">¥{{ totalJpy.toLocaleString() }}　NT${{ totalTwd.toLocaleString() }}</span>
+              <span class="total-value"
+                >¥{{ totalJpy.toLocaleString() }}　NT${{ totalTwd.toLocaleString() }}</span
+              >
             </div>
           </div>
 
@@ -266,34 +288,63 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
             :isDelete="false"
           >
             <template #col-mark="{ row }">
-            <div class="mark-box" @click="toggleMark(row.id)">
-              <icon-flag
-                class="mark-btn"
-                :class="{
-                  'mark-1': markedOrders.get(row.id) === 1,
-                  'mark-2': markedOrders.get(row.id) === 2,
-                }"
-
-              />
-            </div>
+              <div class="mark-box" @click="toggleMark(row.id)">
+                <icon-flag
+                  class="mark-btn"
+                  :class="{
+                    'mark-1': markedOrders.get(row.id) === 1,
+                    'mark-2': markedOrders.get(row.id) === 2,
+                  }"
+                />
+              </div>
             </template>
             <template #col-channelName="{ row }">
-              <span :class="{ 'out-of-stock': isInactive(row) }" class="row-cell" @click="toggleMark(row.id)">{{ row.channelName }}</span>
+              <span
+                :class="{ 'out-of-stock': isInactive(row) }"
+                class="row-cell"
+                @click="toggleMark(row.id)"
+                >{{ row.channelName }}</span
+              >
             </template>
             <template #col-productName="{ row }">
-              <span :class="{ 'out-of-stock': isInactive(row) }" class="row-cell" @click="toggleMark(row.id)">{{ row.productName }}</span>
+              <span
+                :class="{ 'out-of-stock': isInactive(row) }"
+                class="row-cell"
+                @click="toggleMark(row.id)"
+                >{{ row.productName }}</span
+              >
             </template>
             <template #col-quantity="{ row }">
-              <span :class="{ 'out-of-stock': isInactive(row) }" class="row-cell" @click="toggleMark(row.id)">{{ row.quantity }}</span>
+              <span
+                :class="{ 'out-of-stock': isInactive(row) }"
+                class="row-cell"
+                @click="toggleMark(row.id)"
+                >{{ row.quantity }}</span
+              >
             </template>
             <template #col-subtotalJpy="{ row }">
-              <span :class="{ 'out-of-stock': isInactive(row) }" class="row-cell" @click="toggleMark(row.id)">{{ row.subtotalJpy }}</span>
+              <span
+                :class="{ 'out-of-stock': isInactive(row) }"
+                class="row-cell"
+                @click="toggleMark(row.id)"
+                >{{ row.subtotalJpy }}</span
+              >
             </template>
             <template #col-subtotalTwd="{ row }">
-              <span :class="{ 'out-of-stock': isInactive(row) }" class="row-cell" @click="toggleMark(row.id)">{{ row.subtotalTwd }}</span>
+              <span
+                :class="{ 'out-of-stock': isInactive(row) }"
+                class="row-cell"
+                @click="toggleMark(row.id)"
+                >{{ row.subtotalTwd }}</span
+              >
             </template>
             <template #col-orderStatusName="{ row }">
-              <span :class="{ 'out-of-stock': isInactive(row) }" class="row-cell" @click="toggleMark(row.id)">{{ row.orderStatusName }}</span>
+              <span
+                :class="{ 'out-of-stock': isInactive(row) }"
+                class="row-cell"
+                @click="toggleMark(row.id)"
+                >{{ row.orderStatusName }}</span
+              >
             </template>
           </table-component>
         </template>
@@ -444,7 +495,9 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
   padding: 0.55rem 0.75rem;
   cursor: pointer;
   font-size: 0.875rem;
-  transition: background 0.1s, color 0.1s;
+  transition:
+    background 0.1s,
+    color 0.1s;
   border-bottom: 1px solid var(--color-border);
   line-height: 1.4;
 
@@ -464,7 +517,6 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
     border-left: 3px solid var(--color-primary);
     padding-left: calc(0.75rem - 3px);
   }
-
 }
 
 /* ── 訂單面板 ── */
@@ -592,7 +644,7 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
     color: var(--color-text-muted, #bbb);
   }
 }
-.mark-box{
+.mark-box {
   width: 100%;
   height: 100%;
   cursor: pointer;

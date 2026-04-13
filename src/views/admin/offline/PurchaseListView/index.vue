@@ -3,13 +3,15 @@
  * 採購清單頁面
  * 選取活動後，顯示各通路的採購統計（依通路分組，可個別收合）
  */
-import EventSelectComponent, { type EventOption } from '@/components/inputs/selects/EventSelectComponent.vue'
-import type { Option } from '@/interfaces/common'
+import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
+import type { SelectOption } from '@/interfaces/common'
+import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
 import { ref } from 'vue'
 import PurchaseChannelItem from './PurchaseChannelItem.vue'
 import type { PurchaseListData } from '@/services/api/purchase/purchase-api-interface'
 import { purchaseListApi } from '@/services/api/purchase/purchase-api'
-import ShopSelectComponent, { type ShopOption } from '@/components/inputs/selects/ShopSelectComponent.vue'
+import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
+import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 
 /** 單一通路的採購統計資料結構 */
 interface PurchaseList {
@@ -29,7 +31,7 @@ const isShowChannelSelect = ref<boolean>(false)
 /** 當前通路是否已鎖定 */
 const currentEventIsLocked = ref(true)
 /** 當前選取的通路篩選條件 */
-const currentChannelFilter = ref<Option | null>(null)
+const currentChannelFilter = ref<SelectOption<QueryChannelsAllRes | null> | null>(null)
 
 /**
  * 選取活動後，從 API 取得採購統計並轉換為以通路為單位的陣列
@@ -46,7 +48,7 @@ async function fetchPurchaseList() {
 
 function applyChannelFilter() {
   const filter = currentChannelFilter.value
-  if (!filter || filter.value === '') {
+  if (!filter || filter.value === null) {
     displayPurchaseList.value = purchaseList.value
   } else {
     displayPurchaseList.value = purchaseList.value.filter(
@@ -55,9 +57,9 @@ function applyChannelFilter() {
   }
 }
 
-async function selectEvent(data: EventOption) {
-  currentEventId.value = Number(data.selectedData.value)
-  currentEventIsLocked.value = data.isLocked
+async function selectEvent(data: SelectOption<EventsResBase | null>) {
+  currentEventId.value = data.value?.id ?? 0
+  currentEventIsLocked.value = data.value?.isLocked ?? true
   currentChannelFilter.value = null
   await fetchPurchaseList()
   isShowChannelSelect.value = true
@@ -67,8 +69,8 @@ async function selectEvent(data: EventOption) {
  * 選取通路後，進行篩選
  * @param option - 選取的通路 Option
  */
-function selectChannel(option: ShopOption) {
-  currentChannelFilter.value = option.selectedData
+function selectChannel(option: SelectOption<QueryChannelsAllRes | null>) {
+  currentChannelFilter.value = option
   applyChannelFilter()
 }
 </script>

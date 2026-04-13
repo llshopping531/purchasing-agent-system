@@ -5,16 +5,17 @@
  * 並可開啟統計彈窗查看各商品的訂單數量匯總
  */
 import { ref } from 'vue'
-import EventSelectComponent, {
-  type EventOption,
-} from '@/components/inputs/selects/EventSelectComponent.vue'
-import ShopSelectComponent, { type ShopOption } from '@/components/inputs/selects/ShopSelectComponent.vue'
+import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
+import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import OrderTableComponent from '@/components/tables/OrderTableComponent/index.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import OrderFormModal from './OrderFormModal.vue'
 import BatchOrderFormModal from './BatchOrderFormModal.vue'
 import type { OrderQueryContent } from '@/services/api/order/order-api-interfaces'
+import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
+import type { SelectOption } from '@/interfaces/common'
+import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 
 /** OrderTableComponent 的 ref，用於呼叫 refresh 重新載入列表 */
 const orderTableRef = ref<InstanceType<typeof OrderTableComponent>>()
@@ -52,9 +53,9 @@ const headerRow = ref<HeaderRow[]>([
  * 選取活動
  * @param data - 選取的活動 Option
  */
-function selectEvent(data: EventOption) {
-  currentEventId.value = data.selectedData.value
-  currentEventIsLocked.value = data.isLocked
+function selectEvent(data: SelectOption<EventsResBase | null>) {
+  currentEventId.value = data.value?.id.toString() ?? ''
+  currentEventIsLocked.value = data.value?.isLocked ?? true
   isShowChannelSelect.value = true
   currentShopId.value = ''
   isShowTotalBtn.value = false
@@ -65,9 +66,9 @@ function selectEvent(data: EventOption) {
  * 選取通路
  * @param data - 選取的通路 Option
  */
-function selectShop(data: ShopOption) {
-  currentShopId.value = data.selectedData.value
-  currentShopExchangeRate.value = data.exchangeRate
+function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
+  currentShopId.value = data.value?.id.toString() ?? ''
+  currentShopExchangeRate.value = data.value?.exchangeRate ?? 0
 }
 
 /**
@@ -123,7 +124,11 @@ function onConfirmed() {
       </div>
       <div class="btnBox">
         <div class="btn" v-if="isShowTotalBtn" @click="isShowTotalModal = true">顯示統計</div>
-        <div class="btn create" v-if="isTableQueried && !currentEventIsLocked" @click="isShowBatchModal = true">
+        <div
+          class="btn create"
+          v-if="isTableQueried && !currentEventIsLocked"
+          @click="isShowBatchModal = true"
+        >
           新增
         </div>
       </div>
