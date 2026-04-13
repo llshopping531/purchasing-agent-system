@@ -3,7 +3,7 @@
  * 個人購物清單查詢頁面
  * 選取活動後顯示有訂單的客戶清單，點選客戶後展開其個人訂單明細
  */
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import IconFlag from '@/components/icons/IconFlag.vue'
 import EventSelectComponent, {
   type EventOption,
@@ -18,6 +18,9 @@ import type {
   ChannelBonus,
 } from '@/services/api/customer-orders/customer-orders-api-interfaces'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
+import { useSearchStore } from '@/stores/search'
+
+const searchStore = useSearchStore()
 
 /** 目前選取的活動 ID */
 const currentEventId = ref<number | null>(null)
@@ -144,6 +147,15 @@ const orderHeaderRow: HeaderRow[] = [
 const isInactive = (row: CustomerOrder) =>
   row.orderStatusName === '缺貨' || row.orderStatusName === '已取消'
 
+onMounted(async () => {
+  const prev = searchStore.getSearchStore('CUSTOMER_ORDERS')
+  if (prev?.eventId) {
+    currentEventId.value = Number(prev.eventId)
+    loadMarks()
+    customerList.value = await customerOrdersApi.getCustomers({ eventId: currentEventId.value })
+  }
+})
+
 /**
  * 選取活動，重新載入有訂單的客戶清單
  */
@@ -153,6 +165,7 @@ async function selectEvent(data: SelectOption<EventsResBase | null>) {
   selectedCustomer.value = null
   orderList.value = []
   searchKeyword.value = ''
+  searchStore.setSearchStore({ name: 'CUSTOMER_ORDERS', condition: { eventId: currentEventId.value.toString(), channelId: null } })
   loadMarks()
 
   const res = await customerOrdersApi.getCustomers({ eventId: currentEventId.value })
@@ -183,7 +196,7 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
     <p>請選擇活動後，點選客戶查看其購物明細</p>
 
     <div class="selectBox">
-      <event-select-component @selectOption="selectEvent" />
+      <event-select-component :initialId="currentEventId?.toString()" @selectOption="selectEvent" />
     </div>
 
     <div v-if="currentEventId" class="content">

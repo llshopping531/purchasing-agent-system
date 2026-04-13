@@ -4,7 +4,8 @@
  * 選取活動與通路後顯示訂單列表，提供新增／編輯／刪除操作，
  * 並可開啟統計彈窗查看各商品的訂單數量匯總
  */
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { useMenuStore } from '@/stores/menu'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import OrderTableComponent from '@/components/tables/OrderTableComponent/index.vue'
@@ -16,7 +17,11 @@ import type { OrderQueryContent } from '@/services/api/order/order-api-interface
 import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
 import type { SelectOption } from '@/interfaces/common'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
+import { useSearchStore } from '@/stores/search'
 
+/** 查詢結果快取 Store */
+const searchStore = useSearchStore()
+const menuStore = useMenuStore()
 /** OrderTableComponent 的 ref，用於呼叫 refresh 重新載入列表 */
 const orderTableRef = ref<InstanceType<typeof OrderTableComponent>>()
 /** OrderFormModal 的 ref，用於呼叫 createOrder / editOrder / deleteOrder */
@@ -49,6 +54,18 @@ const headerRow = ref<HeaderRow[]>([
   { name: '數量', value: 'value', sort: 0, width: '70px' },
 ])
 
+onMounted(async () => {
+  const prevSearchCondition = searchStore.getSearchStore('ORDER')
+  if (prevSearchCondition?.eventId && prevSearchCondition?.channelId) {
+    currentEventId.value = prevSearchCondition.eventId
+    currentShopId.value = prevSearchCondition.channelId
+    isShowChannelSelect.value = true
+    const events = await menuStore.fetchEventsAll()
+    const matched = events.find((e) => e.id.toString() === prevSearchCondition.eventId)
+    if (matched) currentEventIsLocked.value = matched.isLocked ?? true
+  }
+})
+
 /**
  * 選取活動
  * @param data - 選取的活動 Option
@@ -69,6 +86,10 @@ function selectEvent(data: SelectOption<EventsResBase | null>) {
 function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
   currentShopId.value = data.value?.id.toString() ?? ''
   currentShopExchangeRate.value = data.value?.exchangeRate ?? 0
+  searchStore.setSearchStore({
+    name: 'ORDER',
+    condition: { eventId: currentEventId.value, channelId: currentShopId.value },
+  })
 }
 
 /**
@@ -114,10 +135,11 @@ function onConfirmed() {
     <h3>訂單管理</h3>
     <div class="orderHeader">
       <div class="selectBox">
-        <event-select-component @selectOption="selectEvent" />
+        <event-select-component :initialId="currentEventId" @selectOption="selectEvent" />
         <shop-select-component
           :key="currentEventId"
           :eventId="currentEventId"
+          :initialId="currentShopId"
           @selectOption="selectShop"
           v-if="isShowChannelSelect"
         />

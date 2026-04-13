@@ -16,6 +16,8 @@ const pop = defineProps<{
   isShowAll?: boolean
   /** 是否為必填欄位 */
   required?: boolean
+  /** 初始選取的通路 ID（用於還原暫存狀態） */
+  initialId?: string
 }>()
 
 const defaultValue = ref<SelectOption<QueryChannelsAllRes | null>>({ name: '請選擇通路', value: null })
@@ -60,6 +62,10 @@ async function getChannelList(eventId: string) {
     }))
     if (pop.isShowAll) {
       shopList.value.unshift({ name: '全部', value: null })
+    }
+    if (pop.initialId) {
+      const found = shopList.value.find((opt) => opt.value?.id.toString() === pop.initialId)
+      if (found) defaultValue.value = found
     }
   }
 }

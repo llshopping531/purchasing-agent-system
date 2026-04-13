@@ -3,7 +3,7 @@
  * 通路管理頁面
  * 選取活動後顯示分頁通路列表，並透過 ChannelFormModal ref 處理新增／編輯／刪除操作
  */
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import PaginationComponent from '@/components/PaginationComponent.vue'
@@ -11,7 +11,11 @@ import ChannelFormModal from './ChannelFormModal.vue'
 import { channelApi, type ChannelContent } from '@/services/api/channels/channels-api'
 import type { SelectOption } from '@/interfaces/common'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
+import { useSearchStore } from '@/stores/search'
+import { useMenuStore } from '@/stores/menu'
 
+const searchStore = useSearchStore()
+const menuStore = useMenuStore()
 const channelFormModalRef = ref<InstanceType<typeof ChannelFormModal>>()
 
 const currentEventId = ref('')
@@ -30,10 +34,22 @@ const pageSize = ref(20)
 const totalPages = ref(0)
 const totalElements = ref(0)
 
+onMounted(async () => {
+  const prev = searchStore.getSearchStore('CHANNEL')
+  if (prev?.eventId) {
+    currentEventId.value = prev.eventId
+    const events = await menuStore.fetchEventsAll()
+    const matched = events.find((e) => e.id.toString() === prev.eventId)
+    if (matched) currentEventIsLocked.value = matched.isLocked ?? true
+    getChannelList()
+  }
+})
+
 function selectEvent(data: SelectOption<EventsResBase | null>) {
   currentEventId.value = data.value?.id.toString() ?? ''
   currentEventIsLocked.value = data.value?.isLocked ?? true
   currentPage.value = 0
+  searchStore.setSearchStore({ name: 'CHANNEL', condition: { eventId: currentEventId.value, channelId: null } })
   getChannelList()
 }
 
@@ -67,7 +83,7 @@ function onChangeSize(size: number) {
     <h3>通路管理</h3>
     <div class="channelHeader">
       <div class="selectBox">
-        <event-select-component @selectOption="selectEvent" />
+        <event-select-component :initialId="currentEventId" @selectOption="selectEvent" />
       </div>
       <div class="btnBox">
         <div

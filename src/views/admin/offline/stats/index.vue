@@ -3,7 +3,7 @@
  * 訂單總覽頁面
  * 依活動（與可選通路）查詢訂單金額總計與分頁清單
  */
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
@@ -12,6 +12,9 @@ import type { StatsOverviewItem } from '@/services/api/stats/stats-api-interface
 import type { SelectOption } from '@/interfaces/common'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
+import { useSearchStore } from '@/stores/search'
+
+const searchStore = useSearchStore()
 
 /** 目前選取的活動 ID */
 const currentEventId = ref('')
@@ -45,6 +48,16 @@ const headerRow: HeaderRow[] = [
   { name: '採購者', value: 'purchaserName', sort: 7, width: '100px' },
 ]
 
+onMounted(() => {
+  const prev = searchStore.getSearchStore('STATS')
+  if (prev?.eventId) {
+    currentEventId.value = prev.eventId
+    currentChannelId.value = prev.channelId ?? ''
+    isShowChannelSelect.value = true
+    fetchAll()
+  }
+})
+
 function selectEvent(data: SelectOption<EventsResBase | null>) {
   currentEventId.value = data.value?.id.toString() ?? ''
   currentChannelId.value = ''
@@ -53,6 +66,7 @@ function selectEvent(data: SelectOption<EventsResBase | null>) {
   channelTotals.value = null
   tableData.value = []
   currentPage.value = 0
+  searchStore.setSearchStore({ name: 'STATS', condition: { eventId: currentEventId.value, channelId: null } })
   fetchAll()
 }
 
@@ -60,6 +74,7 @@ function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
   currentChannelId.value = data.value?.id.toString() ?? ''
   channelTotals.value = null
   currentPage.value = 0
+  searchStore.setSearchStore({ name: 'STATS', condition: { eventId: currentEventId.value, channelId: currentChannelId.value || null } })
   fetchAll()
 }
 
@@ -138,13 +153,14 @@ function formatTwd(val: number | null) {
     <!-- 篩選列 -->
     <div class="filter-bar">
       <div class="select-box">
-        <event-select-component @selectOption="selectEvent" />
+        <event-select-component :initialId="currentEventId" @selectOption="selectEvent" />
       </div>
       <div class="select-box">
         <shop-select-component
           v-if="isShowChannelSelect"
           :key="currentEventId"
           :eventId="currentEventId"
+          :initialId="currentChannelId || undefined"
           :isShowAll="true"
           @selectOption="selectShop"
         />

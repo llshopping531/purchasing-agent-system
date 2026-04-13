@@ -9,9 +9,11 @@ import type { SelectOption } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 
-defineProps<{
+const props = defineProps<{
   /** 是否為必填欄位 */
   required?: boolean
+  /** 初始選取的活動 ID（用於還原暫存狀態） */
+  initialId?: string
 }>()
 
 const emit = defineEmits<{
@@ -47,6 +49,10 @@ async function getEventList() {
       name: res.name,
       value: res,
     }))
+    if (props.initialId) {
+      const found = eventList.value.find((opt) => opt.value?.id.toString() === props.initialId)
+      if (found) defaultValue.value = found
+    }
   }
 }
 </script>
@@ -56,7 +62,7 @@ async function getEventList() {
     label="場次"
     :defaultValue="defaultValue"
     :optionList="eventList"
-    :required="required"
+    :required="props.required"
     @selectOption="selectEvent"
   ></select-component>
 </template>

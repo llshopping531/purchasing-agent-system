@@ -3,7 +3,7 @@
  * 分潤查詢頁面
  * 依活動（與可選通路）查詢分潤總計與分潤明細列表
  */
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
@@ -15,6 +15,9 @@ import type {
 import type { SelectOption } from '@/interfaces/common'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
+import { useSearchStore } from '@/stores/search'
+
+const searchStore = useSearchStore()
 
 const currentEventId = ref('')
 const currentChannelId = ref('')
@@ -41,6 +44,16 @@ const headerRow: HeaderRow[] = [
   { name: '採購者', value: 'purchaserName', sort: 8, width: '100px' },
 ]
 
+onMounted(() => {
+  const prev = searchStore.getSearchStore('PROFIT_SHARE')
+  if (prev?.eventId) {
+    currentEventId.value = prev.eventId
+    currentChannelId.value = prev.channelId ?? ''
+    isShowChannelSelect.value = true
+    fetchAll()
+  }
+})
+
 function selectEvent(data: SelectOption<EventsResBase | null>) {
   currentEventId.value = data.value?.id.toString() ?? ''
   currentChannelId.value = ''
@@ -48,6 +61,7 @@ function selectEvent(data: SelectOption<EventsResBase | null>) {
   summary.value = null
   tableData.value = []
   currentPage.value = 0
+  searchStore.setSearchStore({ name: 'PROFIT_SHARE', condition: { eventId: currentEventId.value, channelId: null } })
   fetchAll()
 }
 
@@ -55,6 +69,7 @@ function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
   currentChannelId.value = data.value?.id.toString() ?? ''
   summary.value = null
   currentPage.value = 0
+  searchStore.setSearchStore({ name: 'PROFIT_SHARE', condition: { eventId: currentEventId.value, channelId: currentChannelId.value || null } })
   fetchAll()
 }
 
@@ -124,13 +139,14 @@ function formatPercent(val: number | null) {
     <!-- 篩選列 -->
     <div class="filter-bar">
       <div class="select-box">
-        <event-select-component @selectOption="selectEvent" />
+        <event-select-component :initialId="currentEventId" @selectOption="selectEvent" />
       </div>
       <div class="select-box">
         <shop-select-component
           v-if="isShowChannelSelect"
           :key="currentEventId"
           :eventId="currentEventId"
+          :initialId="currentChannelId || undefined"
           :isShowAll="true"
           @selectOption="selectShop"
         />

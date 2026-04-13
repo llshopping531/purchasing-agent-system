@@ -3,7 +3,7 @@
  * 商品管理頁面
  * 選取活動與通路後顯示分頁商品列表，並透過 ProductFormModal ref 處理新增／編輯／刪除操作
  */
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
@@ -16,6 +16,11 @@ import type { ProductsResBase } from '@/services/api/products/products-api-inter
 import type { SelectOption } from '@/interfaces/common'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
+import { useSearchStore } from '@/stores/search'
+import { useMenuStore } from '@/stores/menu'
+
+const searchStore = useSearchStore()
+const menuStore = useMenuStore()
 
 /** ProductFormModal 的 ref，用於呼叫 editProduct / deleteProduct */
 const productFormModalRef = ref<InstanceType<typeof ProductFormModal>>()
@@ -64,6 +69,33 @@ const totalElements = ref(0)
 /** 當前通路是否已鎖定 */
 const currentEventIsLocked = ref(true)
 
+onMounted(async () => {
+  const prev = searchStore.getSearchStore('PRODUCT')
+  if (prev?.eventId) {
+    currentEventId.value = prev.eventId
+    if (prev.channelId) currentShopId.value = prev.channelId
+    isShowChannelSelect.value = true
+    const [events, channels] = await Promise.all([
+      menuStore.fetchEventsAll(),
+      prev.channelId ? menuStore.fetchChannelsAll(Number(prev.eventId)) : Promise.resolve([]),
+    ])
+    const event = events.find((e) => e.id.toString() === prev.eventId)
+    if (event) {
+      currentEventName.value = event.name
+      currentEventIsLocked.value = event.isLocked ?? true
+    }
+    if (prev.channelId) {
+      const channel = channels.find((c) => c.id.toString() === prev.channelId)
+      if (channel) {
+        currentChannelName.value = channel.name
+        currentShopExchangeRate.value = channel.exchangeRate
+        currentMinJpy.value = channel.thresholdJpy ? channel.thresholdJpy.toLocaleString() : ''
+      }
+      getProductList()
+    }
+  }
+})
+
 /**
  * 選取活動，重置表格並重新查詢
  * @param data - 選取的活動 Option
@@ -75,6 +107,7 @@ function selectEvent(data: SelectOption<EventsResBase | null>) {
   currentShopId.value = ''
   currentChannelName.value = ''
   isShowChannelSelect.value = true
+  searchStore.setSearchStore({ name: 'PRODUCT', condition: { eventId: currentEventId.value, channelId: null } })
   resetTable()
 }
 
@@ -87,6 +120,7 @@ function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
   currentChannelName.value = data.name
   currentShopExchangeRate.value = data.value?.exchangeRate ?? 0
   currentMinJpy.value = data.value?.thresholdJpy ? data.value?.thresholdJpy.toLocaleString() : ''
+  searchStore.setSearchStore({ name: 'PRODUCT', condition: { eventId: currentEventId.value, channelId: currentShopId.value } })
   resetTable()
 }
 
@@ -144,11 +178,12 @@ function onChangeSize(size: number) {
     <h3>商品管理</h3>
     <div class="productHeader">
       <div class="selectBox">
-        <event-select-component @selectOption="selectEvent" />
+        <event-select-component :initialId="currentEventId" @selectOption="selectEvent" />
         <shop-select-component
           v-if="isShowChannelSelect"
           :key="currentEventId"
           :eventId="currentEventId"
+          :initialId="currentShopId || undefined"
           @selectOption="selectShop"
         />
       </div>
