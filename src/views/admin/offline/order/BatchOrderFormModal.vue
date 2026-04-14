@@ -19,6 +19,7 @@ import { orderApi } from '@/services/api/order/order-api'
 import { customersApi } from '@/services/api/customers/customers-api'
 import { productsApi } from '@/services/api/products/products-api'
 import { useModalLayer } from '@/composables/useModalLayer'
+import ModalComponent from '@/components/ModalComponent.vue'
 import { onMounted, onUnmounted } from 'vue'
 
 const props = defineProps<{
@@ -75,7 +76,6 @@ const form = reactive({
   // 商品
   isNewProduct: false,
   productOption: undefined as SelectOption<ProductsResBase> | undefined,
-  product: undefined as ProductsResBase | undefined,
   newProductName: '',
   newProductPriceJpy: null as number | null,
   newProductExchangeRate: null as number | null,
@@ -101,10 +101,6 @@ const formErrors = ref({
   quantity: '',
 })
 
-function onSelectProduct(product: ProductsResBase) {
-  form.product = product
-}
-
 function clickAddCustomer() {
   form.isNewCustomer = true
   form.customerOption = undefined
@@ -113,7 +109,6 @@ function clickAddCustomer() {
 function clickAddProduct() {
   form.isNewProduct = true
   form.productOption = undefined
-  form.product = undefined
 }
 
 // ── 立即新增並送出 ────────────────────────────────────────────
@@ -141,13 +136,13 @@ async function addAndSubmit() {
     formErrors.value.customer = '請選擇顧客'
     valid = false
   }
-
+  console.log(form.productOption)
   if (form.isNewProduct) {
     if (!form.newProductName.trim()) {
       formErrors.value.newProductName = '商品名稱為必填'
       valid = false
     }
-  } else if (!form.productOption || !form.product) {
+  } else if (!form.productOption) {
     formErrors.value.product = '請選擇商品'
     valid = false
   }
@@ -170,7 +165,10 @@ async function addAndSubmit() {
 
   const item: QueueItem = {
     id: `${Date.now()}-${Math.random()}`,
-    customerOption: { value: { id: 0, name: customerLabel } as CustomersResBase, name: customerLabel },
+    customerOption: {
+      value: { id: 0, name: customerLabel } as CustomersResBase,
+      name: customerLabel,
+    },
     productOption: { value: { id: 0, name: productLabel } as ProductsResBase, name: productLabel },
     quantity: snap.quantity!,
     isFixedRate: snap.isFixedRate,
@@ -213,7 +211,7 @@ async function addAndSubmit() {
       channelId: Number(props.shopId),
       customerId,
       productId,
-      orderStatus: "1",
+      orderStatus: '1',
       quantity: item.quantity,
       isFixedRate: item.isFixedRate,
       nonCutTarget: item.nonCutTarget,
@@ -317,8 +315,7 @@ const statusLabel: Record<QueueStatus, string> = {
                 :eventId="props.eventId"
                 :channelId="props.shopId"
                 :defaultValue="form.productOption"
-                @selectOption="form.productOption = $event"
-                @selectProduct="onSelectProduct"
+                @onSelectProduct="form.productOption = $event"
               />
               <span v-if="formErrors.product" class="field-error">{{ formErrors.product }}</span>
               <div class="addLink" @click="clickAddProduct">找不到商品？新增商品</div>
@@ -380,16 +377,21 @@ const statusLabel: Record<QueueStatus, string> = {
     </div>
 
     <!-- 關閉確認提示 -->
-    <div v-if="isShowCloseConfirm" class="waiting-overlay">
-      <div class="close-confirm">
-        <p>您確定要關閉視窗嗎？</p>
-        <span>請確認是否尚有未送出的訂單</span>
-        <div class="close-confirm-btns">
-          <div class="btn" @click="confirmClose">確定關閉</div>
-          <div class="btn btn-outline" @click="isShowCloseConfirm = false">取消</div>
+    <modal-component
+      v-if="isShowCloseConfirm"
+      name="提醒"
+      width="360px"
+      :isShowCancelBtn="true"
+      @confirm="confirmClose"
+      @cancel="isShowCloseConfirm = false"
+    >
+      <template #content>
+        <div class="remind">
+          <p>您確定要關閉視窗嗎？</p>
+          <span>有尚有未送出的訂單</span>
         </div>
-      </div>
-    </div>
+      </template>
+    </modal-component>
 
     <!-- 等待關閉遮罩 -->
     <div v-if="isWaitingToClose" class="waiting-overlay">
@@ -550,7 +552,24 @@ const statusLabel: Record<QueueStatus, string> = {
 .qty {
   font-weight: 600;
 }
+.remind {
+  text-align: center;
+  padding: 1.5rem 0.5rem 0.5rem;
 
+  p {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 0.75rem;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+
+  span {
+    font-size: 0.8rem;
+    color: var(--color-danger);
+    font-weight: 500;
+  }
+}
 .error-msg {
   font-size: 0.78rem;
   color: var(--color-danger);
@@ -566,32 +585,6 @@ const statusLabel: Record<QueueStatus, string> = {
   border-top: 1px solid var(--color-border);
   flex-shrink: 0;
   background: #faf9ff;
-}
-
-/* 等待關閉遮罩 */
-.close-confirm {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  text-align: center;
-
-  p {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #333;
-  }
-
-  span {
-    font-size: 0.82rem;
-    color: var(--color-danger);
-  }
-}
-
-.close-confirm-btns {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
 }
 
 .waiting-overlay {
