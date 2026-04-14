@@ -1,3 +1,5 @@
+import type { ExtraData } from "../common-api-interface"
+
 /**
  * 查詢訂單總覽 request
  */
@@ -31,28 +33,29 @@ export interface QueryStatsOverviewRes {
 export interface StatsOverviewItem {
   /** 訂單 ID */
   id: number
-  /** 顧客名稱 */
-  customerName: string
-  /** 採購者名稱 */
-  purchaserName: string
+  channelId: string
   /** 通路名稱 */
   channelName: string
+  /** 顧客 ID */
+  customerId: string
+  /** 顧客名稱 */
+  customerName: string
+  /** 商品 ID */
+  productId: string
   /** 商品名稱 */
   productName: string
   /** 數量 */
   quantity: number
-  /** 匯率 */
-  exchangeRate: number
-  /** 日幣小計 */
-  subtotalJpy: number
   /** 台幣小計 */
   subtotalTwd: number
-  /** 訂單狀態名稱 */
-  orderStatusName: string
-  /** 是否為盲抽 */
-  isBlindBox: boolean
-  /** 採購確認 */
-  purchaseConfirm: boolean
+  /** 成本 (TWD)：商品日幣 × 成本匯率 × 數量 */
+  cost: number
+  /** 獲利 (TWD)：小計 − 成本 */
+  profit: number
+  /** 分潤 (TWD)：獲利 × 分潤比 */
+  profitShare: number
+  /** 自定義欄位 */
+  extraData: ExtraData
 }
 
 /**

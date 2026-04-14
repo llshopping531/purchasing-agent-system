@@ -16,6 +16,7 @@ const orderStatusOptions: SelectOption<string>[] = [
   { value: '1', name: '已喊單' },
   { value: '2', name: '已購買' },
   { value: '3', name: '已取消' },
+  { value: '4', name: '缺貨' }
 ]
 
 const pop = defineProps<{
@@ -42,6 +43,7 @@ const headerRow = ref<HeaderRow[]>([
   { name: '品項', value: 'productName', sort: 1, width: '300px', mobileSpan: 2, sortable: true },
   { name: '數量', value: 'quantity', sort: 2, width: '70px' },
   { name: '訂單狀態', value: 'orderStatusName', sort: 3, width: '100px', sortable: true },
+  { name: '備註', value: 'note', sort: 3, width: '100px', sortable: true },
   { name: '更多', value: 'more', sort: 4, width: '100px' },
 ])
 
@@ -269,7 +271,7 @@ async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
             @click="openDraws(row)"
             title="查看盲抽結果"
           >
-            <span class="draws-icon"></span>拆拆
+            <span class="draws-icon"></span>拆拆<template v-if="row.drawCount">({{ row.drawCount }})</template>
           </div>
         </div>
       </template>

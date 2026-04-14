@@ -97,6 +97,8 @@ export interface OrderResBase {
   id: number
   /** 活動 ID */
   eventId: number
+  /** 活動名稱 */
+  eventName: string
   /** 通路 ID */
   channelId: number
   /** 客戶 ID */

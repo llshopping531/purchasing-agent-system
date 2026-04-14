@@ -7,22 +7,31 @@ import { onMounted, ref } from 'vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import BooleanTransformComponent from '@/components/BooleanTransformComponent.vue'
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
+import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import CustomerFormModal from './CustomerFormModal.vue'
 import { customersApi } from '@/services/api/customers/customers-api'
 import type { CustomersResBase } from '@/services/api/customers/customers-api-interfaces'
+import { eventApi } from '@/services/api/events/events-api'
+import { customerOrdersApi } from '@/services/api/customer-orders/customer-orders-api'
+import type { SelectOption } from '@/interfaces/common'
 
 /** CustomerFormModal 元件的 ref，用於呼叫其 createCustomer / editCustomer */
 const customerFormModalRef = ref<InstanceType<typeof CustomerFormModal>>()
 /** 是否為快速編輯模式 */
 const isQuickEdit = ref(false)
 
+/** 活動選項清單（含「全部」選項） */
+const eventOptions = ref<SelectOption<number | null>[]>([{ name: '全部', value: null }])
+/** 當前篩選的活動 ID（null = 全部） */
+const selectedEventId = ref<number | null>(null)
+
 /** 表格欄位定義 */
 const headerRow: HeaderRow[] = [
   { name: '客戶名稱', value: 'name', sort: 0, width: '180px' },
-  { name: '來源', value: 'sourceName', sort: 0, width: '100px' },
-  { name: '已私訊官方', value: 'hasMessagedOfficial', sort: 0, width: '120px' },
-  { name: '優惠對象', value: 'isDiscount', sort: 0, width: '90px' },
-  { name: '老闆', value: 'isBoss', sort: 0, width: '70px' },
+  { name: '來源', value: 'sourceName', sort: 0, width: '100px', sortable: true },
+  { name: '已私訊官方', value: 'hasMessagedOfficial', sort: 0, width: '120px', sortable: true },
+  { name: '優惠對象', value: 'isDiscount', sort: 0, width: '90px', sortable: true },
+  { name: '老闆', value: 'isBoss', sort: 0, width: '70px', sortable: true },
   { name: '備註', value: 'note', sort: 0 },
 ]
 
@@ -36,22 +45,88 @@ const pageSize = ref(20)
 const totalPages = ref(0)
 /** 總筆數 */
 const totalElements = ref(0)
+/** 當前排序欄位 */
+const sortField = ref('')
+/** 當前排序方向 */
+const sortDirection = ref<'ASC' | 'DESC'>('ASC')
+/** 活動篩選模式下的全量資料（用於 client-side sort/page） */
+const allEventCustomers = ref<CustomersResBase[]>([])
 
-onMounted(() => {
+onMounted(async () => {
+  const events = await eventApi.getEventsAll()
+  eventOptions.value = [
+    { name: '全部', value: null },
+    ...events.map((e) => ({ name: e.name, value: e.id })),
+  ]
   getCustomerList()
 })
 
 /**
  * 依目前分頁條件查詢顧客列表
+ * 若有選擇活動，改呼叫 customerOrdersApi.getCustomers 取得該活動的客戶（client-side sort/page）
  */
 async function getCustomerList() {
-  const res = await customersApi.getCustomers({
-    page: currentPage.value,
-    size: pageSize.value,
-  })
-  tableData.value = res.content
-  totalPages.value = res.totalPages
-  totalElements.value = res.totalElements
+  if (selectedEventId.value !== null) {
+    const res = await customerOrdersApi.getCustomers({ eventId: selectedEventId.value })
+    allEventCustomers.value = res as unknown as CustomersResBase[]
+    applyClientSortAndPage()
+  } else {
+    const res = await customersApi.getCustomers({
+      page: currentPage.value,
+      size: pageSize.value,
+      sort: sortField.value || undefined,
+      direction: sortField.value ? sortDirection.value : undefined,
+    })
+    tableData.value = res.content
+    totalPages.value = res.totalPages
+    totalElements.value = res.totalElements
+  }
+}
+
+/**
+ * 對活動篩選模式的全量資料做 client-side 排序與分頁
+ */
+function applyClientSortAndPage() {
+  const sorted = [...allEventCustomers.value]
+  if (sortField.value) {
+    sorted.sort((a, b) => {
+      const aVal = a[sortField.value as keyof CustomersResBase]
+      const bVal = b[sortField.value as keyof CustomersResBase]
+      const aComp = typeof aVal === 'boolean' ? (aVal ? 1 : 0) : String(aVal ?? '')
+      const bComp = typeof bVal === 'boolean' ? (bVal ? 1 : 0) : String(bVal ?? '')
+      if (aComp < bComp) return sortDirection.value === 'ASC' ? -1 : 1
+      if (aComp > bComp) return sortDirection.value === 'ASC' ? 1 : -1
+      return 0
+    })
+  }
+  totalElements.value = sorted.length
+  totalPages.value = Math.ceil(sorted.length / pageSize.value) || 1
+  const start = currentPage.value * pageSize.value
+  tableData.value = sorted.slice(start, start + pageSize.value)
+}
+
+/**
+ * 切換活動篩選（value 為 null 表示全部）
+ */
+function onSelectEvent(option: SelectOption<number | null>) {
+  selectedEventId.value = option.value
+  currentPage.value = 0
+  sortField.value = ''
+  getCustomerList()
+}
+
+/**
+ * 排序欄位切換
+ */
+function onSort(field: string, direction: 'ASC' | 'DESC') {
+  sortField.value = field
+  sortDirection.value = direction
+  currentPage.value = 0
+  if (selectedEventId.value !== null) {
+    applyClientSortAndPage()
+  } else {
+    getCustomerList()
+  }
 }
 
 /**
@@ -60,7 +135,11 @@ async function getCustomerList() {
  */
 function onChangePage(page: number) {
   currentPage.value = page
-  getCustomerList()
+  if (selectedEventId.value !== null) {
+    applyClientSortAndPage()
+  } else {
+    getCustomerList()
+  }
 }
 
 /**
@@ -70,7 +149,11 @@ function onChangePage(page: number) {
 function onChangeSize(size: number) {
   pageSize.value = size
   currentPage.value = 0
-  getCustomerList()
+  if (selectedEventId.value !== null) {
+    applyClientSortAndPage()
+  } else {
+    getCustomerList()
+  }
 }
 
 /**
@@ -98,10 +181,20 @@ async function updateCustomerField(
 
 <template>
   <div class="customer">
-    <div class="header">
-      <h3>顧客管理</h3>
-      <div class="btn" @click="customerFormModalRef?.createCustomer()">新增</div>
-      <div class="btn" @click="isQuickEdit = !isQuickEdit" v-if="!isQuickEdit">快速編輯</div>
+    <h3>顧客管理</h3>
+    <div class="filterBar">
+      <div class="selectBox">
+        <select-component
+          label="活動篩選"
+          :optionList="eventOptions"
+          :defaultValue="eventOptions[0]"
+          @selectOption="onSelectEvent"
+        />
+      </div>
+      <div class="btnBox">
+        <div class="btn" @click="customerFormModalRef?.createCustomer()">新增</div>
+        <div class="btn" @click="isQuickEdit = !isQuickEdit" v-if="!isQuickEdit">快速編輯</div>
+      </div>
     </div>
 
     <div v-if="isQuickEdit" class="quick-edit-bar">
@@ -117,9 +210,12 @@ async function updateCustomerField(
       :currentPage="currentPage"
       :totalElements="totalElements"
       :pageSize="pageSize"
+      :sortField="sortField"
+      :sortDirection="sortDirection"
       @edit="customerFormModalRef?.editCustomer($event)"
       @change-page="onChangePage"
       @change-size="onChangeSize"
+      @sort="onSort"
     >
       <template #col-hasMessagedOfficial="{ row }">
         <checkbox-input
@@ -155,13 +251,22 @@ async function updateCustomerField(
 
 <style scoped>
 .customer {
-  .header {
+  .filterBar {
     display: flex;
-    align-items: center;
     gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
     margin-bottom: 1rem;
-    h3 {
-      margin: 0;
+
+    .selectBox {
+      display: flex;
+      gap: 1rem;
+      width: 200px;
+    }
+
+    .btnBox {
+      display: flex;
+      gap: 1rem;
     }
   }
 }
