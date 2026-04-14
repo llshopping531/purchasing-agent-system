@@ -11,6 +11,7 @@ import PaginationComponent from '@/components/PaginationComponent.vue'
 import ProductFormModal from './ProductFormModal.vue'
 import BatchProductFormModal from './BatchProductFormModal.vue'
 import SocialPostModal from './SocialPostModal.vue'
+import ProductImportModal from './ProductImportModal.vue'
 import { productsApi } from '@/services/api/products/products-api'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 import type { SelectOption } from '@/interfaces/common'
@@ -28,6 +29,8 @@ const productFormModalRef = ref<InstanceType<typeof ProductFormModal>>()
 const isShowBatchModal = ref(false)
 /** 是否顯示社群貼文彈窗 */
 const isShowSocialModal = ref(false)
+/** 是否顯示商品匯入彈窗 */
+const isShowImportModal = ref(false)
 
 /** 目前選取的活動 ID */
 const currentEventId = ref('')
@@ -193,6 +196,13 @@ function onChangeSize(size: number) {
           社群貼文
         </div>
         <div
+          class="btn btn-import"
+          v-if="isTableQueried && !currentEventIsLocked"
+          @click="isShowImportModal = true"
+        >
+          匯入
+        </div>
+        <div
           class="btn"
           v-if="isTableQueried && !currentEventIsLocked"
           @click="isShowBatchModal = true"
@@ -242,6 +252,12 @@ function onChangeSize(size: number) {
       :shopId="currentShopId"
       @confirmed="getProductList"
     />
+    <product-import-modal
+      v-if="isShowImportModal"
+      :eventId="currentEventId"
+      @confirmed="getProductList"
+      @close="isShowImportModal = false"
+    />
     <social-post-modal
       v-if="isShowSocialModal"
       :eventId="currentEventId"
@@ -271,6 +287,12 @@ function onChangeSize(size: number) {
     .btnBox {
       display: flex;
       gap: 0.75rem;
+    }
+    .btn-import {
+      background: color-mix(in srgb, var(--color-primary) 75%, transparent);
+      &:hover {
+        background: var(--color-primary);
+      }
     }
     .btn-social {
       background: color-mix(in srgb, var(--color-secondary-dark) 90%, transparent);
