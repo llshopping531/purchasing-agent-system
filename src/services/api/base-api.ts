@@ -124,22 +124,22 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 )
 
-api.interceptors.request.use(
-  async (config) => {
-    if (config.data !== undefined && config.url !== '/crypto/public-key') {
-      const HybridPayload = await cryptoService.getHybridPayload(config.data)
-      const newRequest = {
-        iv: HybridPayload.iv,
-        body:HybridPayload.body
-      }
-      config.headers['X-Encrypted-Key'] = HybridPayload.key
-      config.data = newRequest
-    }
+// api.interceptors.request.use(
+//   async (config) => {
+//     if (config.data !== undefined && config.url !== '/crypto/public-key') {
+//       const HybridPayload = await cryptoService.getHybridPayload(config.data)
+//       const newRequest = {
+//         iv: HybridPayload.iv,
+//         body:HybridPayload.body
+//       }
+//       config.headers['X-Encrypted-Key'] = HybridPayload.key
+//       config.data = newRequest
+//     }
 
-    return config
-  },
-  (error) => Promise.reject(error),
-)
+//     return config
+//   },
+//   (error) => Promise.reject(error),
+// )
 
 // 回應攔截器：關閉 loading、處理業務碼錯誤與 HTTP 錯誤
 api.interceptors.response.use(
