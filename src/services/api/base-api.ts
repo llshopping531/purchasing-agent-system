@@ -1,3 +1,4 @@
+import { ERROR_MESSAGE } from '@/constants/error-message.constant'
 import { useCryptoPublicKeyStore } from '@/stores/crypto-public-key'
 import { useErrorStore } from '@/stores/error'
 import { useLoadingStore } from '@/stores/loading'
@@ -113,7 +114,7 @@ api.interceptors.request.use(
     const key = getRequestKey(config)
     const now = Date.now()
     if (key === lastRequestKey && now - lastRequestTime < DUPLICATE_THRESHOLD_MS) {
-      useWarnStore().show('偵測到連續送出相同的請求，請確認是否需要再次提交。')
+      useWarnStore().show(ERROR_MESSAGE.DUPLICATE_REQUEST)
     }
     lastRequestKey = key
     lastRequestTime = now
@@ -146,7 +147,10 @@ api.interceptors.response.use(
     useLoadingStore().close()
     const data = response.data as BaseApiRes<unknown>
     if (data.code !== 200) {
-      useErrorStore().show(data.message)
+      let errorMessage = data.message
+      if(data.code === 500) errorMessage = ERROR_MESSAGE.SYSTEM_ERROR
+      if(data.code === 400) errorMessage = ERROR_MESSAGE.REQUEST_ERROR
+      useErrorStore().show(errorMessage)
       return Promise.reject(new Error(data.message))
     }
     return response
