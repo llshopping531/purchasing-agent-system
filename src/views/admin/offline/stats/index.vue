@@ -217,14 +217,8 @@ function formatTwd(val: number | null) {
         @changeSize="onChangeSize"
         @sort="onSort"
       >
-        <template #col-subtotalJpy="{ row }">
-          {{ formatJpy(row.subtotalJpy) }}
-        </template>
         <template #col-subtotalTwd="{ row }">
           {{ formatTwd(row.subtotalTwd) }}
-        </template>
-        <template #col-orderStatusName="{ row }">
-          <span class="status-badge">{{ row.orderStatusName }}</span>
         </template>
       </table-component>
     </div>
