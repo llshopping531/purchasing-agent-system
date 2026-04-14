@@ -1,9 +1,12 @@
+import { useCryptoPublicKeyStore } from '@/stores/crypto-public-key'
 import { useErrorStore } from '@/stores/error'
 import { useLoadingStore } from '@/stores/loading'
 import { useUserStore } from '@/stores/user'
 import { useWarnStore } from '@/stores/warn'
 import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
 import axios from 'axios'
+import { cryptoService } from '../crypto-service'
+import { cryptoApiService } from './crypto/crypto-api'
 
 // 重複請求偵測：記錄上一次的請求 key 與時間
 let lastRequestKey: string | null = null
@@ -114,6 +117,23 @@ api.interceptors.request.use(
     }
     lastRequestKey = key
     lastRequestTime = now
+
+    return config
+  },
+  (error) => Promise.reject(error),
+)
+
+api.interceptors.request.use(
+  async (config) => {
+    if (config.data !== undefined && config.url !== '/crypto/public-key') {
+      const HybridPayload = await cryptoService.getHybridPayload(config.data)
+      const newRequest = {
+        iv: HybridPayload.iv,
+        body:HybridPayload.body
+      }
+      config.headers['X-Encrypted-Key'] = HybridPayload.key
+      config.data = newRequest
+    }
 
     return config
   },
