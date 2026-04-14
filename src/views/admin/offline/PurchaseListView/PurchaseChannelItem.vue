@@ -87,6 +87,21 @@ const detailHeaderRow = ref<HeaderRow[]>([
 
 /** 是否展開採購明細表格 */
 const isOpen = ref(true)
+/** 是否顯示通路商品總覽彈窗 */
+const isShowSummaryModal = ref(false)
+
+/** 通路商品總覽表格欄位 */
+const summaryHeaderRow = ref<HeaderRow[]>([
+  { name: '商品名稱', value: 'productName', sort: 0 },
+  { name: '應買', value: 'shouldBuy', sort: 0, width: '100px' },
+  { name: '已買', value: 'purchased', sort: 0, width: '100px' },
+  { name: '未買', value: 'remaining', sort: 0, width: '100px' },
+])
+
+function openSummaryModal(e: MouseEvent) {
+  e.stopPropagation()
+  isShowSummaryModal.value = true
+}
 /** 當前查看的採購明細列表 */
 const currentDetail = ref<PurchaseDetail[]>([])
 /** 是否顯示詳細資料彈窗 */
@@ -171,6 +186,7 @@ async function purchaseCheck() {
     <!-- 通路標題列：點擊展開／收合 -->
     <div class="titleBox" @click="toggle">
       <h3>{{ channelName }}</h3>
+      <div class="view-btn" @click="openSummaryModal">檢視</div>
       <div class="toggleBtn">
         <span class="icon" :class="{ active: isOpen }"></span>
       </div>
@@ -250,6 +266,20 @@ async function purchaseCheck() {
     </div>
   </div>
 
+  <!-- 通路商品總覽彈窗 -->
+  <modal-component
+    v-if="isShowSummaryModal"
+    :name="`${channelName} 商品總覽`"
+    @confirm="isShowSummaryModal = false"
+  >
+    <template #content>
+      <div v-for="item in data" :key="item.productId" class="view-list">
+        <div class="view-item">{{ item.productName }}</div>
+        <div class="view-item">尚未購買：{{ item.shouldBuy }}</div>
+      </div>
+    </template>
+  </modal-component>
+
   <!-- 詳細資料彈窗 -->
   <modal-component v-if="isShowDetailModal" name="詳細資料" @confirm="isShowDetailModal = false">
     <template #content>
@@ -318,6 +348,35 @@ async function purchaseCheck() {
   margin: 1rem 0;
 }
 
+/* 檢視按鈕 */
+.view-btn {
+  font-size: 0.8rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  color: var(--color-primary);
+  cursor: pointer;
+  margin-left: 0.5rem;
+
+  &:hover {
+    background-color: var(--color-primary);
+    color: #fff;
+  }
+}
+.view-list {
+  display: flex;
+  gap: 0.5rem;
+  border-radius: .25rem;
+  &:nth-child(even) {
+    background: #ececec;
+  }
+  .view-item {
+    width: 150px;
+    margin-bottom: 0.25rem;
+    padding: 0.25rem;
+  }
+}
+
 /* 展開／收合按鈕容器 */
 .toggleBtn {
   position: relative;
@@ -349,7 +408,7 @@ async function purchaseCheck() {
   }
 }
 
-.sub-title{
+.sub-title {
   display: flex;
   margin-bottom: 1rem;
   align-items: center;
@@ -378,7 +437,7 @@ async function purchaseCheck() {
 /* 數量總計列 */
 .total-row {
   display: flex;
-  gap: .5rem;
+  gap: 0.5rem;
   align-items: center;
   font-size: 0.9rem;
   padding: 0.4rem 0.5rem;
@@ -394,7 +453,7 @@ async function purchaseCheck() {
     color: var(--color-text, #111);
   }
 }
-.table-box{
+.table-box {
   margin-bottom: 1rem;
 }
 
