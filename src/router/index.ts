@@ -96,6 +96,11 @@ const router = createRouter({
               name: 'ProfitShareView',
               component: () => import('../views/admin/offline/profitShare/index.vue'),
             },
+            {
+              path: 'threads',
+              name: 'ThreadsView',
+              component: () => import('../views/admin/offline/threads/index.vue'),
+            },
           ],
         },
         {

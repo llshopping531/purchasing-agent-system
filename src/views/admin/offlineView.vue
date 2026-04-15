@@ -14,6 +14,7 @@ import IconFlag from '@/components/icons/IconFlag.vue'
 import IconHouse from '@/components/icons/IconHouse.vue'
 import IconChartSimple from '@/components/icons/IconChartSimple.vue'
 import IconMoneyBill from '@/components/icons/IconMoneyBill.vue'
+import IconCommunity from '@/components/icons/IconCommunity.vue'
 
 const isCollapsed = ref(false)
 const uiStore = useUiStore()
@@ -28,6 +29,7 @@ const customerOrdersItem = { name: '個人購物清單', path: PATH.offlineCusto
 const channelItem = { name: '通路管理', path: PATH.offlineChannel }
 const statsItem = { name: '訂單總覽', path: PATH.offlineStats }
 const profitShareItem = { name: '分潤查詢', path: PATH.offlineProfitShare }
+const threadsItem = { name: 'Threads 留言', path: PATH.threads }
 
 router.afterEach(() => {
   uiStore.closeSidebar()
@@ -129,6 +131,17 @@ router.afterEach(() => {
           <router-link :to="customerOrdersItem.path" class="nav-item" :title="isCollapsed ? customerOrdersItem.name : ''">
             <icon-cart-shopping class="nav-icon" />
             <span class="nav-item-name">{{ customerOrdersItem.name }}</span>
+          </router-link>
+        </div>
+
+        <!-- 社群管理 -->
+        <div class="nav-group">
+          <div class="nav-group-label">社群管理</div>
+
+          <!-- Threads 留言 -->
+          <router-link :to="threadsItem.path" class="nav-item" :title="isCollapsed ? threadsItem.name : ''">
+            <icon-community class="nav-icon" />
+            <span class="nav-item-name">{{ threadsItem.name }}</span>
           </router-link>
         </div>
       </nav>
