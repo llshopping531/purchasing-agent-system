@@ -8,6 +8,7 @@ import EventSelectComponent from '@/components/inputs/selects/EventSelectCompone
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import PaginationComponent from '@/components/PaginationComponent.vue'
+import TextInput from '@/components/inputs/TextInput.vue'
 import ProductFormModal from './ProductFormModal.vue'
 import BatchProductFormModal from './BatchProductFormModal.vue'
 import SocialPostModal from './SocialPostModal.vue'
@@ -52,8 +53,8 @@ const isShowChannelSelect = ref(false)
 /** 表格欄位定義 */
 const headerRow: HeaderRow[] = [
   { name: '商品名稱', value: 'name', sort: 0, width: '250px', mobileSpan: 2 },
-  { name: '日幣定價', value: 'priceJpy', sort: 1, width: '100px' },
-  { name: '台幣定價', value: 'priceTwd', sort: 2, width: '100px' },
+  { name: '日幣定價', value: 'priceJpy', sort: 1, width: '100px', sortable: true },
+  { name: '台幣定價', value: 'priceTwd', sort: 2, width: '100px', sortable: true },
   { name: '匯率', value: 'exchangeRate', sort: 3, width: '80px' },
   { name: '盲抽', value: 'isBlindBox', sort: 4, width: '70px' },
   { name: '圖片', value: 'image', sort: 5 },
@@ -71,6 +72,12 @@ const totalPages = ref(0)
 const totalElements = ref(0)
 /** 當前通路是否已鎖定 */
 const currentEventIsLocked = ref(true)
+/** 商品名稱篩選關鍵字 */
+const keyword = ref('')
+/** 目前排序欄位 */
+const sortField = ref<string | undefined>(undefined)
+/** 目前排序方向 */
+const sortDirection = ref<'ASC' | 'DESC' | undefined>(undefined)
 
 onMounted(async () => {
   const prev = searchStore.getSearchStore('PRODUCT')
@@ -150,6 +157,9 @@ async function getProductList() {
     channelId: Number(currentShopId.value),
     page: currentPage.value,
     size: pageSize.value,
+    keyword: keyword.value || undefined,
+    sort: sortField.value,
+    direction: sortDirection.value,
   })
   tableData.value = res.content
   totalPages.value = res.totalPages
@@ -175,6 +185,31 @@ function onChangeSize(size: number) {
   currentPage.value = 0
   getProductList()
 }
+
+/**
+ * 點擊欄位排序
+ */
+function onSort(field: string, direction: 'ASC' | 'DESC') {
+  sortField.value = field
+  sortDirection.value = direction
+  currentPage.value = 0
+  getProductList()
+}
+
+/**
+ * 商品名稱關鍵字變更
+ */
+function onKeyword(val: string | number) {
+  keyword.value = String(val)
+}
+
+/**
+ * 確定篩選，重置頁碼並查詢
+ */
+function onSearch() {
+  currentPage.value = 0
+  getProductList()
+}
 </script>
 
 <template>
@@ -190,6 +225,14 @@ function onChangeSize(size: number) {
           :initialId="currentShopId || undefined"
           @selectOption="selectShop"
         />
+      </div>
+      <div v-if="isTableQueried" class="keyword-bar">
+        <text-input
+          label="商品名稱"
+          :value="keyword"
+          @update:value="onKeyword"
+        />
+        <div class="btn filter-btn" @click="onSearch">確定</div>
       </div>
       <div class="btnBox">
         <div class="btn btn-social" v-if="isTableQueried" @click="isShowSocialModal = true">
@@ -217,6 +260,9 @@ function onChangeSize(size: number) {
       :tableData="tableData"
       :is-delete="!currentEventIsLocked"
       :is-edit="!currentEventIsLocked"
+      :sortField="sortField"
+      :sortDirection="sortDirection"
+      @sort="onSort"
       @edit="productFormModalRef?.editProduct($event)"
       @delete="productFormModalRef?.deleteProduct($event)"
     >
@@ -276,6 +322,14 @@ function onChangeSize(size: number) {
     display: flex;
     gap: 1rem;
     row-gap: 0.25rem;
+  }
+  .keyword-bar {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+    .filter-btn {
+      white-space: nowrap;
+    }
   }
   .productHeader {
     display: flex;

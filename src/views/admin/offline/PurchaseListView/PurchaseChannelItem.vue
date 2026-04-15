@@ -11,7 +11,7 @@ import type {
   PurchaseListData,
   QueryPurchaseDetailReq,
 } from '@/services/api/purchase/purchase-api-interface'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { purchaseListApi } from '@/services/api/purchase/purchase-api'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
@@ -47,10 +47,30 @@ const blindHeaderRow = ref<HeaderRow[]>([
   { name: '盲抽未拆', value: 'blindBoxNotDrawn', sort: 0, width: '100px' },
 ])
 
+/** 商品名稱篩選關鍵字 */
+const productNameKeyword = ref('')
+
 /** 非盲抽商品 */
-const normalData = computed(() => pops.data.filter((item) => !item.isBlindBox))
+const normalData = computed(() =>
+  pops.data.filter(
+    (item) =>
+      !item.isBlindBox &&
+      (!productNameKeyword.value || item.productName.includes(productNameKeyword.value)),
+  ),
+)
 /** 盲抽商品 */
-const blindData = computed(() => pops.data.filter((item) => item.isBlindBox))
+const blindData = computed(() =>
+  pops.data.filter(
+    (item) =>
+      item.isBlindBox &&
+      (!productNameKeyword.value || item.productName.includes(productNameKeyword.value)),
+  ),
+)
+
+// 父層資料更新時重置篩選
+watch(() => pops.data, () => {
+  productNameKeyword.value = ''
+})
 
 /** 非盲抽各欄總計 */
 const normalTotal = computed(() =>
@@ -83,20 +103,13 @@ const detailHeaderRow = ref<HeaderRow[]>([
   { name: '顧客名稱', value: 'customerName', sort: 0, width: '100px' },
   { name: '喊單數量', value: 'quantity', sort: 0, width: '100px' },
   { name: '購買狀況', value: 'orderStatusName', sort: 0, width: '100px' },
+  { name: '備注', value: 'note', sort: 0, width: '150px' },
 ])
 
 /** 是否展開採購明細表格 */
 const isOpen = ref(true)
 /** 是否顯示通路商品總覽彈窗 */
 const isShowSummaryModal = ref(false)
-
-/** 通路商品總覽表格欄位 */
-const summaryHeaderRow = ref<HeaderRow[]>([
-  { name: '商品名稱', value: 'productName', sort: 0 },
-  { name: '應買', value: 'shouldBuy', sort: 0, width: '100px' },
-  { name: '已買', value: 'purchased', sort: 0, width: '100px' },
-  { name: '未買', value: 'remaining', sort: 0, width: '100px' },
-])
 
 function openSummaryModal(e: MouseEvent) {
   e.stopPropagation()
@@ -194,6 +207,13 @@ async function purchaseCheck() {
 
     <!-- 採購明細表格 -->
     <div v-if="isOpen">
+      <div class="product-filter">
+        <text-input
+          label="商品名稱篩選"
+          :value="productNameKeyword"
+          @update:value="productNameKeyword = String($event)"
+        />
+      </div>
       <!-- 盲抽表格 -->
       <template v-if="blindData.length > 0">
         <div class="sub-title">
@@ -453,6 +473,11 @@ async function purchaseCheck() {
     color: var(--color-text, #111);
   }
 }
+.product-filter {
+  margin-bottom: 0.75rem;
+  max-width: 220px;
+}
+
 .table-box {
   margin-bottom: 1rem;
 }

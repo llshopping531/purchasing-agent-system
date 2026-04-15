@@ -10,6 +10,8 @@ export interface QueryProductsReq {
   channelId: number
   /** 客戶關鍵字 */
   customerKeyword?: string
+  /** 商品名稱關鍵字 */
+  keyword?: string
   /** 第幾頁 */
   page?: number
   /** 一頁有幾筆資料 */

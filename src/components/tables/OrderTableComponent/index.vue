@@ -5,6 +5,7 @@
  */
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
+import TextInput from '@/components/inputs/TextInput.vue'
 import { fieldDefsApi } from '@/services/api/sys/field-defs-api'
 import { orderApi, type OrderAllContent } from '@/services/api/order/order-api'
 import { onMounted, ref, watch } from 'vue'
@@ -64,6 +65,9 @@ const selectedBlindOrder = ref<OrderAllContent | null>(null)
 const isShowDrawsModal = ref(false)
 /** 系統自定義欄位定義清單（用於詳細資料彈窗動態欄位） */
 const extraFields = ref<{ name: string; value: string }[]>([])
+
+/** 客戶名稱篩選關鍵字 */
+const customerKeyword = ref('')
 
 /** 當前頁碼（0-based） */
 const currentPage = ref(0)
@@ -167,7 +171,6 @@ async function getFieldDefsApi() {
  */
 async function getOrderList() {
   if (!pop.currentEventId || !pop.currentShopId) return
-console.log(pop.currentShopId)
   const res = await orderApi.getOrders({
     eventId: Number(pop.currentEventId),
     channelId: Number(pop.currentShopId),
@@ -175,6 +178,7 @@ console.log(pop.currentShopId)
     size: pageSize.value,
     sort: sortField.value,
     direction: sortDirection.value,
+    customerKeyword: customerKeyword.value || undefined,
   })
   tableData.value = res.content
   totalPages.value = res.totalPages
@@ -215,6 +219,14 @@ async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
 
 <template>
   <div class="orderTable">
+    <div class="filter-bar">
+      <text-input
+        label="客戶名稱"
+        :value="customerKeyword"
+        @update:value="customerKeyword = String($event)"
+      />
+      <div class="btn filter-btn" @click="currentPage = 0; getOrderList()">確定</div>
+    </div>
     <table-component
       :headerRow="headerRow"
       :is-edit="isOperate"
@@ -293,6 +305,15 @@ async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
 </template>
 
 <style scoped>
+.filter-bar {
+  margin-bottom: 0.75rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+.filter-btn {
+  white-space: nowrap;
+}
 .cancelled {
   color: var(--color-danger);
   text-decoration: line-through;
