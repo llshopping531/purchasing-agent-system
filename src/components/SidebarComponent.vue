@@ -33,7 +33,7 @@ const isZoneOpen = ref(false)
 
 const currentZone = computed(() => ZONES.find((z) => route.path.startsWith(z.path)) ?? ZONES[0])
 
-const otherZones = computed(() => ZONES.filter((z) => z.path !== currentZone.value.path))
+const otherZones = computed(() => ZONES.filter((z) => z.path !== currentZone.value?.path))
 </script>
 
 <template>
