@@ -96,11 +96,6 @@ const router = createRouter({
               name: 'ProfitShareView',
               component: () => import('../views/admin/offline/profitShare/index.vue'),
             },
-            {
-              path: 'threads',
-              name: 'ThreadsView',
-              component: () => import('../views/admin/offline/threads/index.vue'),
-            },
           ],
         },
         {
@@ -120,6 +115,23 @@ const router = createRouter({
           path: 'checkout',
           name: 'checkout',
           component: () => import('../views/admin/checkoutView.vue'),
+        },
+        {
+          /** 系統專區 */
+          path: 'system',
+          name: 'system',
+          component: () => import('../views/admin/systemView.vue'),
+          children: [
+            {
+              path: '',
+              redirect: '/admin/system/threads',
+            },
+            {
+              path: 'threads',
+              name: 'ThreadsView',
+              component: () => import('../views/admin/offline/threads/index.vue'),
+            },
+          ],
         },
       ],
     },

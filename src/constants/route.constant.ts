@@ -31,6 +31,8 @@ export const PATH = {
   /** 通販專區入口 */
   online: '/admin/online',
 
-  /** Threads 留言查詢 */
-  threads: '/admin/offline/threads',
+  /** 系統專區入口 */
+  system: '/admin/system',
+  /** 系統－Threads 留言查詢 */
+  systemThreads: '/admin/system/threads',
 }

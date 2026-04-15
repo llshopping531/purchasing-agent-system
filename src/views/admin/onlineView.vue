@@ -1,56 +1,71 @@
 <script setup lang="ts">
-/**
- * 通販專區頁面（尚在開發中）
- * 目前使用靜態假資料，待後端 API 完成後替換
- */
+import { useRouter } from 'vue-router'
+import { useUiStore } from '@/stores/ui'
+import SidebarComponent from '@/components/SidebarComponent.vue'
 
-/** 活動項目結構 */
-interface EventItem {
-  /** 活動 ID */
-  id: number
-  /** 活動名稱 */
-  name: string
-}
+const uiStore = useUiStore()
+const router = useRouter()
 
-/** 通販活動清單（暫時為靜態假資料） */
-const eventList: EventItem[] = [
-  { id: 0, name: '12月' },
-  { id: 1, name: '3月' },
-]
-
-/** 通路清單（暫時為靜態假資料） */
-const shopList: EventItem[] = [
-  { id: 0, name: '大交流展' },
-  { id: 1, name: 'plaza' },
-]
+router.afterEach(() => {
+  uiStore.closeSidebar()
+})
 </script>
+
 <template>
-  <div class="offline">
-    <h1>通販專區</h1>
-    <div class="shopList">
-      <select name="event" id="event" class="shopSelect">
-        <option :value="eventItem.id" v-for="eventItem in eventList" :key="eventItem.id">
-          {{ eventItem.name }}
-        </option>
-      </select>
-      <select name="shop" id="shop" class="shopSelect">
-        <option :value="shopItem.id" v-for="shopItem in shopList" :key="shopItem.id">
-          {{ shopItem.name }}
-        </option>
-      </select>
-    </div>
-    <router-view></router-view>
+  <div class="layout">
+    <sidebar-component>
+      <template #default>
+        <div class="nav-group">
+          <div class="nav-group-label">通販專區</div>
+        </div>
+      </template>
+    </sidebar-component>
+
+    <main class="main-content">
+      <router-view>
+        <div class="placeholder">通販專區開發中</div>
+      </router-view>
+    </main>
   </div>
 </template>
 
-<style>
-.shopList {
+<style scoped>
+.layout {
   display: flex;
-  gap: 1rem;
-  .shopSelect {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    border: 1px solid var(--color-primary);
+  min-height: calc(100vh - 100px);
+}
+
+.main-content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow: auto;
+  min-width: 0;
+}
+
+.placeholder {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
   }
+}
+
+:deep(.nav-group) {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+:deep(.nav-group-label) {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.06em;
+  padding: 0 14px 4px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 </style>
