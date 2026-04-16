@@ -207,6 +207,11 @@ async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
   })
   await getOrderList()
 }
+
+function filterCustomer() {
+  currentPage.value = 0
+  getOrderList()
+}
 </script>
 
 <template>
@@ -217,15 +222,7 @@ async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
         :value="customerKeyword"
         @update:value="customerKeyword = String($event)"
       />
-      <div
-        class="btn filter-btn"
-        @click="
-          currentPage = 0
-          getOrderList()
-        "
-      >
-        確定
-      </div>
+      <div class="btn filter-btn" @click="filterCustomer()">確定</div>
     </div>
     <table-component
       :headerRow="headerRow"
@@ -262,7 +259,7 @@ async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
       <template #col-orderStatusName="{ row }">
         <order-status-select-component
           :defaultValue="row.orderStatus"
-          @selectOption="updateOrderStatus(row, $event.value)"
+          @selectOption="updateOrderStatus(row, $event.value ?? '')"
           :isDisplayLable="false"
         ></order-status-select-component>
       </template>
