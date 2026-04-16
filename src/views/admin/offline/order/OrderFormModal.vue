@@ -37,7 +37,7 @@ const currentOrderId = ref(0)
 
 // ── 顧客 / 商品選取 ────────────────────────────────────────────
 /** 選取的顧客 Option */
-const formCustomerOption = ref<SelectOption<CustomersResBase> | undefined>(undefined)
+const formCustomerOption = ref<SelectOption<CustomersResBase | undefined> | undefined>(undefined)
 /** 選取的商品 Option */
 const formProductOption = ref<SelectOption<ProductsResBase> | undefined>(undefined)
 /** 商品定價資訊（供顯示用） */
@@ -157,7 +157,7 @@ async function confirm() {
     await orderApi.patchOrders(currentOrderId.value, {
       eventId: Number(props.eventId),
       channelId: Number(props.shopId),
-      customerId: formCustomerOption.value?.value.id ?? 0,
+      customerId: formCustomerOption.value?.value?.id ?? 0,
       productId: formProductOption.value?.value.id ?? 0,
       quantity: formQuantity.value ?? 0,
       exchangeRate: formExchangeRate.value ?? undefined,

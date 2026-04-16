@@ -66,7 +66,7 @@ const hasSuccess = computed(() => queue.value.some((i) => i.status === 'success'
 const form = reactive({
   // 顧客
   isNewCustomer: false,
-  customerOption: undefined as SelectOption<CustomersResBase> | undefined,
+  customerOption: undefined as SelectOption<CustomersResBase | undefined> | undefined,
   newCustomerName: '',
   newCustomerSource: '',
   hasMessagedOfficial: false,
@@ -75,7 +75,7 @@ const form = reactive({
   newCustomerNote: '',
   // 商品
   isNewProduct: false,
-  productOption: undefined as SelectOption<ProductsResBase> | undefined,
+  productOption: undefined as SelectOption<ProductsResBase |undefined> | undefined,
   newProductName: '',
   newProductPriceJpy: null as number | null,
   newProductExchangeRate: null as number | null,
@@ -179,7 +179,7 @@ async function addAndSubmit() {
 
   // 建立顧客 / 商品後送出訂單，不等待
   const submit = async () => {
-    let customerId = snap.customerOption?.value.id ?? 0
+    let customerId = snap.customerOption?.value?.id ?? 0
     if (snap.isNewCustomer) {
       const newCustomer = await customersApi.postCustomers({
         name: snap.newCustomerName,
@@ -192,7 +192,7 @@ async function addAndSubmit() {
       customerId = newCustomer.id
     }
 
-    let productId = snap.productOption?.value.id ?? 0
+    let productId = snap.productOption?.value?.id ?? 0
     if (snap.isNewProduct) {
       const newProduct = await productsApi.postProducts({
         eventId: Number(props.eventId),

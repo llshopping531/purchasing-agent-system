@@ -42,7 +42,7 @@ const transformFormNote = ref('')
 const formResultError = ref('')
 
 /** 選取的現有顧客 Option */
-const formCustomerOption = ref<SelectOption<CustomersResBase> | undefined>(undefined)
+const formCustomerOption = ref<SelectOption<CustomersResBase | undefined> | undefined>(undefined)
 /** 選取的抽取結果 id 陣列 */
 const selectedItem = ref<string[]>([])
 
@@ -137,7 +137,7 @@ async function confirmInner() {
     if(!formCustomerOption.value) return
     const drawIds = [...selectedItem.value].map(item => Number(item))
     const req: DrawsTransferReq = {
-      targetCustomerId: formCustomerOption.value.value.id,
+      targetCustomerId: formCustomerOption.value.value?.id ?? 0,
       quantity: drawIds.length,
       remark: transformFormNote.value,
       drawIds: drawIds
