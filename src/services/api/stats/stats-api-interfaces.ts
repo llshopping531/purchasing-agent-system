@@ -1,4 +1,4 @@
-import type { ExtraData } from "../common-api-interface"
+import type { ExtraData } from '../common-api-interface'
 
 /**
  * 查詢訂單總覽 request
@@ -8,6 +8,8 @@ export interface QueryStatsOverviewReq {
   eventId: number
   /** 通路 ID（可選，不指定時查詢全通路） */
   channelId?: number
+  /** 訂單狀態（可選，多選用逗號分隔，'1'=已喊單 '2'=已購買 '3'=已取消 '4'=缺貨） */
+  orderStatus?: string
   /** 第幾頁 */
   page?: number
   /** 一頁有幾筆資料 */

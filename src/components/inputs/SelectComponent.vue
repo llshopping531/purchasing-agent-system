@@ -5,17 +5,23 @@
  */
 import { ref, shallowRef, watch } from 'vue'
 import type { SelectOption } from '../../interfaces/common'
-
-const pop = defineProps<{
-  /** 選單標籤文字 */
-  label: string
-  /** 預設選取值 */
-  defaultValue: SelectOption<T> | undefined
-  /** 完整選項清單 */
-  optionList: SelectOption<T>[]
-  /** 是否為必填欄位（顯示紅色星號） */
-  required?: boolean
-}>()
+const pop = withDefaults(
+  defineProps<{
+    /** 選單標籤文字 */
+    label: string
+    /** 預設選取值 */
+    defaultValue: SelectOption<T> | undefined
+    /** 完整選項清單 */
+    optionList: SelectOption<T>[]
+    /** 是否為必填欄位（顯示紅色星號） */
+    required?: boolean
+    /** 是否顯示欄位名稱 */
+    isDisplayLable?: boolean
+  }>(),
+  {
+    isDisplayLable: true,
+  },
+)
 
 const emit = defineEmits<{
   /** 使用者選取選項時觸發，帶出選取的 Option */
@@ -76,7 +82,9 @@ function filter() {
 
 <template>
   <div class="select">
-    <span class="label">{{ label }}<span v-if="pop.required" class="required-mark">*</span></span>
+    <span v-show="isDisplayLable" class="label"
+      >{{ label }}<span v-if="pop.required" class="required-mark">*</span></span
+    >
     <input
       class="currentValue"
       type="text"

@@ -13,6 +13,7 @@ import type { SelectOption } from '@/interfaces/common'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
 import { useSearchStore } from '@/stores/search'
+import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
 
 const searchStore = useSearchStore()
 
@@ -36,15 +37,24 @@ const totalPages = ref(0)
 const totalElements = ref(0)
 const sortField = ref('id')
 const sortDirection = ref<'ASC' | 'DESC'>('DESC')
+const currentStatus = ref<string | undefined>(undefined)
 
 const headerRow: HeaderRow[] = [
   { name: '顧客名稱', value: 'customerName', sort: 0, width: '120px', sortable: true },
   { name: '通路', value: 'channelName', sort: 6, width: '100px' },
-  { name: '商品名稱', value: 'productName', sort: 1, width: '200px', sortable: true,mobileSpan:2 },
+  {
+    name: '商品名稱',
+    value: 'productName',
+    sort: 1,
+    width: '200px',
+    sortable: true,
+    mobileSpan: 2,
+  },
   { name: '數量', value: 'quantity', sort: 2, width: '70px', sortable: true },
-  { name: '日幣小計', value: 'subtotalJpy', sort: 3, width: '110px', sortable: true },
-  { name: '台幣小計', value: 'subtotalTwd', sort: 4, width: '110px', sortable: true },
+  { name: '日幣小計', value: 'displaySubtotalJpy', sort: 3, width: '110px', sortable: true },
+  { name: '台幣小計', value: 'displaySubtotalTwd', sort: 4, width: '110px', sortable: true },
   { name: '訂單狀態', value: 'orderStatusName', sort: 5, width: '100px' },
+  { name: '備註', value: 'note', sort: 5, width: '100px' },
   { name: '採購者', value: 'purchaserName', sort: 7, width: '100px' },
 ]
 
@@ -66,7 +76,10 @@ function selectEvent(data: SelectOption<EventsResBase | null>) {
   channelTotals.value = null
   tableData.value = []
   currentPage.value = 0
-  searchStore.setSearchStore({ name: 'STATS', condition: { eventId: currentEventId.value, channelId: null } })
+  searchStore.setSearchStore({
+    name: 'STATS',
+    condition: { eventId: currentEventId.value, channelId: null },
+  })
   fetchAll()
 }
 
@@ -74,7 +87,10 @@ function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
   currentChannelId.value = data.value?.id.toString() ?? ''
   channelTotals.value = null
   currentPage.value = 0
-  searchStore.setSearchStore({ name: 'STATS', condition: { eventId: currentEventId.value, channelId: currentChannelId.value || null } })
+  searchStore.setSearchStore({
+    name: 'STATS',
+    condition: { eventId: currentEventId.value, channelId: currentChannelId.value || null },
+  })
   fetchAll()
 }
 
@@ -97,11 +113,17 @@ async function fetchChannelTotals() {
   })
 }
 
+function updateOrderStatus(status: string | undefined) {
+  currentStatus.value = status
+  fetchOverview()
+}
+
 async function fetchOverview() {
   if (!currentEventId.value) return
   const res = await statsApi.getStatsOverview({
     eventId: Number(currentEventId.value),
     channelId: currentChannelId.value ? Number(currentChannelId.value) : undefined,
+    orderStatus: currentStatus.value,
     page: currentPage.value,
     size: pageSize.value,
     sort: sortField.value,
@@ -164,6 +186,13 @@ function formatTwd(val: number | null) {
           :isShowAll="true"
           @selectOption="selectShop"
         />
+      </div>
+      <div v-if="currentEventId" class="keyword-bar">
+        <order-status-select-component
+          :defaultValue="currentStatus"
+          @selectOption="updateOrderStatus($event.value)"
+          :isDisplayAll="true"
+        ></order-status-select-component>
       </div>
     </div>
 

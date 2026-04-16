@@ -4,21 +4,13 @@
  * 整合訂單列表查詢、分頁、詳細資料彈窗，並向上 emit 編輯／刪除事件
  */
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
-import SelectComponent from '@/components/inputs/SelectComponent.vue'
+import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import { fieldDefsApi } from '@/services/api/sys/field-defs-api'
 import { orderApi, type OrderAllContent } from '@/services/api/order/order-api'
 import { onMounted, ref, watch } from 'vue'
 import OrderDetailModal from './OrderDetailModal.vue'
 import DrawsResultModal from './DrawsResultModal.vue'
-import type { SelectOption } from '@/interfaces/common'
-
-const orderStatusOptions: SelectOption<string>[] = [
-  { value: '1', name: '已喊單' },
-  { value: '2', name: '已購買' },
-  { value: '3', name: '已取消' },
-  { value: '4', name: '缺貨' }
-]
 
 const pop = defineProps<{
   /** 目前選取的活動 ID（字串形式） */
@@ -225,7 +217,15 @@ async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
         :value="customerKeyword"
         @update:value="customerKeyword = String($event)"
       />
-      <div class="btn filter-btn" @click="currentPage = 0; getOrderList()">確定</div>
+      <div
+        class="btn filter-btn"
+        @click="
+          currentPage = 0
+          getOrderList()
+        "
+      >
+        確定
+      </div>
     </div>
     <table-component
       :headerRow="headerRow"
@@ -260,17 +260,11 @@ async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
         </span>
       </template>
       <template #col-orderStatusName="{ row }">
-        <select-component
-          v-if="isOperate"
-          label=""
-          class="status-select"
-          :defaultValue="{ value: row.orderStatus, name: row.orderStatusName }"
-          :optionList="orderStatusOptions"
+        <order-status-select-component
+          :defaultValue="row.orderStatus"
           @selectOption="updateOrderStatus(row, $event.value)"
-        />
-        <span v-else :class="{ cancelled: row.orderStatusName === '已取消' }">
-          {{ row.orderStatusName }}
-        </span>
+          :isDisplayLable="false"
+        ></order-status-select-component>
       </template>
       <template #col-more="{ row }">
         <div class="more-icons">
@@ -283,7 +277,9 @@ async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
             @click="openDraws(row)"
             title="查看盲抽結果"
           >
-            <span class="draws-icon"></span>拆拆<template v-if="row.drawCount">({{ row.drawCount }})</template>
+            <span class="draws-icon"></span>拆拆<template v-if="row.drawCount"
+              >({{ row.drawCount }})</template
+            >
           </div>
         </div>
       </template>

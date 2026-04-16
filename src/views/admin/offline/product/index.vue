@@ -238,13 +238,13 @@ function onSearch() {
         <div class="btn btn-social" v-if="isTableQueried" @click="isShowSocialModal = true">
           社群貼文
         </div>
-        <div
+        <!-- <div
           class="btn btn-import"
           v-if="isTableQueried && !currentEventIsLocked"
           @click="isShowImportModal = true"
         >
           匯入
-        </div>
+        </div> -->
         <div
           class="btn"
           v-if="isTableQueried && !currentEventIsLocked"
