@@ -57,10 +57,8 @@ const selectedBlindOrder = ref<OrderAllContent | null>(null)
 const isShowDrawsModal = ref(false)
 /** 系統自定義欄位定義清單（用於詳細資料彈窗動態欄位） */
 const extraFields = ref<{ name: string; value: string }[]>([])
-
-/** 客戶名稱篩選關鍵字 */
-const customerKeyword = ref('')
-
+/** 客戶或商品名稱篩選關鍵字 */
+const keyword = ref('')
 /** 當前頁碼（0-based） */
 const currentPage = ref(0)
 /** 每頁筆數 */
@@ -170,7 +168,7 @@ async function getOrderList() {
     size: pageSize.value,
     sort: sortField.value,
     direction: sortDirection.value,
-    customerKeyword: customerKeyword.value || undefined,
+    keyword: keyword.value || undefined,
   })
   tableData.value = res.content
   totalPages.value = res.totalPages
@@ -218,9 +216,9 @@ function filterCustomer() {
   <div class="orderTable">
     <div class="filter-bar">
       <text-input
-        label="客戶名稱"
-        :value="customerKeyword"
-        @update:value="customerKeyword = String($event)"
+        label="客戶或商品名稱"
+        :value="keyword"
+        @update:value="keyword = String($event)"
       />
       <div class="btn filter-btn" @click="filterCustomer()">確定</div>
     </div>

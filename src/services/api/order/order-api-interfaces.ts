@@ -9,7 +9,7 @@ export interface OrderQueryReq {
   /** 通路 ID */
   channelId: number
   /** 客戶關鍵字 */
-  customerKeyword?: string
+  keyword?: string
   /** 第幾頁 */
   page?: number
   /** 一頁有幾筆資料 */

@@ -352,11 +352,11 @@ async function updateDetailOrderStatus(row: PurchaseDetail, newStatus: string) {
       </div>
 
       <!-- 已買回報輸入 -->
-      <p class="section-label">已買回報：</p>
+      <!-- <p class="section-label">已買回報：</p>
       <div class="report-section">
         <text-input label="購買數量" v-model:value="buyedNum" />
         <div class="btn" @click="isOpenCheckConfirmModal = true">確定回報</div>
-      </div>
+      </div> -->
 
       <!-- 明細表格 -->
       <p class="section-label">明細：</p>
