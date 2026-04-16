@@ -10,6 +10,10 @@ export interface QueryStatsOverviewReq {
   channelId?: number
   /** 訂單狀態（可選，多選用逗號分隔，'1'=已喊單 '2'=已購買 '3'=已取消 '4'=缺貨） */
   orderStatus?: string
+  /** 顧客 ID（可選） */
+  customerId?: number
+  /** 商品 ID（可選） */
+  productId?: number
   /** 第幾頁 */
   page?: number
   /** 一頁有幾筆資料 */
@@ -35,6 +39,7 @@ export interface QueryStatsOverviewRes {
 export interface StatsOverviewItem {
   /** 訂單 ID */
   id: number
+  eventId: string
   channelId: string
   /** 通路名稱 */
   channelName: string
@@ -48,14 +53,28 @@ export interface StatsOverviewItem {
   productName: string
   /** 數量 */
   quantity: number
+  /** 匯率 */
+  exchangeRate: number
+  /** 日幣小計 */
+  subtotalJpy: number
   /** 台幣小計 */
   subtotalTwd: number
-  /** 成本 (TWD)：商品日幣 × 成本匯率 × 數量 */
-  cost: number
-  /** 獲利 (TWD)：小計 − 成本 */
-  profit: number
-  /** 分潤 (TWD)：獲利 × 分潤比 */
-  profitShare: number
+  /** 顯示用日幣（缺貨時為 0） */
+  displaySubtotalJpy: number
+  /** 顯示用台幣（缺貨時為 0）） */
+  displaySubtotalTwd: number
+  /** 訂單狀態 */
+  orderStatus: string
+  /** 訂單狀態名稱 */
+  orderStatusName: string
+  /** 不計入贈品 */
+  nonBonusTarget: boolean
+  /** 固定匯率 */
+  isFixedRate: boolean
+  /** 不計入分潤 */
+  nonCutTarget: boolean
+  /** 備註 */
+  note: string
   /** 自定義欄位 */
   extraData: ExtraData
 }

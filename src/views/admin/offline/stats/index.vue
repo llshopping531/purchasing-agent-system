@@ -14,6 +14,8 @@ import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
 import { useSearchStore } from '@/stores/search'
 import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
+import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
+import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
 
 const searchStore = useSearchStore()
 
@@ -38,6 +40,8 @@ const totalElements = ref(0)
 const sortField = ref('id')
 const sortDirection = ref<'ASC' | 'DESC'>('DESC')
 const currentStatus = ref<string | undefined>(undefined)
+const currentCustomer = ref<number | undefined>(undefined)
+const currentProduct = ref<number | undefined>(undefined)
 
 const headerRow: HeaderRow[] = [
   { name: '顧客名稱', value: 'customerName', sort: 0, width: '120px', sortable: true },
@@ -50,12 +54,13 @@ const headerRow: HeaderRow[] = [
     sortable: true,
     mobileSpan: 2,
   },
-  { name: '數量', value: 'quantity', sort: 2, width: '70px', sortable: true },
-  { name: '日幣小計', value: 'displaySubtotalJpy', sort: 3, width: '110px', sortable: true },
-  { name: '台幣小計', value: 'displaySubtotalTwd', sort: 4, width: '110px', sortable: true },
-  { name: '訂單狀態', value: 'orderStatusName', sort: 5, width: '100px' },
-  { name: '備註', value: 'note', sort: 5, width: '100px' },
-  { name: '採購者', value: 'purchaserName', sort: 7, width: '100px' },
+  { name: '數量', value: 'quantity', sort: 2, width: '70px' },
+  { name: '匯率', value: 'exchangeRate', sort: 3, width: '70px' },
+  { name: '日幣小計', value: 'displaySubtotalJpy', sort: 4, width: '110px', sortable: true },
+  { name: '台幣小計', value: 'displaySubtotalTwd', sort: 5, width: '110px', sortable: true },
+  { name: '訂單狀態', value: 'orderStatusName', sort: 6, width: '100px' },
+  { name: '備註', value: 'note', sort: 7, width: '100px' },
+  { name: '採購者', value: 'purchaserName', sort: 8, width: '100px' },
 ]
 
 onMounted(() => {
@@ -71,6 +76,8 @@ onMounted(() => {
 function selectEvent(data: SelectOption<EventsResBase | null>) {
   currentEventId.value = data.value?.id.toString() ?? ''
   currentChannelId.value = ''
+  currentCustomer.value = undefined
+  currentProduct.value = undefined
   isShowChannelSelect.value = true
   eventTotals.value = null
   channelTotals.value = null
@@ -85,6 +92,8 @@ function selectEvent(data: SelectOption<EventsResBase | null>) {
 
 function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
   currentChannelId.value = data.value?.id.toString() ?? ''
+  currentCustomer.value = undefined
+  currentProduct.value = undefined
   channelTotals.value = null
   currentPage.value = 0
   searchStore.setSearchStore({
@@ -118,12 +127,25 @@ function updateOrderStatus(status: string | undefined) {
   fetchOverview()
 }
 
+function updateCustomer(customer: number | undefined) {
+  currentCustomer.value = customer
+  currentPage.value = 0
+  fetchOverview()
+}
+function updateProduct(product: number | undefined) {
+  currentProduct.value = product
+  currentPage.value = 0
+  fetchOverview()
+}
+
 async function fetchOverview() {
   if (!currentEventId.value) return
   const res = await statsApi.getStatsOverview({
     eventId: Number(currentEventId.value),
     channelId: currentChannelId.value ? Number(currentChannelId.value) : undefined,
     orderStatus: currentStatus.value,
+    customerId: currentCustomer.value,
+    productId: currentProduct.value,
     page: currentPage.value,
     size: pageSize.value,
     sort: sortField.value,
@@ -193,6 +215,19 @@ function formatTwd(val: number | null) {
           @selectOption="updateOrderStatus($event.value)"
           :isDisplayAll="true"
         ></order-status-select-component>
+        <customer-select-component
+          title="顧客"
+          :eventId="currentEventId"
+          :channelId="currentChannelId"
+          :isDisplayAll="true"
+          @selectOption="updateCustomer($event.value?.id)"
+        ></customer-select-component>
+        <product-select-component
+          :eventId="currentEventId"
+          :channelId="currentChannelId"
+          :isDisplayAll="true"
+          @onSelectProduct="updateProduct($event.value?.id)"
+        />
       </div>
     </div>
 
@@ -248,6 +283,12 @@ function formatTwd(val: number | null) {
       >
         <template #col-subtotalTwd="{ row }">
           {{ formatTwd(row.subtotalTwd) }}
+        </template>
+        <template #col-note="{ row }">
+          <span v-show="row.nonBonusTarget"> 不計入贈品</span>
+          <span v-show="row.isFixedRate"> 固定匯率</span>
+          <span v-show="row.nonCutTarget"> 不計入分潤</span>
+          {{ row.note }}
         </template>
       </table-component>
     </div>

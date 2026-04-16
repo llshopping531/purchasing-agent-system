@@ -8,26 +8,33 @@ import { ref, watch } from 'vue'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { productsApi } from '@/services/api/products/products-api'
+import { orderApi } from '@/services/api/order/order-api'
 import type { SelectOption } from '@/interfaces/common';
 
 const props = defineProps<{
   /** 目前選取的活動 ID（字串形式） */
   eventId: string
-  /** 目前選取的通路 ID（字串形式） */
-  channelId: string
+  /** 目前選取的通路 ID（字串形式），未指定時改從訂單取得不重複商品清單 */
+  channelId?: string
   /** 預設選取的商品 Option */
-  defaultValue?: SelectOption<ProductsResBase>
+  defaultValue?: SelectOption<ProductsResBase | undefined>
   /** 是否為必填欄位 */
   required?: boolean
+  /** 是否顯示「全部」選項 */
+  isDisplayAll?: boolean
 }>()
 
 const emit = defineEmits<{
   /** 使用者選取商品時觸發，帶出商品對應的 Option */
-  (e: 'onSelectProduct', data: SelectOption<ProductsResBase>): void
+  (e: 'onSelectProduct', data: SelectOption<ProductsResBase | undefined>): void
 }>()
 
 /** 轉換為 Option 格式的商品清單 */
-const productOptions = ref<SelectOption<ProductsResBase>[]>([])
+const productOptions = ref<SelectOption<ProductsResBase | undefined>[]>([])
+
+/** 本地管理的預設值，允許元件內部重置 */
+const localDefault = ref<SelectOption<ProductsResBase | undefined> | undefined>(props.defaultValue)
+watch(() => props.defaultValue, (val) => { localDefault.value = val })
 
 // 當活動或通路變更時，重新載入商品清單
 watch(
@@ -35,6 +42,8 @@ watch(
   ([newEventId, newChannelId]) => {
     if (newEventId && newChannelId) {
       getProductList(newEventId, newChannelId)
+    } else if (newEventId) {
+      getDistinctProducts(newEventId)
     }
   },
   { immediate: true },
@@ -42,25 +51,35 @@ watch(
 
 /**
  * 依活動 ID + 通路 ID 從 API 取得所有商品清單
- * @param eventId - 活動 ID 字串
- * @param channelId - 通路 ID 字串
  */
+const allOption: SelectOption<undefined> = { value: undefined, name: '全部' }
+
 async function getProductList(eventId: string, channelId: string) {
+  localDefault.value = undefined
   const res = await productsApi.getProductsAll({
     eventId: Number(eventId),
     channelId: Number(channelId),
   })
-  productOptions.value = res.map((p) => ({
-    name: p.name,
-    value: p,
-  }))
+  const list = res.map((p) => ({ name: p.name, value: p }))
+  productOptions.value = props.isDisplayAll ? [allOption, ...list] : list
 }
 
 /**
- * 使用者選取商品後，emit Option 及完整商品物件
+ * 僅依活動 ID 從訂單取得不重複商品清單（通路未指定時使用）
+ */
+async function getDistinctProducts(eventId: string) {
+  localDefault.value = undefined
+  const res = await orderApi.getDistinctProducts(Number(eventId))
+  const list = res.map((p) => ({ name: p.name, value: p }))
+  productOptions.value = props.isDisplayAll ? [allOption, ...list] : list
+}
+
+/**
+ * 使用者選取商品後，同步 localDefault 並 emit Option
  * @param option - 選取的商品 Option
  */
-function onSelect(option: SelectOption<ProductsResBase>) {
+function onSelect(option: SelectOption<ProductsResBase | undefined>) {
+  localDefault.value = option
   emit('onSelectProduct', option)
 }
 </script>
@@ -69,7 +88,7 @@ function onSelect(option: SelectOption<ProductsResBase>) {
   <select-component
     label="商品"
     :optionList="productOptions"
-    :defaultValue="defaultValue"
+    :defaultValue="localDefault"
     :required="props.required"
     @selectOption="onSelect"
   />

@@ -15,6 +15,8 @@ import { computed, ref, watch } from 'vue'
 import { purchaseListApi } from '@/services/api/purchase/purchase-api'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
+import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
+import { orderApi } from '@/services/api/order/order-api'
 
 const emit = defineEmits<{ refresh: [] }>()
 
@@ -192,6 +194,26 @@ async function purchaseCheck() {
   await purchaseListApi.purchaseCheck(req)
   emit('refresh')
 }
+
+async function updateDetailOrderStatus(row: PurchaseDetail, newStatus: string) {
+  await orderApi.patchOrders(row.id, {
+    eventId: row.eventId,
+    channelId: row.channelId,
+    customerId: row.customerId,
+    productId: row.productId,
+    quantity: row.quantity,
+    exchangeRate: row.exchangeRate,
+    subtotalJpy: row.subtotalJpy,
+    subtotalTwd: row.subtotalTwd,
+    orderStatus: newStatus,
+    nonBonusTarget: row.nonBonusTarget,
+    isFixedRate: row.isFixedRate,
+    nonCutTarget: row.nonCutTarget,
+    purchaseConfirm: row.purchaseConfirm,
+    note: row.note,
+  })
+  if (selectedData.value) await getDetail(selectedData.value)
+}
 </script>
 
 <template>
@@ -343,7 +365,15 @@ async function purchaseCheck() {
         :tableData="currentDetail"
         :isDelete="false"
         :isEdit="false"
-      ></table-component>
+      >
+        <template #col-orderStatusName="{ row }">
+          <order-status-select-component
+            :defaultValue="row.orderStatus"
+            :isDisplayLable="false"
+            @selectOption="updateDetailOrderStatus(row, $event.value ?? '')"
+          />
+        </template>
+      </table-component>
     </template>
   </modal-component>
 

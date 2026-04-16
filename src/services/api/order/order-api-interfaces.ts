@@ -162,15 +162,14 @@ export type ModifyDrawsResultRes = DrawsData
 
 /** 轉單 req */
 export interface DrawsTransferReq {
-  targetCustomerId: number;
-  quantity:         number;
-  remark:           string;
-  drawIds:          number[];
+  targetCustomerId: number
+  quantity: number
+  remark: string
+  drawIds: number[]
 }
 
 /** 轉單 res */
 export type DrawsTransferRes = OrderResBase
-
 
 // 共用
 

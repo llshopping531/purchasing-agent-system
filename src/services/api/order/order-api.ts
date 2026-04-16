@@ -1,4 +1,6 @@
 import { deleteApi, getApi, patchApi, postApi } from '../base-api'
+import type { CustomersResBase } from '../customers/customers-api-interfaces'
+import type { ProductsResBase } from '../products/products-api-interfaces'
 import type {
   CreateDrawsResultReq,
   CreateDrawsResultRes,
@@ -71,7 +73,10 @@ export const orderApi = {
    * @param req - 新增訂單所需欄位
    * @returns 新增後的訂單資料
    */
-  postDrawsResult: async (orderId: number,req: CreateDrawsResultReq): Promise<CreateDrawsResultRes> => {
+  postDrawsResult: async (
+    orderId: number,
+    req: CreateDrawsResultReq,
+  ): Promise<CreateDrawsResultRes> => {
     return await postApi(`/orders/${orderId}/draws`, req)
   },
 
@@ -81,7 +86,10 @@ export const orderApi = {
    * @param req - 要更新的訂單欄位
    * @returns 修改後的訂單資料
    */
-  patchDrawsResult: async (orderId: number, req: ModifyDrawsResultReq): Promise<ModifyDrawsResultRes> => {
+  patchDrawsResult: async (
+    orderId: number,
+    req: ModifyDrawsResultReq,
+  ): Promise<ModifyDrawsResultRes> => {
     return await patchApi(`/orders/draws/${orderId}`, req)
   },
 
@@ -98,7 +106,33 @@ export const orderApi = {
    * @param req - 新增訂單所需欄位
    * @returns 轉單後的訂單資料
    */
-  drawsTransfer: async (orderId: number,req: DrawsTransferReq): Promise<DrawsTransferRes> => {
+  drawsTransfer: async (orderId: number, req: DrawsTransferReq): Promise<DrawsTransferRes> => {
     return await postApi(`/orders/${orderId}/transfer`, req)
+  },
+
+  /**
+   * 查詢活動或通路的顧客列表
+   * @param eventId - 訂單 Id
+   * @returns 活動或通路的顧客列表資料
+   */
+  getDistinctProducts: async (eventId: number): Promise<ProductsResBase[]> => {
+    return await getApi(`/orders/distinct-products?eventId=${eventId}`)
+  },
+
+  /**
+   * 查詢活動或通路的顧客列表
+   * @param eventId - 訂單 Id
+   * @param channelId - 通路 Id
+   * @returns 活動或通路的顧客列表資料
+   */
+  getDistinctCustomers: async (
+    eventId: number,
+    channelId?: number,
+  ): Promise<CustomersResBase[]> => {
+    if (channelId) {
+      return await getApi(`/orders/distinct-customers?eventId=${eventId}&channelId=${channelId}`)
+    }
+
+    return await getApi(`/orders/distinct-customers?eventId=${eventId}`)
   },
 }
