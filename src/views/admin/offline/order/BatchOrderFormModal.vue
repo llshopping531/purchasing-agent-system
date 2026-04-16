@@ -175,7 +175,7 @@ async function addAndSubmit() {
     nonCutTarget: snap.nonCutTarget,
     status: 'submitting',
   }
-  queue.value.push(item)
+  queue.value.unshift(item)
 
   // 建立顧客 / 商品後送出訂單，不等待
   const submit = async () => {

@@ -79,7 +79,7 @@ async function addAndSubmit() {
     name: snap.name,
     status: 'submitting',
   }
-  queue.value.push(item)
+  queue.value.unshift(item)
 
   const submit = async () => {
     await productsApi.postProducts({

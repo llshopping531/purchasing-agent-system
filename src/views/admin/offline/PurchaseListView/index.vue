@@ -71,6 +71,16 @@ onMounted(async () => {
     const matched = events.find((e) => e.id.toString() === prev.eventId)
     if (matched) currentEventIsLocked.value = matched.isLocked
     await fetchPurchaseList()
+
+    // 還原通路篩選條件
+    if (prev.channelId) {
+      const channels = await menuStore.fetchChannelsAll(currentEventId.value)
+      const channel = channels.find((c) => c.id.toString() === prev.channelId)
+      if (channel) {
+        currentChannelFilter.value = { name: channel.name, value: channel }
+        applyChannelFilter()
+      }
+    }
   }
 })
 

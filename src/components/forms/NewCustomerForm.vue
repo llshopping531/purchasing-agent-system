@@ -6,11 +6,19 @@
  */
 import TextInput from '@/components/inputs/TextInput.vue'
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
+import SelectComponent from '@/components/inputs/SelectComponent.vue'
+import type { SelectOption } from '@/interfaces/common'
 
 defineProps<{
   /** 欄位驗證錯誤訊息 */
   errors?: Partial<Record<'name' | 'source', string>>
 }>()
+
+const sourceOptions: SelectOption<string>[] = [
+  { value: '1', name: 'LINE' },
+  { value: '2', name: 'FACEBOOK' },
+  { value: '3', name: 'THREADS' },
+]
 
 /** 顧客名稱 */
 const name = defineModel<string>('name', { default: '' })
@@ -29,7 +37,16 @@ const note = defineModel<string>('note', { default: '' })
 <template>
   <div class="new-customer"></div>
   <text-input label="顧客名稱" v-model:value="name" required :error-message="errors?.name" />
-  <text-input label="來源" v-model:value="source" required :error-message="errors?.source" />
+  <div class="source-wrap">
+    <select-component
+      label="來源"
+      :required="true"
+      :defaultValue="sourceOptions.find((o) => o.value === source)"
+      :optionList="sourceOptions"
+      @selectOption="source = $event.value"
+    />
+    <span v-if="errors?.source" class="source-error">{{ errors.source }}</span>
+  </div>
   <checkbox-input label="已私訊官方" v-model="hasMessagedOfficial" />
   <checkbox-input label="優惠對象" v-model="isDiscount" />
   <checkbox-input label="老闆" v-model="isBoss" />
@@ -41,5 +58,14 @@ const note = defineModel<string>('note', { default: '' })
   @media (max-width: 768px) {
     width: 100%;
   }
+}
+.source-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.source-error {
+  font-size: 0.78rem;
+  color: var(--color-danger, #dc2626);
 }
 </style>
