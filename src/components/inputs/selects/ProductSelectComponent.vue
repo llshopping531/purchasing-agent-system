@@ -62,6 +62,7 @@ async function getProductList(eventId: string, channelId: string) {
   })
   const list = res.map((p) => ({ name: p.name, value: p }))
   productOptions.value = props.isDisplayAll ? [allOption, ...list] : list
+  if (props.defaultValue !== undefined) localDefault.value = props.defaultValue
 }
 
 /**
@@ -72,6 +73,7 @@ async function getDistinctProducts(eventId: string) {
   const res = await orderApi.getDistinctProducts(Number(eventId))
   const list = res.map((p) => ({ name: p.name, value: p }))
   productOptions.value = props.isDisplayAll ? [allOption, ...list] : list
+  if (props.defaultValue !== undefined) localDefault.value = props.defaultValue
 }
 
 /**

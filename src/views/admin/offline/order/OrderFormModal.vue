@@ -39,7 +39,7 @@ const currentOrderId = ref(0)
 /** 選取的顧客 Option */
 const formCustomerOption = ref<SelectOption<CustomersResBase | undefined> | undefined>(undefined)
 /** 選取的商品 Option */
-const formProductOption = ref<SelectOption<ProductsResBase> | undefined>(undefined)
+const formProductOption = ref<SelectOption<ProductsResBase | undefined> | undefined>(undefined)
 /** 商品定價資訊（供顯示用） */
 const editProductInfo = ref<
   { name: string; priceJpy: number; priceTwd: number; exchangeRate: number } | undefined
@@ -158,7 +158,7 @@ async function confirm() {
       eventId: Number(props.eventId),
       channelId: Number(props.shopId),
       customerId: formCustomerOption.value?.value?.id ?? 0,
-      productId: formProductOption.value?.value.id ?? 0,
+      productId: formProductOption.value?.value?.id ?? 0,
       quantity: formQuantity.value ?? 0,
       exchangeRate: formExchangeRate.value ?? undefined,
       subtotalJpy: formSubtotalJpy.value ?? undefined,
@@ -233,8 +233,7 @@ defineExpose({ editOrder, deleteOrder })
               :eventId="props.eventId"
               :channelId="props.shopId"
               :defaultValue="formProductOption"
-              @selectOption="formProductOption = $event"
-              @selectProduct="onSelectProduct"
+              @onSelectProduct="formProductOption = $event; $event.value && onSelectProduct($event.value)"
             />
             <span v-if="formErrors.product" class="field-error">{{ formErrors.product }}</span>
           </div>
