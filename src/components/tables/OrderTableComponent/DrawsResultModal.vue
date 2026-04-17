@@ -32,13 +32,15 @@ const drawsList = ref<DrawsData[]>([])
 const innerMode = ref<'none' | 'create' | 'edit' | 'delete' | 'transform'>('none')
 /** 修改／刪除時的目標抽取結果 ID */
 const currentDrawId = ref(0)
-/** 表單：抽取結果 */
+/** 表單：抽取結果（修改模式用） */
 const formResult = ref('')
-/** 表單：備註 */
+/** 表單：備註（修改模式用） */
 const formNote = ref('')
+/** 新增模式：多筆 row */
+const formRows = ref<{ result: string; note: string; resultError: string }[]>([])
 /** 轉移表單：備註 */
 const transformFormNote = ref('')
-/** 表單驗證錯誤 */
+/** 表單驗證錯誤（修改模式用） */
 const formResultError = ref('')
 
 /** 選取的現有顧客 Option */
@@ -61,10 +63,18 @@ async function loadDraws() {
  * 開啟新增模式
  */
 function openCreate() {
-  formResult.value = ''
-  formNote.value = ''
-  formResultError.value = ''
+  formRows.value = [{ result: '', note: '', resultError: '' }]
   innerMode.value = 'create'
+}
+
+/** 新增一列 */
+function addRow() {
+  formRows.value.push({ result: '', note: '', resultError: '' })
+}
+
+/** 移除指定列 */
+function removeRow(index: number) {
+  formRows.value.splice(index, 1)
 }
 
 /**
@@ -108,6 +118,17 @@ function cancelInner() {
  * 新增或修改前的欄位驗證
  */
 async function beforeConfirmInner(): Promise<boolean> {
+  if (innerMode.value === 'create') {
+    let valid = true
+    for (const row of formRows.value) {
+      row.resultError = ''
+      if (!row.result.trim()) {
+        row.resultError = '結果為必填'
+        valid = false
+      }
+    }
+    return valid
+  }
   formResultError.value = ''
   if (!formResult.value.trim()) {
     formResultError.value = '結果為必填'
@@ -122,10 +143,12 @@ async function beforeConfirmInner(): Promise<boolean> {
 async function confirmInner() {
   console.log('confirmInner')
   if (innerMode.value === 'create') {
-    await orderApi.postDrawsResult(props.order.id, {
-      result: formResult.value,
-      note: formNote.value,
-    })
+    for (const row of formRows.value) {
+      await orderApi.postDrawsResult(props.order.id, {
+        result: row.result,
+        note: row.note,
+      })
+    }
   } else if (innerMode.value === 'edit') {
     await orderApi.patchDrawsResult(currentDrawId.value, {
       result: formResult.value,
@@ -152,11 +175,40 @@ async function confirmInner() {
 </script>
 
 <template>
-  <!-- 新增 / 修改表單 -->
+  <!-- 新增表單（多筆） -->
   <confirm-modal-component
-    v-if="innerMode === 'create' || innerMode === 'edit'"
-    :name="innerMode === 'create' ? '新增抽取結果' : '修改抽取結果'"
-    :confirmText="innerMode === 'create' ? '確定要新增此抽取結果嗎？' : '確定要修改此抽取結果嗎？'"
+    v-if="innerMode === 'create'"
+    name="新增抽取結果"
+    confirmText="確定要新增嗎？"
+    :beforeConfirm="beforeConfirmInner"
+    width="480px"
+    @cancel="cancelInner"
+    @confirm="confirmInner"
+  >
+    <template #content>
+      <div class="draws-form">
+        <div v-for="(row, index) in formRows" :key="index" class="draws-row">
+          <div class="draws-row-inputs">
+            <text-input
+              label="結果"
+              v-model:value="row.result"
+              required
+              :error-message="row.resultError"
+            />
+            <text-input label="備註" v-model:value="row.note" />
+          </div>
+          <span v-if="formRows.length > 1" class="remove-row-btn" @click="removeRow(index)">✕</span>
+        </div>
+        <div class="add-row-btn" @click="addRow">＋ 新增一行</div>
+      </div>
+    </template>
+  </confirm-modal-component>
+
+  <!-- 修改表單 -->
+  <confirm-modal-component
+    v-else-if="innerMode === 'edit'"
+    name="修改抽取結果"
+    confirmText="確定要修改此抽取結果嗎？"
     :beforeConfirm="beforeConfirmInner"
     width="420px"
     @cancel="cancelInner"
@@ -360,6 +412,42 @@ async function confirmInner() {
   gap: 0.75rem;
   padding: 0.5rem;
   margin-top: 0.5rem;
+
+  .draws-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+
+    .draws-row-inputs {
+      flex: 1;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      > * { flex: 1; min-width: 140px; }
+    }
+  }
+
+  .remove-row-btn {
+    cursor: pointer;
+    color: var(--color-danger);
+    font-size: 0.85rem;
+    padding: 0.2rem 0.4rem;
+    margin-top: 1.8rem;
+    border-radius: 3px;
+    &:hover { background: var(--color-danger); color: #fff; }
+  }
+
+  .add-row-btn {
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--color-primary);
+    border: 1px dashed var(--color-primary);
+    border-radius: 4px;
+    text-align: center;
+    padding: 0.35rem;
+    &:hover { background: var(--color-primary); color: #fff; }
+  }
+
   .lebal {
     font-weight: 600;
     font-size: 0.875rem;
