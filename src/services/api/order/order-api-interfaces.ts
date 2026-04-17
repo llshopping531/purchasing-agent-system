@@ -75,6 +75,8 @@ export interface OrderReqBase {
   subtotalTwd?: number
   /** 訂單狀態 */
   orderStatus?: string
+  /** 排序位置（可選，若不提供則自動追加到末尾 */
+  sortOrder?:string
   /** 不計入贈品 */
   nonBonusTarget?: boolean
   /** 固定匯率 */
@@ -115,6 +117,8 @@ export interface OrderResBase {
   subtotalTwd: number
   /** 訂單狀態 */
   orderStatus: string
+  /** 排序位置（可選，若不提供則自動追加到末尾 */
+  sortOrder:string
   /** 不計入贈品 */
   nonBonusTarget: boolean
   /** 固定匯率 */

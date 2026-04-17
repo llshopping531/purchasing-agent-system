@@ -28,6 +28,8 @@ const emit = defineEmits<{
   (e: 'delete', data: OrderAllContent): void
   /** 點擊編輯時觸發，帶出目標訂單資料 */
   (e: 'edit', data: OrderAllContent): void
+  /** 點擊插入下一筆時觸發，帶出目標訂單資料 */
+  (e: 'insert', data: OrderAllContent): void
 }>()
 
 /** 表頭欄位定義 */
@@ -119,6 +121,14 @@ function editData(data: OrderAllContent) {
 }
 
 /**
+ * 向上 emit 插入下一筆事件
+ * @param data - 目標訂單資料（新訂單將插入此筆之後）
+ */
+function insertData(data: OrderAllContent) {
+  emit('insert', data)
+}
+
+/**
  * 換頁
  * @param page - 目標頁碼（0-based）
  */
@@ -166,8 +176,8 @@ async function getOrderList() {
     channelId: Number(pop.currentShopId),
     page: currentPage.value,
     size: pageSize.value,
-    sort: sortField.value,
-    direction: sortDirection.value,
+    sort: sortField.value ?? 'sortOrder',
+    direction: sortDirection.value ?? 'ASC',
     keyword: keyword.value || undefined,
   })
   tableData.value = res.content
@@ -267,6 +277,14 @@ function filterCustomer() {
             <span class="detail-icon"></span>資訊
           </div>
           <div
+            v-if="isOperate"
+            class="insert-btn more-btn"
+            @click="insertData(row)"
+            title="在此筆後插入新訂單"
+          >
+            插入下一筆
+          </div>
+          <div
             class="draws-btn more-btn"
             v-if="row.isBlindBox && row.orderStatus !== '1'"
             @click="openDraws(row)"
@@ -318,6 +336,14 @@ function filterCustomer() {
   }
   &.detail-btn {
     color: #7c70e0;
+  }
+  &.insert-btn {
+    color: #16a34a;
+    cursor: pointer;
+    font-size: 0.8rem;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 .more-icons {

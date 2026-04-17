@@ -30,10 +30,12 @@ const emit = defineEmits<{
 
 /** 彈窗是否顯示 */
 const isVisible = ref(false)
-/** 操作模式：2 = 修改，3 = 刪除 */
-const modalMode = ref<2 | 3>(2)
+/** 操作模式：1 = 插入新訂單，2 = 修改，3 = 刪除 */
+const modalMode = ref<1 | 2 | 3>(2)
 /** 目標訂單 ID */
 const currentOrderId = ref(0)
+/** 插入時使用的 sortOrder（複製自上一筆資料） */
+const insertSortOrder = ref<string | undefined>(undefined)
 
 // ── 顧客 / 商品選取 ────────────────────────────────────────────
 /** 選取的顧客 Option */
@@ -82,6 +84,16 @@ function onSelectProduct(product: ProductsResBase) {
     priceTwd: product.priceTwd ?? 0,
     exchangeRate: product.exchangeRate ?? 0,
   }
+}
+
+/**
+ * 開啟插入訂單彈窗（新訂單將插入此筆之後，sortOrder 沿用此筆）
+ * @param currentData - 參考訂單資料
+ */
+function insertOrder(currentData: OrderQueryContent) {
+  modalMode.value = 1
+  insertSortOrder.value = currentData.sortOrder
+  isVisible.value = true
 }
 
 /**
@@ -153,6 +165,22 @@ async function beforeConfirm(): Promise<boolean> {
  * 執行修改或刪除 API，成功後關閉彈窗並通知父層
  */
 async function confirm() {
+  if (modalMode.value === 1) {
+    await orderApi.postOrders({
+      eventId: Number(props.eventId),
+      channelId: Number(props.shopId),
+      customerId: formCustomerOption.value?.value?.id ?? 0,
+      productId: formProductOption.value?.value?.id ?? 0,
+      quantity: formQuantity.value ?? 0,
+      orderStatus: '1',
+      note: formNote.value,
+      nonBonusTarget: formNonBonusTarget.value,
+      isFixedRate: formIsFixedRate.value,
+      nonCutTarget: formNonCutTarget.value,
+      purchaseConfirm: formPurchaseConfirm.value,
+      sortOrder: insertSortOrder.value,
+    })
+  }
   if (modalMode.value === 2) {
     await orderApi.patchOrders(currentOrderId.value, {
       eventId: Number(props.eventId),
@@ -199,17 +227,18 @@ function closeModal() {
   formErrors.customer = ''
   formErrors.product = ''
   formErrors.quantity = ''
+  insertSortOrder.value = undefined
   isVisible.value = false
 }
 
-defineExpose({ editOrder, deleteOrder })
+defineExpose({ editOrder, deleteOrder, insertOrder })
 </script>
 
 <template>
   <confirm-modal-component
     v-if="isVisible"
-    name="編輯訂單"
-    :confirmText="modalMode === 3 ? '您確定要刪除此訂單嗎？' : '您確定要修改此訂單嗎？'"
+    :name="modalMode === 1 ? '插入下一筆訂單' : '編輯訂單'"
+    :confirmText="modalMode === 3 ? '您確定要刪除此訂單嗎？' : modalMode === 1 ? '您確定要插入此筆訂單嗎？' : '您確定要修改此訂單嗎？'"
     :isDelete="modalMode === 3"
     :beforeConfirm="beforeConfirm"
     width="500px"
@@ -217,7 +246,7 @@ defineExpose({ editOrder, deleteOrder })
     @confirm="confirm"
   >
     <template #content>
-      <div v-if="modalMode === 2" class="form">
+      <div v-if="modalMode === 1 || modalMode === 2" class="form">
         <div class="row">
           <div class="field">
             <customer-select-component

@@ -166,6 +166,7 @@ function onConfirmed() {
       @tableData="getTableData"
       @delete="orderFormModalRef?.deleteOrder($event)"
       @edit="orderFormModalRef?.editOrder($event)"
+      @insert="orderFormModalRef?.insertOrder($event)"
     />
     <router-view />
 

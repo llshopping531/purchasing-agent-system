@@ -171,7 +171,11 @@ async function getDetail(data: PurchaseListData) {
     productId: data.productId,
   }
   const res = await purchaseListApi.getPurchassDetail(req)
-  currentDetail.value = res
+  currentDetail.value = res.slice().sort((a, b) => {
+    const aOrder = Number(a.sortOrder) || 0
+    const bOrder = Number(b.sortOrder) || 0
+    return aOrder - bOrder
+  })
 }
 
 /**
@@ -331,7 +335,12 @@ async function updateDetailOrderStatus(row: PurchaseDetail, newStatus: string) {
           :tableData="currentDetail"
           :isDelete="false"
           :isEdit="false"
-        ></table-component>
+        >
+          <template #col-quantity="{ row }">
+            <span>{{ row.quantity }}</span>
+            <span v-if="Number(row.drawCount) > 0" class="draw-count">（已拆 {{ row.drawCount }}）</span>
+          </template>
+        </table-component>
       </div>
     </template>
   </modal-component>
@@ -366,6 +375,10 @@ async function updateDetailOrderStatus(row: PurchaseDetail, newStatus: string) {
         :isDelete="false"
         :isEdit="false"
       >
+        <template #col-quantity="{ row }">
+          <span>{{ row.quantity }}</span>
+          <span v-if="Number(row.drawCount) > 0" class="draw-count">（已拆 {{ row.drawCount }}）</span>
+        </template>
         <template #col-orderStatusName="{ row }">
           <order-status-select-component
             :defaultValue="row.orderStatus"
@@ -552,5 +565,12 @@ async function updateDetailOrderStatus(row: PurchaseDetail, newStatus: string) {
   display: flex;
   gap: 1rem;
   align-items: end;
+}
+
+/* 已拆數量標示 */
+.draw-count {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #888);
+  margin-left: 0.2rem;
 }
 </style>

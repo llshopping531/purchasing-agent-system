@@ -89,6 +89,10 @@ export interface PurchaseDetail {
   purchaserName: string
   /** 通路名稱 */
   channelName: string
+  /** 排序 */
+  sortOrder:string
+  /** 已拆數量 */
+  drawCount:string
 }
 
 /** 處理採購 request */
