@@ -16,6 +16,7 @@ import { purchaseListApi } from '@/services/api/purchase/purchase-api'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
+import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
 import { orderApi } from '@/services/api/order/order-api'
 
 const emit = defineEmits<{ refresh: [] }>()
@@ -100,11 +101,20 @@ const blindTotal = computed(() =>
   ),
 )
 
-/** 明細彈窗表格欄位定義 */
+/** 明細彈窗表格欄位定義（唯讀） */
 const detailHeaderRow = ref<HeaderRow[]>([
   { name: '顧客名稱', value: 'customerName', sort: 0, width: '100px' },
   { name: '喊單數量', value: 'quantity', sort: 0, width: '100px' },
   { name: '購買狀況', value: 'orderStatusName', sort: 0, width: '100px' },
+  { name: '備注', value: 'note', sort: 0, width: '150px' },
+])
+
+/** 採購回報彈窗表格欄位定義（含購買確認） */
+const checkDetailHeaderRow = ref<HeaderRow[]>([
+  { name: '顧客名稱', value: 'customerName', sort: 0, width: '100px' },
+  { name: '喊單數量', value: 'quantity', sort: 0, width: '100px' },
+  { name: '購買狀況', value: 'orderStatusName', sort: 0, width: '100px' },
+  { name: '購買確認', value: 'purchaseConfirm', sort: 0, width: '90px' },
   { name: '備注', value: 'note', sort: 0, width: '150px' },
 ])
 
@@ -217,6 +227,34 @@ async function updateDetailOrderStatus(row: PurchaseDetail, newStatus: string) {
     note: row.note,
   })
   if (selectedData.value) await getDetail(selectedData.value)
+}
+
+async function updateDetailPurchaseConfirm(row: PurchaseDetail, value: boolean) {
+  await orderApi.patchOrders(row.id, {
+    eventId: row.eventId,
+    channelId: row.channelId,
+    customerId: row.customerId,
+    productId: row.productId,
+    quantity: row.quantity,
+    exchangeRate: row.exchangeRate,
+    subtotalJpy: row.subtotalJpy,
+    subtotalTwd: row.subtotalTwd,
+    orderStatus: row.orderStatus,
+    nonBonusTarget: row.nonBonusTarget,
+    isFixedRate: row.isFixedRate,
+    nonCutTarget: row.nonCutTarget,
+    purchaseConfirm: value,
+    note: row.note,
+  })
+  row.purchaseConfirm = value
+}
+
+async function confirmAllPurchased() {
+  for (const row of currentDetail.value) {
+    if (!row.purchaseConfirm) {
+      await updateDetailPurchaseConfirm(row, true)
+    }
+  }
 }
 </script>
 
@@ -368,9 +406,12 @@ async function updateDetailOrderStatus(row: PurchaseDetail, newStatus: string) {
       </div> -->
 
       <!-- 明細表格 -->
-      <p class="section-label">明細：</p>
+      <div class="section-header">
+        <p class="section-label">明細：</p>
+        <div class="btn confirm-all-btn" @click="confirmAllPurchased">全部已購買</div>
+      </div>
       <table-component
-        :headerRow="detailHeaderRow"
+        :headerRow="checkDetailHeaderRow"
         :tableData="currentDetail"
         :isDelete="false"
         :isEdit="false"
@@ -384,6 +425,13 @@ async function updateDetailOrderStatus(row: PurchaseDetail, newStatus: string) {
             :defaultValue="row.orderStatus"
             :isDisplayLable="false"
             @selectOption="updateDetailOrderStatus(row, $event.value ?? '')"
+          />
+        </template>
+        <template #col-purchaseConfirm="{ row }">
+          <checkbox-input
+            :modelValue="row.purchaseConfirm"
+            label=""
+            @update:modelValue="updateDetailPurchaseConfirm(row, !!$event)"
           />
         </template>
       </table-component>
@@ -554,9 +602,27 @@ async function updateDetailOrderStatus(row: PurchaseDetail, newStatus: string) {
   }
 }
 
+/* 區塊標題列（含按鈕） */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+
+  .confirm-all-btn {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.75rem;
+    background: var(--color-primary);
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    &:hover { opacity: 0.85; }
+  }
+}
+
 /* 區塊標籤文字 */
 .section-label {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
 }
 
 /* 已買回報輸入區塊 */

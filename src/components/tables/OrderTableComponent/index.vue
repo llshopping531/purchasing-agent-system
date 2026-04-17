@@ -6,6 +6,7 @@
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
+import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
 import { fieldDefsApi } from '@/services/api/sys/field-defs-api'
 import { orderApi, type OrderAllContent } from '@/services/api/order/order-api'
 import { onMounted, ref, watch } from 'vue'
@@ -38,8 +39,9 @@ const headerRow = ref<HeaderRow[]>([
   { name: '品項', value: 'productName', sort: 1, width: '300px', mobileSpan: 2, sortable: true },
   { name: '數量', value: 'quantity', sort: 2, width: '70px' },
   { name: '訂單狀態', value: 'orderStatusName', sort: 3, width: '100px', sortable: true },
-  { name: '備註', value: 'note', sort: 3, width: '100px', sortable: true },
-  { name: '更多', value: 'more', sort: 4, width: '100px' },
+  { name: '購買確認', value: 'purchaseConfirm', sort: 4, width: '80px' },
+  { name: '備註', value: 'note', sort: 5, width: '100px', sortable: true },
+  { name: '更多', value: 'more', sort: 6, width: '100px' },
 ])
 
 /** 目前排序欄位 */
@@ -216,6 +218,26 @@ async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
   await getOrderList()
 }
 
+async function updatePurchaseConfirm(row: OrderAllContent, value: boolean) {
+  await orderApi.patchOrders(row.id, {
+    eventId: row.eventId,
+    channelId: row.channelId,
+    customerId: row.customerId,
+    productId: row.productId,
+    quantity: row.quantity,
+    exchangeRate: row.exchangeRate,
+    subtotalJpy: row.subtotalJpy,
+    subtotalTwd: row.subtotalTwd,
+    orderStatus: row.orderStatus,
+    nonBonusTarget: row.nonBonusTarget,
+    isFixedRate: row.isFixedRate,
+    nonCutTarget: row.nonCutTarget,
+    purchaseConfirm: value,
+    note: row.note,
+  })
+  row.purchaseConfirm = value
+}
+
 function filterCustomer() {
   currentPage.value = 0
   getOrderList()
@@ -270,6 +292,13 @@ function filterCustomer() {
           @selectOption="updateOrderStatus(row, $event.value ?? '')"
           :isDisplayLable="false"
         ></order-status-select-component>
+      </template>
+      <template #col-purchaseConfirm="{ row }">
+        <checkbox-input
+          :modelValue="row.purchaseConfirm"
+          label=""
+          @update:modelValue="isOperate && updatePurchaseConfirm(row, !!$event)"
+        />
       </template>
       <template #col-more="{ row }">
         <div class="more-icons">
