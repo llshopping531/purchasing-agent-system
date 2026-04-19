@@ -359,7 +359,7 @@ async function confirmAllPurchased() {
     <template #content>
       <div v-for="item in data" :key="item.productId" class="view-list">
         <div class="view-item">{{ item.productName }}</div>
-        <div class="view-item">尚未購買：{{ item.shouldBuy }}</div>
+        <div class="view-item">尚未購買：{{ item.remaining }}</div>
       </div>
     </template>
   </modal-component>
