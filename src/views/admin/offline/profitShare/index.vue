@@ -34,9 +34,9 @@ const sortField = ref('id')
 const sortDirection = ref<'ASC' | 'DESC'>('DESC')
 
 const headerRow: HeaderRow[] = [
-  { name: '顧客名稱', value: 'customerName', sort: 0, width: '120px', sortable: true },
-  { name: '通路', value: 'channelName', sort: 1, width: '100px', sortable: true },
-  { name: '商品名稱', value: 'productName', sort: 2, width: '200px', sortable: true, mobileSpan: 2 },
+  { name: '顧客名稱', value: 'customerName', sort: 0, width: '150px', sortable: true },
+  { name: '通路', value: 'channelName', sort: 1, width: '150px', sortable: true },
+  { name: '商品名稱', value: 'productName', sort: 2, sortable: true, mobileSpan: 2 },
   { name: '數量', value: 'quantity', sort: 3, width: '70px' },
   { name: '獲利', value: 'profit', sort: 5, width: '110px', sortable: true },
   { name: '分潤金額', value: 'profitShare', sort: 6, width: '110px', sortable: true },
