@@ -4,6 +4,7 @@
  * 選取活動後顯示有訂單的客戶清單，點選客戶後展開其個人訂單明細
  */
 import { ref, computed, onMounted } from 'vue'
+import { formatTwd, formatJpy } from '@/utils/format'
 import IconFlag from '@/components/icons/IconFlag.vue'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
@@ -17,6 +18,7 @@ import type {
 } from '@/services/api/customer-orders/customer-orders-api-interfaces'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 import { useSearchStore } from '@/stores/search'
+import { isInactiveOrder } from '@/utils/order'
 
 const searchStore = useSearchStore()
 
@@ -135,15 +137,13 @@ const totalJpy = computed(() =>
 const orderHeaderRow: HeaderRow[] = [
   { name: '', value: 'mark', sort: 0, width: '40px' },
   { name: '通路', value: 'channelName', sort: 1, width: '100px' },
-  { name: '商品名稱', value: 'productName', sort: 1, width: '250px' },
+  { name: '商品名稱', value: 'productName', sort: 1 },
   { name: '數量', value: 'quantity', sort: 2, width: '70px' },
   { name: '日幣小計', value: 'subtotalJpy', sort: 3, width: '100px' },
   { name: '台幣小計', value: 'subtotalTwd', sort: 4, width: '100px' },
   { name: '訂單狀態', value: 'orderStatusName', sort: 5, width: '100px' },
 ]
 
-const isInactive = (row: CustomerOrder) =>
-  row.orderStatusName === '缺貨' || row.orderStatusName === '已取消'
 
 onMounted(async () => {
   const prev = searchStore.getSearchStore('CUSTOMER_ORDERS')
@@ -163,7 +163,10 @@ async function selectEvent(data: SelectOption<EventsResBase | null>) {
   selectedCustomer.value = null
   orderList.value = []
   searchKeyword.value = ''
-  searchStore.setSearchStore({ name: 'CUSTOMER_ORDERS', condition: { eventId: currentEventId.value.toString(), channelId: null } })
+  searchStore.setSearchStore({
+    name: 'CUSTOMER_ORDERS',
+    condition: { eventId: currentEventId.value.toString(), channelId: null },
+  })
   loadMarks()
 
   const res = await customerOrdersApi.getCustomers({ eventId: currentEventId.value })
@@ -257,16 +260,12 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
               </div>
               <div class="bonus-info">
                 <span
-                  >¥{{ bonus.totalJpy.toLocaleString() }} / ¥{{
-                    bonus.thresholdJpy.toLocaleString()
-                  }}</span
+                  >{{ formatJpy(bonus.totalJpy) }} / {{ formatJpy(bonus.thresholdJpy) }}</span
                 >
                 <span class="bonus-count">已滿額 {{ bonus.bonusCount }} 次</span>
               </div>
               <div class="bonus-remaining">
-                還差 ¥{{
-                  ((bonus.bonusCount + 1) * bonus.thresholdJpy - bonus.totalJpy).toLocaleString()
-                }}
+                還差 {{ formatJpy((bonus.bonusCount + 1) * bonus.thresholdJpy - bonus.totalJpy) }}
                 達下次滿額
               </div>
             </div>
@@ -284,7 +283,7 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
             <div class="total-inline">
               <span class="total-label">已購買總金額</span>
               <span class="total-value"
-                >¥{{ totalJpy.toLocaleString() }}　NT${{ totalTwd.toLocaleString() }}</span
+                >{{ formatJpy(totalJpy) }}　{{ formatTwd(totalTwd) }}</span
               >
             </div>
           </div>
@@ -297,6 +296,7 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
             :tableData="filteredOrderList"
             :isEdit="false"
             :isDelete="false"
+            :rowClass="(row) => isInactiveOrder(row.orderStatusName) ? 'inactive' : ''"
           >
             <template #col-mark="{ row }">
               <div class="mark-box" @click="toggleMark(row.id)">
@@ -309,53 +309,22 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
                 />
               </div>
             </template>
-            <template #col-channelName="{ row }">
-              <span
-                :class="{ 'out-of-stock': isInactive(row) }"
-                class="row-cell"
-                @click="toggleMark(row.id)"
-                >{{ row.channelName }}</span
-              >
-            </template>
-            <template #col-productName="{ row }">
-              <span
-                :class="{ 'out-of-stock': isInactive(row) }"
-                class="row-cell"
-                @click="toggleMark(row.id)"
-                >{{ row.productName }}</span
-              >
-            </template>
-            <template #col-quantity="{ row }">
-              <span
-                :class="{ 'out-of-stock': isInactive(row) }"
-                class="row-cell"
-                @click="toggleMark(row.id)"
-                >{{ row.quantity }}</span
-              >
-            </template>
             <template #col-subtotalJpy="{ row }">
-              <span
-                :class="{ 'out-of-stock': isInactive(row) }"
-                class="row-cell"
-                @click="toggleMark(row.id)"
-                >{{ row.subtotalJpy }}</span
-              >
+            {{ formatJpy(row.subtotalJpy) }}
             </template>
             <template #col-subtotalTwd="{ row }">
-              <span
-                :class="{ 'out-of-stock': isInactive(row) }"
-                class="row-cell"
-                @click="toggleMark(row.id)"
-                >{{ row.subtotalTwd }}</span
-              >
+              <span class="row-cell" @click="toggleMark(row.id)">
+                <span
+                  v-if="(!row.subtotalTwd || String(row.subtotalTwd) === '-') && !isInactiveOrder(row.orderStatusName)"
+                  class="warn-icon"
+                  title="台幣小計為空"
+                  >!</span
+                >
+                {{ formatTwd(row.subtotalTwd) }}
+              </span>
             </template>
             <template #col-orderStatusName="{ row }">
-              <span
-                :class="{ 'out-of-stock': isInactive(row) }"
-                class="row-cell"
-                @click="toggleMark(row.id)"
-                >{{ row.orderStatusName }}</span
-              >
+              <span class="row-cell" @click="toggleMark(row.id)">{{ row.orderStatusName }}</span>
             </template>
           </table-component>
         </template>
@@ -690,11 +659,20 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
   width: 100%;
 }
 
-/* ── 共用 ── */
-.out-of-stock {
-  color: var(--color-danger, #e53e3e);
-  text-decoration: line-through;
-  opacity: 0.8;
+.warn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #d97706;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-right: 0.25rem;
 }
 
 .empty {

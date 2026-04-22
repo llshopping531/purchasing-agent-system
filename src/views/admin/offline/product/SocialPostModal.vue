@@ -5,6 +5,7 @@
  * 含商品行的模板列會依全部商品逐筆展開輸出，最後一鍵複製
  */
 import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { formatTwd, formatJpy } from '@/utils/format'
 import MaskComponent from '@/components/MaskComponent.vue'
 import { productsApi } from '@/services/api/products/products-api'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
@@ -117,8 +118,8 @@ function isProductLine(line: string): boolean {
 function renderProduct(line: string, product: ProductsResBase): string {
   return line
     .replace(/\$\{productName\}/g, product.name)
-    .replace(/\$\{productPrice\}/g, product.priceTwd ? `$${product.priceTwd.toLocaleString()}` : '—')
-    .replace(/\$\{productPriceJpy\}/g, product.priceJpy ? `¥${product.priceJpy.toLocaleString()}` : '—')
+    .replace(/\$\{productPrice\}/g, formatTwd(product.priceTwd))
+    .replace(/\$\{productPriceJpy\}/g, product.priceJpy ? formatJpy(product.priceJpy) : '—')
     .replace(/\$\{isBlindBox\}/g, product.isBlindBox ? '_盲抽' : '')
 }
 

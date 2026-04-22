@@ -10,6 +10,10 @@ import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
 import { fieldDefsApi } from '@/services/api/sys/field-defs-api'
 import { orderApi, type OrderAllContent } from '@/services/api/order/order-api'
 import { onMounted, ref, watch } from 'vue'
+import { isInactiveOrder } from '@/utils/order'
+import { formatTwd } from '@/utils/format'
+import SelectComponent from '@/components/inputs/SelectComponent.vue'
+import { useBossCustomersStore } from '@/stores/bossCustomers'
 import OrderDetailModal from './OrderDetailModal.vue'
 import DrawsResultModal from './DrawsResultModal.vue'
 
@@ -38,10 +42,12 @@ const headerRow = ref<HeaderRow[]>([
   { name: '購買者', value: 'customerName', sort: 0, width: '150px', sortable: true },
   { name: '品項', value: 'productName', sort: 1, width: '300px', mobileSpan: 2, sortable: true },
   { name: '數量', value: 'quantity', sort: 2, width: '70px' },
-  { name: '訂單狀態', value: 'orderStatusName', sort: 3, width: '100px', sortable: true },
-  { name: '購買確認', value: 'purchaseConfirm', sort: 4, width: '80px' },
-  { name: '備註', value: 'note', sort: 5, width: '100px', sortable: true },
-  { name: '更多', value: 'more', sort: 6, width: '100px' },
+  { name: '台幣小計', value: 'subtotalTwd', sort: 3, width: '90px' },
+  { name: '訂單狀態', value: 'orderStatusName', sort: 4, width: '130px', sortable: true },
+  { name: '購買確認', value: 'purchaseConfirm', sort: 5, width: '85px' },
+  { name: '備註', value: 'note', sort: 6, sortable: true },
+  { name: '購買者', value: 'purchaserName', sort: 7, width: '100px', sortable: true },
+  { name: '更多', value: 'more', sort: 8, width: '230px' },
 ])
 
 /** 目前排序欄位 */
@@ -90,8 +96,11 @@ function openDraws(data: OrderAllContent) {
   isShowDrawsModal.value = true
 }
 
+const bossCustomersStore = useBossCustomersStore()
+
 onMounted(() => {
   getFieldDefsApi()
+  bossCustomersStore.ensure()
 })
 
 defineExpose({ refresh: getOrderList })
@@ -212,6 +221,7 @@ async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
     nonBonusTarget: row.nonBonusTarget,
     isFixedRate: row.isFixedRate,
     nonCutTarget: row.nonCutTarget,
+    purchaserName:row.purchaserName,
     purchaseConfirm: row.purchaseConfirm,
     note: row.note,
   })
@@ -232,10 +242,32 @@ async function updatePurchaseConfirm(row: OrderAllContent, value: boolean) {
     nonBonusTarget: row.nonBonusTarget,
     isFixedRate: row.isFixedRate,
     nonCutTarget: row.nonCutTarget,
+    purchaserName:row.purchaserName,
     purchaseConfirm: value,
     note: row.note,
   })
   row.purchaseConfirm = value
+}
+
+async function updateOrderPurchaser(row: OrderAllContent, purchaserName: string) {
+  await orderApi.patchOrders(row.id, {
+    eventId: row.eventId,
+    channelId: row.channelId,
+    customerId: row.customerId,
+    productId: row.productId,
+    quantity: row.quantity,
+    exchangeRate: row.exchangeRate,
+    subtotalJpy: row.subtotalJpy,
+    subtotalTwd: row.subtotalTwd,
+    orderStatus: row.orderStatus,
+    nonBonusTarget: row.nonBonusTarget,
+    isFixedRate: row.isFixedRate,
+    nonCutTarget: row.nonCutTarget,
+    purchaseConfirm: row.purchaseConfirm,
+    note: row.note,
+    purchaserName,
+  })
+  row.purchaserName = purchaserName
 }
 
 function filterCustomer() {
@@ -265,6 +297,7 @@ function filterCustomer() {
       :pageSize="pageSize"
       :sortField="sortField"
       :sortDirection="sortDirection"
+      :rowClass="(row) => isInactiveOrder(row.orderStatusName) ? 'inactive' : ''"
       @sort="onSort"
       @delete="deleteData"
       @edit="editData"
@@ -272,18 +305,25 @@ function filterCustomer() {
       @change-size="onChangeSize"
     >
       <template #col-customerName="{ row }">
-        <span :class="{ cancelled: row.orderStatusName === '已取消' }">
-          {{ row.customerName }}
-        </span>
+        <span>{{ row.customerName }}</span>
       </template>
-      <template #col-productName="{ row }">
-        <span :class="{ cancelled: row.orderStatusName === '已取消' }">
-          {{ row.productName }}
-        </span>
+      <template #col-purchaserName="{ row }">
+        <select-component
+          label=""
+          :isDisplayLable="false"
+          :optionList="bossCustomersStore.options"
+          :defaultValue="bossCustomersStore.options.find(o => o.name === row.purchaserName)"
+          @selectOption="updateOrderPurchaser(row, $event.value.name)"
+        />
       </template>
-      <template #col-quantity="{ row }">
-        <span :class="{ cancelled: row.orderStatusName === '已取消' }">
-          {{ row.quantity }}
+      <template #col-subtotalTwd="{ row }">
+        <span>
+          <span
+            v-if="(!row.subtotalTwd || String(row.subtotalTwd) === '-') && !isInactiveOrder(row.orderStatusName)"
+            class="warn-icon"
+            title="台幣小計為空"
+          >!</span>
+          {{ formatTwd(row.subtotalTwd) }}
         </span>
       </template>
       <template #col-orderStatusName="{ row }">
@@ -352,10 +392,20 @@ function filterCustomer() {
 .filter-btn {
   white-space: nowrap;
 }
-.cancelled {
-  color: var(--color-danger);
-  text-decoration: line-through;
-  opacity: 0.8;
+.warn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #d97706;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-right: 0.25rem;
 }
 .more-btn {
   display: flex;

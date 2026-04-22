@@ -4,6 +4,7 @@
  * 依活動（與可選通路）查詢分潤總計與分潤明細列表
  */
 import { onMounted, ref } from 'vue'
+import { formatTwd } from '@/utils/format'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
@@ -119,10 +120,6 @@ function onSort(field: string) {
   fetchDetail()
 }
 
-function formatTwd(val: number | null) {
-  if (val == null) return '—'
-  return `NT$ ${val.toLocaleString()}`
-}
 
 function formatPercent(val: number | null) {
   if (val == null) return '—'

@@ -8,4 +8,6 @@ export interface SelectOption<T> {
   value: T
   /** 選項顯示名稱 */
   name: string
+  /** 選項顏色（可選，例如 '#e53e3e'） */
+  color?: string
 }

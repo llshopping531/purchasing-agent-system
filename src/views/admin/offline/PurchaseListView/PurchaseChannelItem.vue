@@ -34,7 +34,7 @@ const pops = defineProps<{
 
 /** 非盲抽表格欄位定義 */
 const headerRow = ref<HeaderRow[]>([
-  { name: '商品名稱', value: 'productName', sort: 0, width: '200px', mobileSpan: 2 },
+  { name: '商品名稱', value: 'productName', sort: 0, mobileSpan: 2 },
   { name: '應買數量', value: 'shouldBuy', sort: 0, width: '100px' },
   { name: '已買數量', value: 'purchased', sort: 0, width: '100px' },
   { name: '未買數量', value: 'remaining', sort: 0, width: '100px' },
@@ -42,7 +42,7 @@ const headerRow = ref<HeaderRow[]>([
 
 /** 盲抽表格欄位定義（含已拆／未拆欄位） */
 const blindHeaderRow = ref<HeaderRow[]>([
-  { name: '商品名稱', value: 'productName', sort: 0, width: '200px', mobileSpan: 2 },
+  { name: '商品名稱', value: 'productName', sort: 0, mobileSpan: 2 },
   { name: '應買數量', value: 'shouldBuy', sort: 0, width: '100px' },
   { name: '已買數量', value: 'purchased', sort: 0, width: '100px' },
   { name: '未買數量', value: 'remaining', sort: 0, width: '100px' },
@@ -71,9 +71,12 @@ const blindData = computed(() =>
 )
 
 // 父層資料更新時重置篩選
-watch(() => pops.data, () => {
-  productNameKeyword.value = ''
-})
+watch(
+  () => pops.data,
+  () => {
+    productNameKeyword.value = ''
+  },
+)
 
 /** 非盲抽各欄總計 */
 const normalTotal = computed(() =>
@@ -106,7 +109,7 @@ const detailHeaderRow = ref<HeaderRow[]>([
   { name: '顧客名稱', value: 'customerName', sort: 0, width: '100px' },
   { name: '喊單數量', value: 'quantity', sort: 0, width: '100px' },
   { name: '購買狀況', value: 'orderStatusName', sort: 0, width: '100px' },
-  { name: '備注', value: 'note', sort: 0, width: '150px' },
+  { name: '備注', value: 'note', sort: 0 },
 ])
 
 /** 採購回報彈窗表格欄位定義（含購買確認） */
@@ -115,7 +118,7 @@ const checkDetailHeaderRow = ref<HeaderRow[]>([
   { name: '喊單數量', value: 'quantity', sort: 0, width: '100px' },
   { name: '購買狀況', value: 'orderStatusName', sort: 0, width: '100px' },
   { name: '購買確認', value: 'purchaseConfirm', sort: 0, width: '90px' },
-  { name: '備注', value: 'note', sort: 0, width: '150px' },
+  { name: '備注', value: 'note', sort: 0 },
 ])
 
 /** 是否展開採購明細表格 */
@@ -357,10 +360,12 @@ async function confirmAllPurchased() {
     @confirm="isShowSummaryModal = false"
   >
     <template #content>
-      <div v-for="item in data" :key="item.productId" class="view-list">
-        <div class="view-item">{{ item.productName }}</div>
-        <div class="view-item">尚未購買：{{ item.remaining }}</div>
-      </div>
+      <template v-for="item in data" :key="item.productId">
+        <div class="view-list" v-if="item.remaining > 0">
+          <div class="view-item">{{ item.productName }}</div>
+          <div class="view-item">尚未購買：{{ item.remaining }}</div>
+        </div>
+      </template>
     </template>
   </modal-component>
 
@@ -376,7 +381,9 @@ async function confirmAllPurchased() {
         >
           <template #col-quantity="{ row }">
             <span>{{ row.quantity }}</span>
-            <span v-if="Number(row.drawCount) > 0" class="draw-count">（已拆 {{ row.drawCount }}）</span>
+            <span v-if="Number(row.drawCount) > 0" class="draw-count"
+              >（已拆 {{ row.drawCount }}）</span
+            >
           </template>
         </table-component>
       </div>
@@ -418,7 +425,9 @@ async function confirmAllPurchased() {
       >
         <template #col-quantity="{ row }">
           <span>{{ row.quantity }}</span>
-          <span v-if="Number(row.drawCount) > 0" class="draw-count">（已拆 {{ row.drawCount }}）</span>
+          <span v-if="Number(row.drawCount) > 0" class="draw-count"
+            >（已拆 {{ row.drawCount }}）</span
+          >
         </template>
         <template #col-orderStatusName="{ row }">
           <order-status-select-component
@@ -477,7 +486,7 @@ async function confirmAllPurchased() {
 .view-list {
   display: flex;
   gap: 0.5rem;
-  border-radius: .25rem;
+  border-radius: 0.25rem;
   &:nth-child(even) {
     background: #ececec;
   }
@@ -616,7 +625,9 @@ async function confirmAllPurchased() {
     color: #fff;
     border-radius: 4px;
     cursor: pointer;
-    &:hover { opacity: 0.85; }
+    &:hover {
+      opacity: 0.85;
+    }
   }
 }
 

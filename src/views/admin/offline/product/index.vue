@@ -15,11 +15,13 @@ import SocialPostModal from './SocialPostModal.vue'
 import ProductImportModal from './ProductImportModal.vue'
 import { productsApi } from '@/services/api/products/products-api'
 import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
+import { orderApi } from '@/services/api/order/order-api'
 import type { SelectOption } from '@/interfaces/common'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
 import { useSearchStore } from '@/stores/search'
 import { useMenuStore } from '@/stores/menu'
+import { formatTwd } from '@/utils/format'
 
 const searchStore = useSearchStore()
 const menuStore = useMenuStore()
@@ -101,8 +103,8 @@ onMounted(async () => {
         currentShopExchangeRate.value = channel.exchangeRate
         currentMinJpy.value = channel.thresholdJpy ? channel.thresholdJpy.toLocaleString() : ''
       }
-      getProductList()
     }
+    getProductList()
   }
 })
 
@@ -118,7 +120,10 @@ function selectEvent(data: SelectOption<EventsResBase | null>) {
   currentShopId.value = ''
   currentChannelName.value = ''
   isShowChannelSelect.value = true
-  searchStore.setSearchStore({ name: 'PRODUCT', condition: { eventId: currentEventId.value, channelId: null } })
+  searchStore.setSearchStore({
+    name: 'PRODUCT',
+    condition: { eventId: currentEventId.value, channelId: null },
+  })
   resetTable()
 }
 
@@ -131,27 +136,38 @@ function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
   currentChannelName.value = data.name
   currentShopExchangeRate.value = data.value?.exchangeRate ?? 0
   currentMinJpy.value = data.value?.thresholdJpy ? data.value?.thresholdJpy.toLocaleString() : ''
-  searchStore.setSearchStore({ name: 'PRODUCT', condition: { eventId: currentEventId.value, channelId: currentShopId.value } })
+  searchStore.setSearchStore({
+    name: 'PRODUCT',
+    condition: { eventId: currentEventId.value, channelId: currentShopId.value },
+  })
   resetTable()
 }
 
 /**
- * 重置頁碼，並在活動與通路都已選取時重新查詢
+ * 重置頁碼，並在活動已選取時重新查詢
  */
 function resetTable() {
   currentPage.value = 0
   tableData.value = []
-  if (currentEventId.value && currentShopId.value) {
+  if (currentEventId.value) {
     getProductList()
   }
 }
 
 /**
  * 依目前活動 ID、通路 ID 及分頁條件查詢商品列表
- * 活動或通路未選取時不發送請求
+ * 活動未選取時不發送請求；未選通路則以 getDistinctProducts 查詢全部通路（無分頁）
  */
 async function getProductList() {
-  if (!currentEventId.value || !currentShopId.value) return
+  if (!currentEventId.value) return
+  if (!currentShopId.value) {
+    const res = await orderApi.getDistinctProducts(Number(currentEventId.value))
+    tableData.value = res
+    totalPages.value = 0
+    totalElements.value = res.length
+    isTableQueried.value = true
+    return
+  }
   const res = await productsApi.getProducts({
     eventId: Number(currentEventId.value),
     channelId: Number(currentShopId.value),
@@ -215,6 +231,7 @@ function onSearch() {
 <template>
   <div class="product">
     <h3>商品管理</h3>
+    <div class="system-note">1. 如需新增商品請先選擇通路</div>
     <div class="productHeader">
       <div class="selectBox">
         <event-select-component :initialId="currentEventId" @selectOption="selectEvent" />
@@ -223,31 +240,32 @@ function onSearch() {
           :key="currentEventId"
           :eventId="currentEventId"
           :initialId="currentShopId || undefined"
+          :isShowAll="true"
           @selectOption="selectShop"
         />
       </div>
       <div v-if="isTableQueried" class="keyword-bar">
-        <text-input
-          label="商品名稱"
-          :value="keyword"
-          @update:value="onKeyword"
-        />
+        <text-input label="商品名稱" :value="keyword" @update:value="onKeyword" />
         <div class="btn filter-btn" @click="onSearch">確定</div>
       </div>
       <div class="btnBox">
-        <div class="btn btn-social" v-if="isTableQueried" @click="isShowSocialModal = true">
+        <div
+          class="btn btn-social"
+          v-if="isTableQueried && currentShopId"
+          @click="isShowSocialModal = true"
+        >
           社群貼文
         </div>
         <!-- <div
           class="btn btn-import"
-          v-if="isTableQueried && !currentEventIsLocked"
+          v-if="isTableQueried && currentShopId && !currentEventIsLocked"
           @click="isShowImportModal = true"
         >
           匯入
         </div> -->
         <div
           class="btn"
-          v-if="isTableQueried && !currentEventIsLocked"
+          v-if="isTableQueried && currentShopId && !currentEventIsLocked"
           @click="isShowBatchModal = true"
         >
           新增
@@ -266,6 +284,17 @@ function onSearch() {
       @edit="productFormModalRef?.editProduct($event)"
       @delete="productFormModalRef?.deleteProduct($event)"
     >
+      <template #col-priceTwd="{ row }">
+        <span>
+          <span
+            v-if="!row.priceTwd || String(row.priceTwd) === '-'"
+            class="warn-icon"
+            title="台幣定價為空"
+            >!</span
+          >
+          {{ formatTwd(row.priceTwd) }}
+        </span>
+      </template>
       <template #col-isBlindBox="{ row }">
         <span v-if="row.isBlindBox" class="blind-badge">盲抽</span>
         <span v-else class="noImage">－</span>
@@ -317,6 +346,21 @@ function onSearch() {
 </template>
 
 <style scoped>
+.warn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #d97706;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-right: 0.25rem;
+}
 .product {
   .selectBox {
     display: flex;
@@ -330,6 +374,15 @@ function onSearch() {
     .filter-btn {
       white-space: nowrap;
     }
+  }
+  .system-note {
+    width: 100%;
+    background: #ffffff;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #d8d4f7;
+    margin: 1rem 0;
+    font-size: 0.9rem;
   }
   .productHeader {
     display: flex;

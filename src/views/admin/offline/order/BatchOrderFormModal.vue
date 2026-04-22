@@ -85,6 +85,7 @@ const form = reactive({
   quantity: 1 as number | null,
   isFixedRate: false,
   nonCutTarget: false,
+  note: '',
 })
 
 /** 回傳當下表單值的純值快照（避免 async closure 讀到後續的 reactive 變更） */
@@ -212,9 +213,10 @@ async function addAndSubmit() {
       customerId,
       productId,
       orderStatus: '1',
-      quantity: item.quantity,
-      isFixedRate: item.isFixedRate,
-      nonCutTarget: item.nonCutTarget,
+      quantity: snap.quantity!,
+      isFixedRate: snap.isFixedRate,
+      nonCutTarget: snap.nonCutTarget,
+      note: snap.note,
     })
   }
 
@@ -341,6 +343,9 @@ const statusLabel: Record<QueueStatus, string> = {
               required
               :error-message="formErrors.quantity"
             />
+          </div>
+          <div class="text-input">
+            <text-input label="備註" v-model:value="form.note" />
           </div>
         </div>
         <div class="form-row">

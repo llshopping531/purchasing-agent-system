@@ -44,6 +44,8 @@ const pop = withDefaults(
     sortField?: string
     /** 目前排序方向 */
     sortDirection?: 'ASC' | 'DESC'
+    /** 依列資料動態回傳 CSS class 字串 */
+    rowClass?: (row: T) => string
   }>(),
   {
     isDelete: true,
@@ -127,7 +129,7 @@ function displayValue(val: unknown): unknown {
       <div class="header">
         <div
           class="header-item"
-          :style="{ 'min-width': header.width }"
+          :style="{ 'min-width': header.width, width: header.width }"
           v-for="header in sortedHeaderRow"
           :key="header.sort"
           :class="[header.value, { sortable: header.sortable }]"
@@ -156,7 +158,7 @@ function displayValue(val: unknown): unknown {
         <div class="header-item operate" v-if="isDelete || isEdit">操作</div>
       </div>
       <div class="body">
-        <div class="body-item" v-for="(dataRow, index) in pop.tableData" :key="index">
+        <div class="body-item" v-for="(dataRow, index) in pop.tableData" :key="index" :class="pop.rowClass?.(dataRow)">
           <div
             class="item-col"
             v-for="header in sortedHeaderRow"
@@ -211,7 +213,8 @@ function displayValue(val: unknown): unknown {
   .item-col {
     width: calc(100% / var(--row-count));
     @media (min-width: 769px) {
-      min-width: var(--col-width);
+      min-width: var(--col-width, 100px);
+      width: var(--col-width, 100%);
     }
   }
 
@@ -258,7 +261,8 @@ function displayValue(val: unknown): unknown {
     }
 
     &.operate {
-      width: 150px;
+      width: 130px;
+      min-width: 130px;
     }
   }
 
@@ -284,6 +288,11 @@ function displayValue(val: unknown): unknown {
       &:last-child .item-col:last-child {
         border-bottom-right-radius: var(--radius-md);
       }
+
+      &.inactive .item-col {
+        color: var(--color-danger, #e53e3e);
+        text-decoration: line-through;
+      }
     }
   }
 
@@ -298,7 +307,8 @@ function displayValue(val: unknown): unknown {
   .item-col.operate {
     gap: 0.35rem;
     justify-content: center;
-    width: 120px;
+    width: 130px;
+    min-width: 130px;
     flex-wrap: wrap;
 
     .btn {

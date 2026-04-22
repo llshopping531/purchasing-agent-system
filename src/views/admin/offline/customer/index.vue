@@ -30,7 +30,7 @@ const headerRow: HeaderRow[] = [
   { name: '客戶名稱', value: 'name', sort: 0, width: '180px' },
   { name: '來源', value: 'sourceName', sort: 0, width: '100px', sortable: true },
   { name: '已私訊官方', value: 'hasMessagedOfficial', sort: 0, width: '120px', sortable: true },
-  { name: '優惠對象', value: 'isDiscount', sort: 0, width: '90px', sortable: true },
+  { name: '優惠對象', value: 'isDiscount', sort: 0, width: '130px', sortable: true },
   { name: '老闆', value: 'isBoss', sort: 0, width: '70px', sortable: true },
   { name: '備註', value: 'note', sort: 0 },
 ]

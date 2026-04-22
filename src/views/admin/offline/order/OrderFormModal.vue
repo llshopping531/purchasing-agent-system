@@ -5,6 +5,7 @@
  * 操作完成後 emit confirmed 通知父層重新載入訂單列表
  */
 import { ref, reactive, watch } from 'vue'
+import { formatTwd, formatJpy } from '@/utils/format'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
 import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
@@ -268,8 +269,8 @@ defineExpose({ editOrder, deleteOrder, insertOrder })
           </div>
         </div>
         <div v-if="editProductInfo" class="productInfo">
-          <span>日幣定價：¥{{ editProductInfo.priceJpy }}</span>
-          <span>台幣單價：NT${{ editProductInfo.priceTwd }}</span>
+          <span>日幣定價：{{ formatJpy(editProductInfo.priceJpy) }}</span>
+          <span>台幣單價：{{ formatTwd(editProductInfo.priceTwd) }}</span>
           <span>匯率：{{ editProductInfo.exchangeRate }}</span>
         </div>
         <div class="row">

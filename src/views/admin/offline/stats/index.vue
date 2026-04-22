@@ -13,9 +13,11 @@ import type { SelectOption } from '@/interfaces/common'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
 import { useSearchStore } from '@/stores/search'
+import { formatTwd, formatJpy } from '@/utils/format'
 import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
 import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
 import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
+import { isInactiveOrder } from '@/utils/order'
 
 const searchStore = useSearchStore()
 
@@ -45,12 +47,11 @@ const currentProduct = ref<number | undefined>(undefined)
 
 const headerRow: HeaderRow[] = [
   { name: '顧客名稱', value: 'customerName', sort: 0, width: '120px', sortable: true },
-  { name: '通路', value: 'channelName', sort: 6, width: '100px' },
+  { name: '通路', value: 'channelName', sort: 6, width: '150px' },
   {
     name: '商品名稱',
     value: 'productName',
     sort: 1,
-    width: '200px',
     sortable: true,
     mobileSpan: 2,
   },
@@ -59,7 +60,7 @@ const headerRow: HeaderRow[] = [
   { name: '日幣小計', value: 'displaySubtotalJpy', sort: 4, width: '110px', sortable: true },
   { name: '台幣小計', value: 'displaySubtotalTwd', sort: 5, width: '110px', sortable: true },
   { name: '訂單狀態', value: 'orderStatusName', sort: 6, width: '100px' },
-  { name: '備註', value: 'note', sort: 7, width: '100px' },
+  { name: '備註', value: 'note', sort: 7 },
   { name: '採購者', value: 'purchaserName', sort: 8, width: '100px' },
 ]
 
@@ -178,16 +179,6 @@ function onSort(field: string) {
   currentPage.value = 0
   fetchOverview()
 }
-
-function formatJpy(val: number | null) {
-  if (val == null) return '-'
-  return `¥ ${val.toLocaleString()}`
-}
-
-function formatTwd(val: number | null) {
-  if (val == null) return '—'
-  return `NT$ ${val.toLocaleString()}`
-}
 </script>
 
 <template>
@@ -271,6 +262,7 @@ function formatTwd(val: number | null) {
         :headerRow="headerRow"
         :isDelete="false"
         :isEdit="false"
+        :rowClass="(row) => isInactiveOrder(row.orderStatusName) ? 'inactive' : ''"
         :totalPages="totalPages"
         :currentPage="currentPage"
         :totalElements="totalElements"
@@ -281,8 +273,20 @@ function formatTwd(val: number | null) {
         @changeSize="onChangeSize"
         @sort="onSort"
       >
-        <template #col-subtotalTwd="{ row }">
-          {{ formatTwd(row.subtotalTwd) }}
+        <template #col-displaySubtotalTwd="{ row }">
+          <span
+            v-if="
+              (!row.subtotalTwd || String(row.subtotalTwd) === '-') &&
+              !isInactiveOrder(row.orderStatusName)
+            "
+            class="warn-icon"
+            title="台幣小計為空"
+            >!</span
+          >
+          {{ formatTwd(row.displaySubtotalTwd) }}
+        </template>
+        <template #col-displaySubtotalJpy="{ row }">
+          {{ formatJpy(row.displaySubtotalJpy) }}
         </template>
         <template #col-note="{ row }">
           <span v-show="row.nonBonusTarget"> 不計入贈品</span>
@@ -290,6 +294,21 @@ function formatTwd(val: number | null) {
           <span v-show="row.nonCutTarget"> 不計入分潤</span>
           {{ row.note }}
         </template>
+        <!-- <template #col-subtotalTwd="{ row }">
+          <span
+            :class="{ 'out-of-stock': isInactive(row) }"
+            class="row-cell"
+            @click="toggleMark(row.id)"
+          >
+            <span
+              v-if="(!row.subtotalTwd || String(row.subtotalTwd) === '-') && !isInactive(row)"
+              class="warn-icon"
+              title="台幣小計為空"
+              >!</span
+            >
+            {{ row.subtotalTwd }}
+          </span>
+        </template> -->
       </table-component>
     </div>
 
@@ -378,6 +397,22 @@ h3 {
   font-weight: 600;
   background: color-mix(in srgb, var(--color-primary) 10%, transparent);
   color: var(--color-primary-dark);
+}
+
+.warn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #d97706;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-right: 0.25rem;
 }
 
 /* ── 空狀態 ── */

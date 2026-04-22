@@ -111,9 +111,9 @@ export const orderApi = {
   },
 
   /**
-   * 查詢活動或通路的顧客列表
+   * 查詢活動或通路的商品列表
    * @param eventId - 訂單 Id
-   * @returns 活動或通路的顧客列表資料
+   * @returns 活動或通路的商品列表資料
    */
   getDistinctProducts: async (eventId: number): Promise<ProductsResBase[]> => {
     return await getApi(`/orders/distinct-products?eventId=${eventId}`)

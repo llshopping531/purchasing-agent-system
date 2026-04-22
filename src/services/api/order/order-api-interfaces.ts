@@ -85,6 +85,8 @@ export interface OrderReqBase {
   nonCutTarget?: boolean
   /** 採購確認 */
   purchaseConfirm?: boolean
+  /** 採購者 */
+  purchaserName?: string
   /** 備註 */
   note?: string
   /** 自定義欄位 */

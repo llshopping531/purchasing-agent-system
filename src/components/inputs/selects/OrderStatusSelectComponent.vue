@@ -28,19 +28,19 @@ const emit = defineEmits<{
 
 /** 訂單狀態靜態選項清單 */
 const orderStatusOptions: SelectOption<string | undefined>[] = [
-  { value: '1', name: '已喊單' },
-  { value: '2', name: '已購買' },
-  { value: '3', name: '已取消' },
-  { value: '4', name: '缺貨' },
+  { value: '1', name: '已喊單', color: '#2563eb' },
+  { value: '2', name: '已購買', color: '#16a34a' },
+  { value: '3', name: '已取消', color: '#dc2626' },
+  { value: '4', name: '缺貨',   color: '#d97706' },
 ]
 
 /** 訂單狀態靜態選項清單 */
 const orderStatusAllOptions: SelectOption<string | undefined>[] = [
   { value: undefined, name: '全部' },
-  { value: '1', name: '已喊單' },
-  { value: '2', name: '已購買' },
-  { value: '3', name: '已取消' },
-  { value: '4', name: '缺貨' },
+  { value: '1', name: '已喊單', color: '#2563eb' },
+  { value: '2', name: '已購買', color: '#16a34a' },
+  { value: '3', name: '已取消', color: '#dc2626' },
+  { value: '4', name: '缺貨',   color: '#d97706' },
 ]
 
 function getOrderStatusOption(orderStatus: string | undefined) {

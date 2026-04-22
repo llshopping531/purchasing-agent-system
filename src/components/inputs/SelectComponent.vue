@@ -51,6 +51,17 @@ watch(
   },
 )
 
+/** 目前選取項目的顏色 */
+const currentColor = ref(pop.defaultValue?.color ?? '')
+
+// 當外部預設值更新時同步顏色
+watch(
+  () => pop.defaultValue,
+  (newDefault) => {
+    currentColor.value = newDefault?.color ?? ''
+  },
+)
+
 /** 展開下拉清單 */
 function openOptionList() {
   isOpenOption.value = true
@@ -68,6 +79,7 @@ function closeOptionList() {
 function selectOption(selectedOption: SelectOption<T>) {
   isOpenOption.value = false
   inputValue.value = selectedOption.name
+  currentColor.value = selectedOption.color ?? ''
   currentOptionList.value = pop.optionList
   emit('selectOption', selectedOption)
 }
@@ -88,6 +100,7 @@ function filter() {
     <input
       class="currentValue"
       type="text"
+      :style="currentColor ? { color: currentColor, fontWeight: '600' } : {}"
       @focus="openOptionList()"
       @blur="closeOptionList()"
       @input="filter()"
@@ -100,6 +113,7 @@ function filter() {
         class="optionItem"
         v-for="option in currentOptionList"
         :key="option.name"
+        :style="option.color ? { borderLeft: `3px solid ${option.color}`, color: option.color } : {}"
         @mousedown="selectOption(option)"
       >
         {{ option.name }}

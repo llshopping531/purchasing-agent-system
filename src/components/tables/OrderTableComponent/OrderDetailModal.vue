@@ -5,6 +5,7 @@
  */
 import BooleanTransformComponent from '@/components/BooleanTransformComponent.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
+import { formatTwd } from '@/utils/format'
 import type { OrderAllContent } from '@/services/api/order/order-api'
 
 defineProps<{
@@ -62,7 +63,7 @@ const emit = defineEmits<{
         <div class="detail-line">
           <div class="detail-row">
             <span class="detail-label">小計 (台幣)</span>
-            <span class="detail-value">{{ order.subtotalTwd }} TWD</span>
+            <span class="detail-value">{{ formatTwd(order.subtotalTwd) }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">採購者</span>

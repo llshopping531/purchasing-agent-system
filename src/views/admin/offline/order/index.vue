@@ -38,9 +38,7 @@ const currentShopExchangeRate = ref(0)
 /** 是否已執行過查詢（用於控制新增按鈕顯示） */
 const isTableQueried = ref(false)
 /** 是否顯示統計按鈕（有資料時才顯示） */
-const isShowTotalBtn = ref(false)
-/** 是否顯示統計彈窗 */
-const isShowTotalModal = ref(false)
+const isShowTable = ref(false)
 /** 是否顯示通路下拉 */
 const isShowChannelSelect = ref(false)
 /** 當前通路是否已鎖定 */
@@ -76,7 +74,7 @@ function selectEvent(data: SelectOption<EventsResBase | null>) {
   currentEventIsLocked.value = data.value.isLocked
   isShowChannelSelect.value = true
   currentShopId.value = ''
-  isShowTotalBtn.value = false
+  isShowTable.value = false
   isTableQueried.value = false
 }
 
@@ -100,7 +98,7 @@ function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
  */
 function getTableData(data: OrderQueryContent[]) {
   isTableQueried.value = true
-  isShowTotalBtn.value = data.length !== 0
+  isShowTable.value = data.length !== 0
 
   /** 各訂單的品項與數量 */
   const itemData = data.map((item) => ({ name: item.productName, value: item.quantity }))
@@ -146,7 +144,6 @@ function onConfirmed() {
         />
       </div>
       <div class="btnBox">
-        <div class="btn" v-if="isShowTotalBtn" @click="isShowTotalModal = true">顯示統計</div>
         <div
           class="btn create"
           v-if="isTableQueried && !currentEventIsLocked"
@@ -158,7 +155,7 @@ function onConfirmed() {
     </div>
     <order-table-component
       v-if="currentShopId"
-      v-show="isShowTotalBtn"
+      v-show="isShowTable"
       ref="orderTableRef"
       :currentEventId="currentEventId"
       :currentShopId="currentShopId"
@@ -169,19 +166,6 @@ function onConfirmed() {
       @insert="orderFormModalRef?.insertOrder($event)"
     />
     <router-view />
-
-    <modal-component name="統計" @confirm="isShowTotalModal = false" v-if="isShowTotalModal">
-      <template #content>
-        <div class="totalTable">
-          <table-component
-            :headerRow="headerRow"
-            :tableData="tableData"
-            :isDelete="false"
-            :isEdit="false"
-          />
-        </div>
-      </template>
-    </modal-component>
 
     <batch-order-form-modal
       v-if="isShowBatchModal"
