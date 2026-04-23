@@ -9,13 +9,13 @@ import IconFlag from '@/components/icons/IconFlag.vue'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
-import { customerOrdersApi } from '@/services/api/customer-orders/customer-orders-api'
+import { packingListApi } from '@/services/api/packing-list/packing-list-api'
 import type { SelectOption } from '@/interfaces/common'
 import type {
-  CustomerOrdersCustomer,
+  PackingListCustomer,
   CustomerOrder,
   ChannelBonus,
-} from '@/services/api/customer-orders/customer-orders-api-interfaces'
+} from '@/services/api/packing-list/packing-list-api-interfaces'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 import { useSearchStore } from '@/stores/search'
 import { isInactiveOrder } from '@/utils/order'
@@ -31,13 +31,13 @@ const currentEventId = ref<number | null>(null)
 const isCustomerPanelOpen = ref(false)
 
 /** 活動內有訂單的客戶清單 */
-const customerList = ref<CustomerOrdersCustomer[]>([])
+const customerList = ref<PackingListCustomer[]>([])
 
 /** 搜尋關鍵字 */
 const searchKeyword = ref('')
 
 /** 目前選取的客戶 */
-const selectedCustomer = ref<CustomerOrdersCustomer | null>(null)
+const selectedCustomer = ref<PackingListCustomer | null>(null)
 
 /** 選取客戶的個人訂單清單 */
 const orderList = ref<CustomerOrder[]>([])
@@ -155,7 +155,7 @@ onMounted(async () => {
   if (prev?.eventId) {
     currentEventId.value = Number(prev.eventId)
     loadMarks()
-    customerList.value = await customerOrdersApi.getCustomers({ eventId: currentEventId.value })
+    customerList.value = await packingListApi.getCustomers({ eventId: currentEventId.value })
   }
 })
 
@@ -174,22 +174,22 @@ async function selectEvent(data: SelectOption<EventsResBase | null>) {
   })
   loadMarks()
 
-  const res = await customerOrdersApi.getCustomers({ eventId: currentEventId.value })
+  const res = await packingListApi.getCustomers({ eventId: currentEventId.value })
   customerList.value = res
 }
 
 /**
  * 選取客戶，載入其個人訂單明細與滿額狀態
  */
-async function selectCustomer(customer: CustomerOrdersCustomer) {
+async function selectCustomer(customer: PackingListCustomer) {
   if (!currentEventId.value) return
   selectedCustomer.value = customer
   filterChannel.value = ''
   filterProduct.value = ''
   isCustomerPanelOpen.value = false
   const [orders, bonus] = await Promise.all([
-    customerOrdersApi.getCustomerOrders({ customerId: customer.id, eventId: currentEventId.value }),
-    customerOrdersApi.getChannelBonus({ customerId: customer.id, eventId: currentEventId.value }),
+    packingListApi.getCustomerOrders({ customerId: customer.id, eventId: currentEventId.value }),
+    packingListApi.getChannelBonus({ customerId: customer.id, eventId: currentEventId.value }),
   ])
   orderList.value = orders
   channelBonusList.value = bonus
@@ -205,8 +205,8 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
 </script>
 
 <template>
-  <div class="customer-orders">
-    <h3>個人購物清單</h3>
+  <div class="packing-list">
+    <h3>包貨清單</h3>
     <p>請選擇活動後，點選客戶查看其購物明細</p>
 
     <div class="selectBox">
@@ -358,7 +358,7 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
 </template>
 
 <style scoped>
-.customer-orders {
+.packing-list {
   .selectBox {
     margin-bottom: 1.5rem;
   }

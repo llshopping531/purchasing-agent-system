@@ -21,7 +21,7 @@ const productItem      = { name: '商品管理',   path: PATH.offlineProduct }
 const eventItem        = { name: '活動管理',   path: PATH.offlineEvent }
 const customerItem     = { name: '顧客管理',   path: PATH.offlineCustomer }
 const purchaseListItem = { name: '採購清單',   path: PATH.offlinePurchaseList }
-const customerOrdersItem = { name: '個人購物清單', path: PATH.offlineCustomerOrders }
+const packingListItem    = { name: '包貨清單', path: PATH.offlinePackingList }
 const channelItem      = { name: '通路管理',   path: PATH.offlineChannel }
 const statsItem        = { name: '訂單總覽',   path: PATH.offlineStats }
 const profitShareItem  = { name: '分潤查詢',   path: PATH.offlineProfitShare }
@@ -67,8 +67,8 @@ router.afterEach(() => {
           <router-link :to="purchaseListItem.path" class="nav-item">
             <icon-list-check class="nav-icon" /><span class="nav-item-name" v-if="!isCollapsed">{{ purchaseListItem.name }}</span>
           </router-link>
-          <router-link :to="customerOrdersItem.path" class="nav-item">
-            <icon-cart-shopping class="nav-icon" /><span class="nav-item-name" v-if="!isCollapsed">{{ customerOrdersItem.name }}</span>
+          <router-link :to="packingListItem.path" class="nav-item">
+            <icon-cart-shopping class="nav-icon" /><span class="nav-item-name" v-if="!isCollapsed">{{ packingListItem.name }}</span>
           </router-link>
         </div>
       </template>

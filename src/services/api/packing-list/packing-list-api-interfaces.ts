@@ -3,7 +3,7 @@ import type { ExtraData } from '../common-api-interface'
 /**
  * 查詢活動內有訂單的客戶清單 request
  */
-export interface GetCustomerOrdersCustomersReq {
+export interface GetPackingListCustomersReq {
   /** 活動 ID */
   eventId: number
 }
@@ -11,7 +11,7 @@ export interface GetCustomerOrdersCustomersReq {
 /**
  * 活動內有訂單的客戶資料
  */
-export interface CustomerOrdersCustomer {
+export interface PackingListCustomer {
   /** 客戶 ID */
   id: number
   /** 客戶名稱 */
@@ -35,12 +35,12 @@ export interface CustomerOrdersCustomer {
 }
 
 /** 查詢活動內有訂單的客戶清單 response */
-export type GetCustomerOrdersCustomersRes = CustomerOrdersCustomer[]
+export type GetPackingListCustomersRes = PackingListCustomer[]
 
 /**
  * 查詢客戶在活動內的個人訂單清單 request
  */
-export interface GetCustomerOrdersReq {
+export interface GetPackingListReq {
   /** 客戶 ID */
   customerId: number
   /** 活動 ID */
@@ -80,7 +80,7 @@ export interface CustomerOrder {
 }
 
 /** 查詢客戶在活動內的個人訂單清單 response */
-export type GetCustomerOrdersRes = CustomerOrder[]
+export type GetPackingListRes = CustomerOrder[]
 
 /**
  * 查詢客戶在活動內各通路滿額狀態 request

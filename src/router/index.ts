@@ -77,9 +77,9 @@ const router = createRouter({
               component: () => import('../views/admin/offline/product/index.vue'),
             },
             {
-              path: 'customerOrders',
-              name: 'CustomerOrdersView',
-              component: () => import('../views/admin/offline/customerOrders/index.vue'),
+              path: 'packingList',
+              name: 'PackingListView',
+              component: () => import('../views/admin/offline/packingList/index.vue'),
             },
             {
               path: 'channel',

@@ -1,21 +1,21 @@
 import { getApi } from '../base-api'
 import type {
-  GetCustomerOrdersCustomersReq,
-  GetCustomerOrdersCustomersRes,
-  GetCustomerOrdersReq,
-  GetCustomerOrdersRes,
+  GetPackingListCustomersReq,
+  GetPackingListCustomersRes,
+  GetPackingListReq,
+  GetPackingListRes,
   GetChannelBonusReq,
   GetChannelBonusRes,
 } from './customer-orders-api-interfaces'
 
 /** 包貨管理與客戶訂單相關 API 集合 */
-export const customerOrdersApi = {
+export const packingListApi = {
   /**
    * 查詢活動內有訂單的客戶清單
    * @param req - 包含活動 ID 的查詢條件
    * @returns 有訂單的客戶清單
    */
-  getCustomers: async (req: GetCustomerOrdersCustomersReq): Promise<GetCustomerOrdersCustomersRes> => {
+  getCustomers: async (req: GetPackingListCustomersReq): Promise<GetPackingListCustomersRes> => {
     return await getApi('/packing/customers', req)
   },
   /**
@@ -23,7 +23,7 @@ export const customerOrdersApi = {
    * @param req - 包含客戶 ID 與活動 ID 的查詢條件
    * @returns 該客戶的訂單清單
    */
-  getCustomerOrders: async (req: GetCustomerOrdersReq): Promise<GetCustomerOrdersRes> => {
+  getCustomerOrders: async (req: GetPackingListReq): Promise<GetPackingListRes> => {
     return await getApi('/packing/orders', req)
   },
 

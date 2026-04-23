@@ -12,7 +12,7 @@ import CustomerFormModal from './CustomerFormModal.vue'
 import { customersApi } from '@/services/api/customers/customers-api'
 import type { CustomersResBase } from '@/services/api/customers/customers-api-interfaces'
 import { eventApi } from '@/services/api/events/events-api'
-import { customerOrdersApi } from '@/services/api/customer-orders/customer-orders-api'
+import { packingListApi } from '@/services/api/packing-list/packing-list-api'
 import type { SelectOption } from '@/interfaces/common'
 
 /** CustomerFormModal 元件的 ref，用於呼叫其 createCustomer / editCustomer */
@@ -63,11 +63,11 @@ onMounted(async () => {
 
 /**
  * 依目前分頁條件查詢顧客列表
- * 若有選擇活動，改呼叫 customerOrdersApi.getCustomers 取得該活動的客戶（client-side sort/page）
+ * 若有選擇活動，改呼叫 packingListApi.getCustomers 取得該活動的客戶（client-side sort/page）
  */
 async function getCustomerList() {
   if (selectedEventId.value !== null) {
-    const res = await customerOrdersApi.getCustomers({ eventId: selectedEventId.value })
+    const res = await packingListApi.getCustomers({ eventId: selectedEventId.value })
     allEventCustomers.value = res as unknown as CustomersResBase[]
     applyClientSortAndPage()
   } else {
