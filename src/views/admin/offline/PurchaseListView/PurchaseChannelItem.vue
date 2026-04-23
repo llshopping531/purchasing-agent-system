@@ -356,16 +356,17 @@ async function confirmAllPurchased() {
   <!-- 通路商品總覽彈窗 -->
   <modal-component
     v-if="isShowSummaryModal"
-    :name="`${channelName} 商品總覽`"
+    :name="`${channelName} 未買商品總覽`"
     @confirm="isShowSummaryModal = false"
   >
     <template #content>
-      <template v-for="item in data" :key="item.productId">
-        <div class="view-list" v-if="item.remaining > 0">
+      <template v-if="data.some(item => item.remaining > 0)">
+        <div v-for="item in data.filter(i => i.remaining > 0)" :key="item.productId" class="view-list">
           <div class="view-item">{{ item.productName }}</div>
           <div class="view-item">尚未購買：{{ item.remaining }}</div>
         </div>
       </template>
+      <div v-else class="summary-all-done">此通路全數皆已購買</div>
     </template>
   </modal-component>
 
@@ -482,6 +483,12 @@ async function confirmAllPurchased() {
     background-color: var(--color-primary);
     color: #fff;
   }
+}
+.summary-all-done {
+  text-align: center;
+  padding: 1.5rem 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
 }
 .view-list {
   display: flex;

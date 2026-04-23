@@ -19,6 +19,8 @@ import type {
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 import { useSearchStore } from '@/stores/search'
 import { isInactiveOrder } from '@/utils/order'
+import { orderApi } from '@/services/api/order/order-api'
+import type { DrawsData } from '@/services/api/order/order-api-interfaces'
 
 const searchStore = useSearchStore()
 
@@ -45,6 +47,9 @@ const channelBonusList = ref<ChannelBonus[]>([])
 
 /** 訂單標記 Map：orderId → 標記類型（1=橘, 2=紅） */
 const markedOrders = ref<Map<number, 1 | 2>>(new Map())
+
+/** 盲抽結果 Map：orderId → DrawsData[] */
+const drawsResultMap = ref<Map<number, DrawsData[]>>(new Map())
 
 const MARK_STORAGE_KEY = 'customerOrderMarks'
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000
@@ -136,7 +141,7 @@ const totalJpy = computed(() =>
 /** 訂單清單表頭 */
 const orderHeaderRow: HeaderRow[] = [
   { name: '', value: 'mark', sort: 0, width: '40px' },
-  { name: '通路', value: 'channelName', sort: 1, width: '100px' },
+  { name: '通路', value: 'channelName', sort: 1, width: '150px' },
   { name: '商品名稱', value: 'productName', sort: 1 },
   { name: '數量', value: 'quantity', sort: 2, width: '70px' },
   { name: '日幣小計', value: 'subtotalJpy', sort: 3, width: '100px' },
@@ -188,6 +193,14 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
   ])
   orderList.value = orders
   channelBonusList.value = bonus
+
+  const results = await Promise.all(orders.map((o) => orderApi.getDrawsResult(o.id)))
+  const map = new Map<number, DrawsData[]>()
+  orders.forEach((o, i) => {
+    const r = results[i]
+    if (r && r.length > 0) map.set(o.id, r)
+  })
+  drawsResultMap.value = map
 }
 </script>
 
@@ -321,6 +334,16 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
                   >!</span
                 >
                 {{ formatTwd(row.subtotalTwd) }}
+              </span>
+            </template>
+            <template #col-productName="{ row }">
+              <span class="row-cell" @click="toggleMark(row.id)">
+                {{ row.productName }}
+                <span
+                  v-for="d in drawsResultMap.get(row.id)"
+                  :key="d.id"
+                  class="draws-tag"
+                >{{ d.result }}</span>
               </span>
             </template>
             <template #col-orderStatusName="{ row }">
@@ -659,6 +682,20 @@ async function selectCustomer(customer: CustomerOrdersCustomer) {
   width: 100%;
 }
 
+.draws-tag {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-xl);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--color-secondary) 15%, transparent);
+  color: var(--color-secondary-dark);
+  margin: 0.1rem 0.15rem 0.1rem 0;
+}
+.noData {
+  color: #bbb;
+  font-size: 0.85rem;
+}
 .warn-icon {
   display: inline-flex;
   align-items: center;
