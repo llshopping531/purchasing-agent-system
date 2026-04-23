@@ -21,6 +21,12 @@ const router = createRouter({
       component: LoginView,
     },
     {
+      /** 公開訂單查詢頁，透過 queryUuid 查詢客戶訂單，不需登入 */
+      path: '/query/:uuid',
+      name: 'queryOrders',
+      component: () => import('../views/QueryView.vue'),
+    },
+    {
       /** 使用者前台，需登入才可進入子頁面 */
       path: '/user',
       name: 'user',

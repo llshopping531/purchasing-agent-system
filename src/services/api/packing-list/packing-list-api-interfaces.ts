@@ -16,6 +16,8 @@ export interface PackingListCustomer {
   id: number
   /** 客戶名稱 */
   name: string
+  /** 個人訂單查詢連結 UUID */
+  queryUuid: string
   /** 來源 */
   source: string
   /** 來源名稱 */

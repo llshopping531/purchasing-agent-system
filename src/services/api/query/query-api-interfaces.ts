@@ -1,0 +1,32 @@
+/**
+ * 客戶查詢連結的訂單（充實後）資料
+ */
+export interface QueryOrderEnriched {
+  /** 活動 ID */
+  eventId: number
+  /** 通路 ID */
+  channelId: number
+  /** 通路名稱 */
+  channelName: string
+  /** 商品 ID */
+  productId: number
+  /** 商品名稱 */
+  productName: string
+  /** 數量 */
+  quantity: number
+  /** 日幣小計 */
+  subtotalJpy: number
+  /** 台幣小計 */
+  subtotalTwd: number
+  /** 匯率 */
+  exchangeRate: number
+  /** 台幣單價 */
+  unitTwd: number
+  /** 訂單狀態值 */
+  orderStatus: string
+  /** 訂單狀態名稱 */
+  orderStatusName: string
+}
+
+/** 查詢客戶充實後訂單列表 response */
+export type GetQueryOrdersEnrichedRes = QueryOrderEnriched[]

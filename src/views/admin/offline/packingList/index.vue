@@ -6,10 +6,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { formatTwd, formatJpy } from '@/utils/format'
 import IconFlag from '@/components/icons/IconFlag.vue'
+import IconCopy from '@/components/icons/IconCopy.vue'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { packingListApi } from '@/services/api/packing-list/packing-list-api'
+import { customersApi } from '@/services/api/customers/customers-api'
 import type { SelectOption } from '@/interfaces/common'
 import type {
   PackingListCustomer,
@@ -23,6 +25,19 @@ import { orderApi } from '@/services/api/order/order-api'
 import type { DrawsData } from '@/services/api/order/order-api-interfaces'
 
 const searchStore = useSearchStore()
+
+/** 最近複製過的客戶 ID，用於顯示「已複製」回饋 */
+const copiedCustomerId = ref<number | null>(null)
+
+/** 複製客戶的個人查詢連結到剪貼簿 */
+async function copyQueryLink(customer: PackingListCustomer, event: MouseEvent) {
+  event.stopPropagation()
+  const  queryUuid  = await customersApi.getQueryUuid(customer.id)
+  const url = `${window.location.origin}/query/${queryUuid}`
+  await navigator.clipboard.writeText(url)
+  copiedCustomerId.value = customer.id
+  setTimeout(() => { copiedCustomerId.value = null }, 1500)
+}
 
 /** 目前選取的活動 ID */
 const currentEventId = ref<number | null>(null)
@@ -144,7 +159,8 @@ const orderHeaderRow: HeaderRow[] = [
   { name: '通路', value: 'channelName', sort: 1, width: '150px' },
   { name: '商品名稱', value: 'productName', sort: 1 },
   { name: '數量', value: 'quantity', sort: 2, width: '70px' },
-  { name: '日幣小計', value: 'subtotalJpy', sort: 3, width: '100px' },
+  { name: '匯率', value: 'exchangeRate', sort: 2, width: '70px' },
+  { name: '台幣單價', value: 'unitTwd', sort: 3, width: '100px' },
   { name: '台幣小計', value: 'subtotalTwd', sort: 4, width: '100px' },
   { name: '訂單狀態', value: 'orderStatusName', sort: 5, width: '100px' },
 ]
@@ -240,7 +256,15 @@ async function selectCustomer(customer: PackingListCustomer) {
             :class="{ selected: selectedCustomer?.id === customer.id }"
             @click="selectCustomer(customer)"
           >
-            {{ customer.name }}
+            <span class="customer-name">{{ customer.name }}</span>
+            <button
+              class="copy-link-btn"
+              :class="{ copied: copiedCustomerId === customer.id }"
+              :title="copiedCustomerId === customer.id ? '已複製！' : '複製查詢連結'"
+              @click="copyQueryLink(customer, $event)"
+            >
+              <icon-copy class="copy-icon" />
+            </button>
           </li>
         </ul>
       </div>
@@ -489,6 +513,44 @@ async function selectCustomer(customer: PackingListCustomer) {
   overflow: hidden;
   max-height: 60vh;
   overflow-y: auto;
+}
+
+.customer-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copy-link-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  color: var(--color-text-muted, #aaa);
+  transition: color 0.15s, background 0.15s;
+  padding: 0;
+
+  &:hover {
+    color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  }
+
+  &.copied {
+    color: #16a34a;
+  }
+}
+
+.copy-icon {
+  width: 11px;
+  height: 11px;
 }
 
 .customer-item {

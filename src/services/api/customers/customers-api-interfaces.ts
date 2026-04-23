@@ -50,6 +50,12 @@ export type ModifyCustomersReq = CustomersReqBase
 /** 修改客戶 response */
 export type ModifyCustomersRes = CustomersResBase
 
+/** 查詢客戶 queryUuid response */
+export interface GetCustomerQueryUuidRes {
+  /** 客戶個人訂單查詢連結 UUID */
+  queryUuid: string
+}
+
 // 共用
 
 /**

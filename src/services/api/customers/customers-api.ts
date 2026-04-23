@@ -2,6 +2,7 @@ import { getApi, patchApi, postApi } from '../base-api'
 import type {
   CreateCustomersReq,
   CreateCustomersRes,
+  GetCustomerQueryUuidRes,
   ModifyCustomersReq,
   ModifyCustomersRes,
   QueryCustomersAllRes,
@@ -45,5 +46,14 @@ export const customersApi = {
    */
   patchCustomers: async (id: number, req: ModifyCustomersReq): Promise<ModifyCustomersRes> => {
     return await patchApi(`/customers/${id}`, req)
+  },
+
+  /**
+   * 查詢客戶的個人訂單查詢連結 UUID
+   * @param id - 客戶 ID
+   * @returns queryUuid
+   */
+  getQueryUuid: async (id: number): Promise<GetCustomerQueryUuidRes> => {
+    return await getApi(`/customers/${id}/query-uuid`)
   },
 }

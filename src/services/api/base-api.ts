@@ -43,6 +43,12 @@ const api: AxiosInstance = axios.create({
   timeout: 10000,
 })
 
+/** axios 實例(開放api)，統一設定 baseURL 與 timeout */
+const publicApi: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_PUBLIC_API_BASE_URL,
+  timeout: 10000,
+})
+
 /**
  * 發送 GET 請求
  * @template resT - 回應資料型別
@@ -51,8 +57,18 @@ const api: AxiosInstance = axios.create({
  * @param req - 查詢參數（轉為 query string）
  * @returns 解包後的資料
  */
-export const getApi = async <resT, reqT>(url: string, req?: reqT): Promise<resT> => {
-  const res = await api.get<BaseApiRes<resT>>(url, { params: req })
+export const getApi = async <resT, reqT>(
+  url: string,
+  req?: reqT,
+  isPublic?: boolean,
+): Promise<resT> => {
+  let res
+  if (isPublic) {
+    res = await publicApi.get<BaseApiRes<resT>>(url, { params: req })
+  } else {
+    res = await api.get<BaseApiRes<resT>>(url, { params: req })
+  }
+
   return res.data.data
 }
 
@@ -148,8 +164,8 @@ api.interceptors.response.use(
     const data = response.data as BaseApiRes<unknown>
     if (data.code !== 200) {
       let errorMessage = data.message
-      if(data.code === 500) errorMessage = ERROR_MESSAGE.SYSTEM_ERROR
-      if(data.code === 400) errorMessage = ERROR_MESSAGE.REQUEST_ERROR
+      if (data.code === 500) errorMessage = ERROR_MESSAGE.SYSTEM_ERROR
+      if (data.code === 400) errorMessage = ERROR_MESSAGE.REQUEST_ERROR
       useErrorStore().show(errorMessage)
       return Promise.reject(new Error(data.message))
     }
