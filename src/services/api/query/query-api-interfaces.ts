@@ -30,3 +30,17 @@ export interface QueryOrderEnriched {
 
 /** 查詢客戶充實後訂單列表 response */
 export type GetQueryOrdersEnrichedRes = QueryOrderEnriched[]
+
+/** 透過 queryUuid 查詢客戶基本資料 response */
+export interface GetQueryCustomerRes {
+  id: number
+  name: string
+  source: string
+  hasMessagedOfficial: boolean
+  isDiscount: boolean
+  isBoss: boolean
+  isBlacklist: boolean
+  queryUuid: string
+  note: string
+  extraData: string
+}

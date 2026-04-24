@@ -46,7 +46,7 @@ const headerRow = ref<HeaderRow[]>([
   { name: '訂單狀態', value: 'orderStatusName', sort: 4, width: '130px', sortable: true },
   { name: '購買確認', value: 'purchaseConfirm', sort: 5, width: '85px' },
   { name: '備註', value: 'note', sort: 6, sortable: true },
-  { name: '購買者', value: 'purchaserName', sort: 7, width: '100px', sortable: true },
+  { name: '購買者', value: 'purchaser', sort: 7, width: '100px', sortable: true },
   { name: '更多', value: 'more', sort: 8, width: '230px' },
 ])
 
@@ -221,7 +221,7 @@ async function updateOrderStatus(row: OrderAllContent, newStatus: string) {
     nonBonusTarget: row.nonBonusTarget,
     isFixedRate: row.isFixedRate,
     nonCutTarget: row.nonCutTarget,
-    purchaserName:row.purchaserName,
+    purchaser:row.purchaser,
     purchaseConfirm: row.purchaseConfirm,
     note: row.note,
   })
@@ -242,14 +242,14 @@ async function updatePurchaseConfirm(row: OrderAllContent, value: boolean) {
     nonBonusTarget: row.nonBonusTarget,
     isFixedRate: row.isFixedRate,
     nonCutTarget: row.nonCutTarget,
-    purchaserName:row.purchaserName,
+    purchaser:row.purchaser,
     purchaseConfirm: value,
     note: row.note,
   })
   row.purchaseConfirm = value
 }
 
-async function updateOrderPurchaser(row: OrderAllContent, purchaserName: string) {
+async function updateOrderPurchaser(row: OrderAllContent, purchaser: string) {
   await orderApi.patchOrders(row.id, {
     eventId: row.eventId,
     channelId: row.channelId,
@@ -265,9 +265,9 @@ async function updateOrderPurchaser(row: OrderAllContent, purchaserName: string)
     nonCutTarget: row.nonCutTarget,
     purchaseConfirm: row.purchaseConfirm,
     note: row.note,
-    purchaserName,
+    purchaser,
   })
-  row.purchaserName = purchaserName
+  row.purchaser = purchaser
 }
 
 function filterCustomer() {
@@ -307,13 +307,13 @@ function filterCustomer() {
       <template #col-customerName="{ row }">
         <span>{{ row.customerName }}</span>
       </template>
-      <template #col-purchaserName="{ row }">
+      <template #col-purchaser="{ row }">
         <select-component
           label=""
           :isDisplayLable="false"
-          :optionList="bossCustomersStore.options"
-          :defaultValue="bossCustomersStore.options.find(o => o.name === row.purchaserName)"
-          @selectOption="updateOrderPurchaser(row, $event.value.name)"
+          :optionList="[...bossCustomersStore.options, { name: '無', value: null as any }]"
+          :defaultValue="bossCustomersStore.options.find(o => o.name === row.purchaser)"
+          @selectOption="updateOrderPurchaser(row, $event.value?.name ?? '')"
         />
       </template>
       <template #col-subtotalTwd="{ row }">
@@ -383,6 +383,7 @@ function filterCustomer() {
 </template>
 
 <style scoped>
+
 .filter-bar {
   margin-bottom: 0.75rem;
   display: flex;

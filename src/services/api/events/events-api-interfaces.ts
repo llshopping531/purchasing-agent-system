@@ -35,6 +35,9 @@ export interface QueryEventsRes {
 /** 查詢活動內容 */
 export type QueryEventsContent = EventsResBase
 
+/** 查詢單一活動 response */
+export type GetEventByIdRes = EventsResBase
+
 /** 查詢所有活動（不分頁） response */
 export type QueryEventsAllRes = EventsResBase
 

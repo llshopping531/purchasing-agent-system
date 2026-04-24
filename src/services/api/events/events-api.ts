@@ -2,6 +2,7 @@ import { deleteApi, getApi, patchApi, postApi } from '../base-api'
 import type {
   CreateEventsReq,
   CreateEventsRes,
+  GetEventByIdRes,
   ModifyEventsReq,
   ModifyEventsRes,
   QueryEventsAllRes,
@@ -53,5 +54,14 @@ export const eventApi = {
    */
   deleteEvents: async (id: number): Promise<undefined> => {
     return await deleteApi(`/events/${id}`)
+  },
+
+  /**
+   * 查詢單一活動
+   * @param id - 活動 ID
+   * @returns 活動資料
+   */
+  getEventById: async (id: number): Promise<GetEventByIdRes> => {
+    return await getApi(`/events/${id}`)
   },
 }
