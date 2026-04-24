@@ -81,6 +81,7 @@ const form = reactive({
   newProductExchangeRate: null as number | null,
   newProductPriceTwd: null as number | null,
   newProductImage: '',
+  newProductIsBlindBox: false,
   // 訂單
   quantity: 1 as number | null,
   isFixedRate: false,
@@ -203,6 +204,7 @@ async function addAndSubmit() {
         exchangeRate: snap.newProductExchangeRate ?? undefined,
         priceTwd: snap.newProductPriceTwd ?? undefined,
         image: snap.newProductImage,
+        isBlindBox: snap.newProductIsBlindBox,
       })
       productId = newProduct.id
     }
@@ -330,6 +332,7 @@ const statusLabel: Record<QueueStatus, string> = {
                   v-model:exchangeRate="form.newProductExchangeRate"
                   v-model:priceTwd="form.newProductPriceTwd"
                   v-model:image="form.newProductImage"
+                  v-model:isBlindBox="form.newProductIsBlindBox"
                   :errors="{ name: formErrors.newProductName || undefined }"
                 />
                 <div class="addLink" @click="form.isNewProduct = false">返回選擇商品</div>
