@@ -6,7 +6,7 @@ import type {
   GetPackingListRes,
   GetChannelBonusReq,
   GetChannelBonusRes,
-} from './customer-orders-api-interfaces'
+} from './packing-list-api-interfaces'
 
 /** 包貨管理與客戶訂單相關 API 集合 */
 export const packingListApi = {

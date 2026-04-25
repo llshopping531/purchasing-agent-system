@@ -99,7 +99,7 @@ const autoParams = [
 // ── 自訂全域參數（從模板偵測未知 token） ──────────────────────
 const customTokens = computed<string[]>(() => {
   const matches = [...template.value.matchAll(/\{\{([\w\u4e00-\u9fff$/.@\- ]+)\}\}/g)]
-  const all = [...new Set(matches.map((m) => m[1].trim()))]
+  const all = [...new Set(matches.map((m) => (m[1] as string).trim()))]
   return all.filter((t) => !AUTO_TOKENS.includes(t))
 })
 

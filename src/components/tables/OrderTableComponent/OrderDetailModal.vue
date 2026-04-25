@@ -67,7 +67,7 @@ const emit = defineEmits<{
           </div>
           <div class="detail-row">
             <span class="detail-label">採購者</span>
-            <span class="detail-value">{{ order.purchaserName }}</span>
+            <span class="detail-value">{{ order.purchaser }}</span>
           </div>
         </div>
         <div class="detail-line">
