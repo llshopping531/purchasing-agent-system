@@ -27,6 +27,8 @@ export const PATH = {
   offlineStats: '/admin/offline/stats',
   /** 場販－分潤查詢 */
   offlineProfitShare: '/admin/offline/profitShare',
+  /** 場販－活動結算 */
+  offlineSettlement: '/admin/offline/settlement',
 
   /** 通販專區入口 */
   online: '/admin/online',

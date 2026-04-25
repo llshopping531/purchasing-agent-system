@@ -102,6 +102,11 @@ const router = createRouter({
               name: 'ProfitShareView',
               component: () => import('../views/admin/offline/profitShare/index.vue'),
             },
+            {
+              path: 'settlement',
+              name: 'SettlementView',
+              component: () => import('../views/admin/offline/settlement/index.vue'),
+            },
           ],
         },
         {

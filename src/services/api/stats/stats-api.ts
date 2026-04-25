@@ -12,6 +12,8 @@ import type {
   QueryStatsProfitShareRes,
   QueryBonusRequirementStatsReq,
   QueryBonusRequirementStatsRes,
+  QueryCustomerRankingReq,
+  QueryCustomerRankingRes,
 } from './stats-api-interfaces'
 
 /** 統計相關 API 集合 */
@@ -56,5 +58,12 @@ export const statsApi = {
    */
   getBonusRequirementStats: async (req: QueryBonusRequirementStatsReq): Promise<QueryBonusRequirementStatsRes> => {
     return await getApi('/stats/bonus-requirement-stats', req)
+  },
+
+  /**
+   * 查詢活動內顧客消費排行
+   */
+  getCustomerRanking: async (req: QueryCustomerRankingReq): Promise<QueryCustomerRankingRes> => {
+    return await getApi('/stats/customer-ranking', req)
   },
 }

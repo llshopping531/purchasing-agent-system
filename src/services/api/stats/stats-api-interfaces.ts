@@ -138,6 +138,33 @@ export interface QueryBonusRequirementStatsRes {
 }
 
 /**
+ * 查詢顧客消費排行 request
+ */
+export interface QueryCustomerRankingReq {
+  /** 活動 ID */
+  eventId: number
+  /** 排序欄位 */
+  sort?: string
+  /** 排序方向 */
+  direction?: 'ASC' | 'DESC'
+}
+
+/** 顧客消費排行單筆資料 */
+export interface CustomerRankingItem {
+  /** 顧客 ID */
+  customerId: number
+  /** 顧客名稱 */
+  customerName: string
+  /** 總數量 */
+  totalQuantity: number
+  /** 台幣總計 */
+  totalTwd: number
+}
+
+/** 查詢顧客消費排行 response */
+export type QueryCustomerRankingRes = CustomerRankingItem[]
+
+/**
  * 查詢分潤總計 request
  */
 export interface QueryStatsProfitShareSummaryReq {

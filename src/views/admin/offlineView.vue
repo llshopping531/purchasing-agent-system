@@ -25,6 +25,7 @@ const packingListItem    = { name: '包貨清單', path: PATH.offlinePackingList
 const channelItem      = { name: '通路管理',   path: PATH.offlineChannel }
 const statsItem        = { name: '訂單總覽',   path: PATH.offlineStats }
 const profitShareItem  = { name: '分潤查詢',   path: PATH.offlineProfitShare }
+const settlementItem   = { name: '活動結算',   path: PATH.offlineSettlement }
 
 router.afterEach(() => {
   uiStore.closeSidebar()
@@ -58,6 +59,9 @@ router.afterEach(() => {
           </router-link>
           <router-link :to="profitShareItem.path" class="nav-item">
             <icon-money-bill class="nav-icon" /><span class="nav-item-name" v-if="!isCollapsed">{{ profitShareItem.name }}</span>
+          </router-link>
+          <router-link :to="settlementItem.path" class="nav-item">
+            <icon-money-bill class="nav-icon" /><span class="nav-item-name" v-if="!isCollapsed">{{ settlementItem.name }}</span>
           </router-link>
         </div>
 
