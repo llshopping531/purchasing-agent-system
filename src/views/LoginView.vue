@@ -14,11 +14,7 @@ const password = ref('')
 async function login() {
   const data = await accountApi.login({ account: account.value, password: password.value })
   userStore.login({ token: data.token, role: data.role })
-  let path = userStore.redirectPath
-  if (path === '') {
-    path = userStore.isAdmin ? '/admin' : '/user'
-  }
-  router.push(path)
+  router.push('/admin/offline')
 }
 </script>
 

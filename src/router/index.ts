@@ -160,7 +160,6 @@ router.beforeEach((to) => {
     userStore.setRedirect(to.fullPath)
     return '/login'
   }
-  if (to.meta.requiresAdmin && !userStore.isAdmin) return '/'
 })
 
 export default router

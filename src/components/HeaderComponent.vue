@@ -32,7 +32,6 @@ const isLogin = ref(userStore.isLogin)
 
 function toLogin() {
   router.push('/login')
-  userStore.setRedirect(route.fullPath)
 }
 
 function logout() {
