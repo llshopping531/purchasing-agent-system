@@ -125,6 +125,13 @@ export interface QueryBonusRequirementStatsReq {
   channelId: string
 }
 
+/** 特典顧客明細單筆資料 */
+export interface BonusRequirementDetail {
+  customerId: number
+  customerName: string
+  bonusCount: number
+}
+
 /**
  * 查詢通路滿額需求統計 response
  */
@@ -133,8 +140,10 @@ export interface QueryBonusRequirementStatsRes {
   channelId: number
   /** 通路名稱 */
   channelName: string
-  /** 滿額需求金額（日幣） */
+  /** 滿額需求數量 */
   bonusRequirement: number
+  /** 顧客特典明細 */
+  details: BonusRequirementDetail[]
 }
 
 /**

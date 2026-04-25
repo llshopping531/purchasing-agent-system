@@ -4,7 +4,7 @@
  * 依活動（與可選通路）查詢訂單金額總計與分頁清單
  */
 import { onMounted, ref } from 'vue'
-import type { QueryBonusRequirementStatsRes } from '@/services/api/stats/stats-api-interfaces'
+import type { QueryBonusRequirementStatsRes, BonusRequirementDetail } from '@/services/api/stats/stats-api-interfaces'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
@@ -19,6 +19,7 @@ import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusS
 import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
 import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
 import { isInactiveOrder } from '@/utils/order'
+import ModalComponent from '@/components/ModalComponent.vue'
 
 const searchStore = useSearchStore()
 
@@ -28,6 +29,8 @@ const currentEventId = ref('')
 const currentChannelId = ref('')
 /** 是否顯示通路下拉 */
 const isShowChannelSelect = ref(false)
+/** 是否展開篩選列 */
+const isFilterExpanded = ref(false)
 
 /** 活動金額總計 */
 const eventTotals = ref<{ totalJpy: number; totalTwd: number } | null>(null)
@@ -36,6 +39,8 @@ const channelTotals = ref<{ totalJpy: number; totalTwd: number } | null>(null)
 
 /** 通路滿額需求統計 */
 const channelBonusData = ref<QueryBonusRequirementStatsRes | null>(null)
+/** 特典明細彈窗 */
+const bonusModalDetails = ref<BonusRequirementDetail[] | null>(null)
 
 /** 總覽表格資料 */
 const tableData = ref<StatsOverviewItem[]>([])
@@ -202,45 +207,62 @@ function onSort(field: string) {
 
     <!-- 篩選列 -->
     <div class="filter-bar">
-      <div class="select-box">
-        <event-select-component :initialId="currentEventId" @selectOption="selectEvent" />
+      <div class="filter-bar-row">
+        <div class="select-box">
+          <event-select-component :initialId="currentEventId" @selectOption="selectEvent" />
+        </div>
+        <div class="select-box">
+          <shop-select-component
+            v-if="isShowChannelSelect"
+            :key="currentEventId"
+            :eventId="currentEventId"
+            :initialId="currentChannelId || undefined"
+            :isShowAll="true"
+            @selectOption="selectShop"
+          />
+        </div>
+        <button
+          class="filter-toggle-btn"
+          @click="isFilterExpanded = !isFilterExpanded"
+          v-if="currentEventId"
+        >
+          {{ isFilterExpanded ? '收合篩選' : '更多篩選' }}
+        </button>
       </div>
-      <div class="select-box">
-        <shop-select-component
-          v-if="isShowChannelSelect"
-          :key="currentEventId"
-          :eventId="currentEventId"
-          :initialId="currentChannelId || undefined"
-          :isShowAll="true"
-          @selectOption="selectShop"
-        />
-      </div>
-      <div v-if="currentEventId" class="keyword-bar">
-        <order-status-select-component
-          :defaultValue="currentStatus"
-          @selectOption="updateOrderStatus($event.value)"
-          :isDisplayAll="true"
-        ></order-status-select-component>
-        <customer-select-component
-          title="顧客"
-          :eventId="currentEventId"
-          :channelId="currentChannelId"
-          :isDisplayAll="true"
-          @selectOption="updateCustomer($event.value?.id)"
-        ></customer-select-component>
-        <product-select-component
-          :eventId="currentEventId"
-          :channelId="currentChannelId"
-          :isDisplayAll="true"
-          @onSelectProduct="updateProduct($event.value?.id)"
-        />
-      </div>
+      <template v-if="currentEventId && isFilterExpanded">
+        <div class="filter-bar-row">
+          <div class="select-box">
+            <order-status-select-component
+              :defaultValue="currentStatus"
+              @selectOption="updateOrderStatus($event.value)"
+              :isDisplayAll="true"
+            ></order-status-select-component>
+          </div>
+          <div class="select-box">
+            <customer-select-component
+              title="顧客"
+              :eventId="currentEventId"
+              :channelId="currentChannelId"
+              :isDisplayAll="true"
+              @selectOption="updateCustomer($event.value?.id)"
+            ></customer-select-component>
+          </div>
+          <div class="select-box">
+            <product-select-component
+              :eventId="currentEventId"
+              :channelId="currentChannelId"
+              :isDisplayAll="true"
+              @onSelectProduct="updateProduct($event.value?.id)"
+            />
+          </div>
+        </div>
+      </template>
     </div>
 
     <!-- 統計卡片 -->
     <div v-if="eventTotals" class="totals-section">
-      <!-- 活動總計 -->
-      <div class="totals-group">
+      <!-- 活動總計（選取通路後隱藏） -->
+      <div v-if="!currentChannelId" class="totals-group">
         <div class="totals-label">活動總計</div>
         <div class="totals-cards">
           <div class="stat-card jpy">
@@ -266,21 +288,21 @@ function onSort(field: string) {
             <div class="stat-card-title">台幣總計</div>
             <div class="stat-card-value">{{ formatTwd(channelTotals.totalTwd) }}</div>
           </div>
+          <div
+            class="stat-card jpy secondary clickable"
+            v-if="channelBonusData"
+            @click="bonusModalDetails = channelBonusData.details"
+          >
+            <div class="stat-card-title">特典數量 <span class="click-hint">點擊查看明細</span></div>
+            <div class="stat-card-value">{{ channelBonusData.bonusRequirement }}</div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 通路滿額需求 -->
     <div v-if="channelBonusData" class="totals-section">
-      <div class="totals-group">
-        <div class="totals-label">滿額需求</div>
-        <div class="totals-cards">
-          <div class="stat-card jpy secondary">
-            <div class="stat-card-title">{{ channelBonusData.channelName }} 特典數量</div>
-            <div class="stat-card-value">{{ channelBonusData.bonusRequirement }}</div>
-          </div>
-        </div>
-      </div>
+      <div class="totals-group"></div>
     </div>
 
     <!-- 總覽表格 -->
@@ -290,7 +312,7 @@ function onSort(field: string) {
         :headerRow="headerRow"
         :isDelete="false"
         :isEdit="false"
-        :rowClass="(row) => isInactiveOrder(row.orderStatusName) ? 'inactive' : ''"
+        :rowClass="(row) => (isInactiveOrder(row.orderStatusName) ? 'inactive' : '')"
         :totalPages="totalPages"
         :currentPage="currentPage"
         :totalElements="totalElements"
@@ -342,6 +364,32 @@ function onSort(field: string) {
 
     <!-- 尚未選取活動提示 -->
     <div v-else class="empty-hint">請先選取活動以查詢訂單總覽</div>
+
+    <!-- 特典明細彈窗 -->
+    <modal-component
+      v-if="bonusModalDetails"
+      name="特典明細"
+      width="360px"
+      @confirm="bonusModalDetails = null"
+      @cancel="bonusModalDetails = null"
+    >
+      <template #content>
+        <table class="bonus-detail-table">
+          <thead>
+            <tr>
+              <th>顧客名稱</th>
+              <th>特典數量</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="d in bonusModalDetails" :key="d.customerId">
+              <td>{{ d.customerName }}</td>
+              <td class="bonus-count">{{ d.bonusCount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </template>
+    </modal-component>
   </div>
 </template>
 
@@ -362,11 +410,37 @@ h3 {
 /* ── 篩選列 ── */
 .filter-bar {
   display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.filter-bar-row {
+  display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: flex-end;
+
   .select-box {
     width: 45%;
+  }
+}
+
+.filter-toggle-btn {
+  align-self: flex-end;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-xl);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
   }
 }
 
@@ -518,6 +592,56 @@ h3 {
   margin-right: 0.25rem;
 }
 
+.clickable {
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.1s;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+}
+
+.click-hint {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  margin-left: 4px;
+}
+
+
+.bonus-detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1.5px solid var(--color-border);
+  }
+
+  td {
+    padding: 0.55rem 0.5rem;
+    color: var(--color-text);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.bonus-count {
+  font-weight: 700;
+  color: var(--color-primary-dark, var(--color-primary));
+  font-size: 1rem;
+}
+
 /* ── 空狀態 ── */
 .empty-hint {
   text-align: center;
@@ -584,14 +708,13 @@ h3 {
 
   .stat-card {
     min-width: 0;
-    display: flex;
     gap: 0.25rem;
     align-items: center;
   }
 
   .totals-cards {
     flex-wrap: wrap;
-    justify-content: space-between;
+    gap: 2rem;
   }
 }
 </style>

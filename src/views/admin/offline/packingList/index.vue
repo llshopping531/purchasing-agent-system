@@ -180,13 +180,12 @@ const totalJpy = computed(() =>
 /** 訂單清單表頭 */
 const orderHeaderRow: HeaderRow[] = [
   { name: '', value: 'mark', sort: 0, width: '40px' },
-  { name: '通路', value: 'channelName', sort: 1, width: '150px' },
-  { name: '商品名稱', value: 'productName', sort: 1 },
+  { name: '通路', value: 'channelName', sort: 1, width: '150px' ,mobileSpan:2},
+  { name: '商品名稱', value: 'productName', sort: 1,mobileSpan:2 },
   { name: '數量', value: 'quantity', sort: 2, width: '70px' },
-  { name: '匯率', value: 'exchangeRate', sort: 2, width: '70px' },
-  { name: '台幣單價', value: 'unitTwd', sort: 3, width: '100px' },
   { name: '台幣小計', value: 'subtotalTwd', sort: 4, width: '100px' },
   { name: '訂單狀態', value: 'orderStatusName', sort: 5, width: '100px' },
+  { name: '備註', value: 'note', sort: 6, width: '100px' },
 ]
 
 
