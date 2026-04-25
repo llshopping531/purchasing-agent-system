@@ -86,6 +86,7 @@ const form = reactive({
   quantity: 1 as number | null,
   isFixedRate: false,
   nonCutTarget: false,
+  nonBonusTarget: false,
   note: '',
 })
 
@@ -218,6 +219,7 @@ async function addAndSubmit() {
       quantity: snap.quantity!,
       isFixedRate: snap.isFixedRate,
       nonCutTarget: snap.nonCutTarget,
+      nonBonusTarget: snap.nonBonusTarget,
       note: snap.note,
     })
   }
@@ -354,6 +356,7 @@ const statusLabel: Record<QueueStatus, string> = {
         <div class="form-row">
           <checkbox-input label="固定匯率" v-model="form.isFixedRate" />
           <checkbox-input label="非分潤對象" v-model="form.nonCutTarget" />
+          <checkbox-input label="無特典對象" v-model="form.nonBonusTarget" />
         </div>
         <div class="add-btn-row">
           <div class="btn add-btn" @click="addAndSubmit">新增</div>

@@ -307,6 +307,12 @@ function filterCustomer() {
       <template #col-customerName="{ row }">
         <span>{{ row.customerName }}</span>
       </template>
+      <template #col-productName="{ row }">
+        <span class="product-name-cell">
+          {{ row.productName }}
+          <span v-if="row.isBlindBox" class="blind-tag">盲抽</span>
+        </span>
+      </template>
       <template #col-purchaser="{ row }">
         <select-component
           label=""
@@ -408,6 +414,23 @@ function filterCustomer() {
   line-height: 1;
   margin-right: 0.25rem;
 }
+.product-name-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.blind-tag {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: color-mix(in srgb, #d97706 15%, transparent);
+  color: #d97706;
+  white-space: nowrap;
+}
+
 .more-btn {
   display: flex;
   gap: 0.25rem;

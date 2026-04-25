@@ -1,4 +1,4 @@
-import { getApi } from '../base-api'
+import { getApi, postApi } from '../base-api'
 import type {
   QueryStatsChannelTotalsReq,
   QueryStatsChannelTotalsRes,
@@ -10,6 +10,8 @@ import type {
   QueryStatsProfitShareSummaryRes,
   QueryStatsProfitShareReq,
   QueryStatsProfitShareRes,
+  QueryBonusRequirementStatsReq,
+  QueryBonusRequirementStatsRes,
 } from './stats-api-interfaces'
 
 /** 統計相關 API 集合 */
@@ -47,5 +49,12 @@ export const statsApi = {
    */
   getStatsProfitShare: async (req: QueryStatsProfitShareReq): Promise<QueryStatsProfitShareRes> => {
     return await getApi('/stats/profit-share', req)
+  },
+
+  /**
+   * 查詢通路滿額需求統計
+   */
+  getBonusRequirementStats: async (req: QueryBonusRequirementStatsReq): Promise<QueryBonusRequirementStatsRes> => {
+    return await getApi('/stats/bonus-requirement-stats', req)
   },
 }

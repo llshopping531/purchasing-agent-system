@@ -4,6 +4,7 @@
  * 選取活動後顯示有訂單的客戶清單，點選客戶後展開其個人訂單明細
  */
 import { ref, computed, onMounted } from 'vue'
+import ModalComponent from '@/components/ModalComponent.vue'
 import { formatTwd, formatJpy } from '@/utils/format'
 import IconFlag from '@/components/icons/IconFlag.vue'
 import IconCopy from '@/components/icons/IconCopy.vue'
@@ -12,6 +13,8 @@ import TableComponent, { type HeaderRow } from '@/components/tables/TableCompone
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { packingListApi } from '@/services/api/packing-list/packing-list-api'
 import { customersApi } from '@/services/api/customers/customers-api'
+import { productsApi } from '@/services/api/products/products-api'
+import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 import type { SelectOption } from '@/interfaces/common'
 import type {
   PackingListCustomer,
@@ -29,11 +32,32 @@ const searchStore = useSearchStore()
 /** 最近複製過的客戶 ID，用於顯示「已複製」回饋 */
 const copiedCustomerId = ref<number | null>(null)
 
-/** 複製客戶的個人查詢連結到剪貼簿 */
+/** 商品詳情彈窗 */
+const productModal = ref<ProductsResBase | null>(null)
+
+const productModalHeaders: HeaderRow[] = [
+  { name: '日幣單價', value: 'priceJpy',    sort: 0 },
+  { name: '台幣單價', value: 'priceTwd',    sort: 1 },
+  { name: '匯率',    value: 'exchangeRate', sort: 2 },
+]
+
+const productModalRows = computed(() => {
+  const p = productModal.value
+  if (!p) return []
+  return [{ priceJpy: formatJpy(p.priceJpy), priceTwd: formatTwd(p.priceTwd), exchangeRate: p.exchangeRate }]
+})
+
+async function openProductModal(productId: number) {
+  productModal.value = await productsApi.getSingleProduct(productId)
+}
+
+/** 另開視窗並複製客戶的個人查詢連結 */
 async function copyQueryLink(customer: PackingListCustomer, event: MouseEvent) {
   event.stopPropagation()
   const  queryUuid  = await customersApi.getQueryUuid(customer.id)
-  const url = `${window.location.origin}/query/${queryUuid}`
+  const tab = currentEventId.value ? `?tab=${currentEventId.value}` : ''
+  const url = `${window.location.origin}/query/${queryUuid}${tab}`
+  window.open(url, '_blank')
   await navigator.clipboard.writeText(url)
   copiedCustomerId.value = customer.id
   setTimeout(() => { copiedCustomerId.value = null }, 1500)
@@ -210,9 +234,9 @@ async function selectCustomer(customer: PackingListCustomer) {
   orderList.value = orders
   channelBonusList.value = bonus
 
-  const results = await Promise.all(orders.map((o) => orderApi.getDrawsResult(o.id)))
+  const results = await Promise.all(orders.map((o: CustomerOrder) => orderApi.getDrawsResult(o.id)))
   const map = new Map<number, DrawsData[]>()
-  orders.forEach((o, i) => {
+  orders.forEach((o: CustomerOrder, i: number) => {
     const r = results[i]
     if (r && r.length > 0) map.set(o.id, r)
   })
@@ -362,7 +386,7 @@ async function selectCustomer(customer: PackingListCustomer) {
             </template>
             <template #col-productName="{ row }">
               <span class="row-cell" @click="toggleMark(row.id)">
-                {{ row.productName }}
+                <span class="product-link" @click.stop="openProductModal(row.productId)">{{ row.productName }}</span>
                 <span
                   v-for="d in drawsResultMap.get(row.id)"
                   :key="d.id"
@@ -379,6 +403,34 @@ async function selectCustomer(customer: PackingListCustomer) {
       </div>
     </div>
   </div>
+  <!-- 商品詳情彈窗 -->
+  <modal-component
+    v-if="productModal"
+    name="商品資訊"
+    width="420px"
+    @confirm="productModal = null"
+    @cancel="productModal = null"
+  >
+    <template #content>
+      <div class="product-modal-content">
+        <div v-if="productModal.image" class="product-hero">
+          <img :src="productModal.image" class="product-img" />
+        </div>
+        <div class="product-modal-info">
+          <div class="product-modal-name">
+            {{ productModal.name }}
+            <span v-if="productModal.isBlindBox" class="blind-tag">盲抽</span>
+          </div>
+          <table-component
+            :headerRow="productModalHeaders"
+            :tableData="productModalRows"
+            :isEdit="false"
+            :isDelete="false"
+          />
+        </div>
+      </div>
+    </template>
+  </modal-component>
 </template>
 
 <style scoped>
@@ -742,6 +794,92 @@ async function selectCustomer(customer: PackingListCustomer) {
   cursor: pointer;
   display: block;
   width: 100%;
+}
+
+.product-link {
+  cursor: pointer;
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  &:hover { opacity: 0.75; }
+}
+
+
+.product-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.product-hero {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-background);
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.product-modal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.product-modal-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: 0.01em;
+}
+
+.product-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.product-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  gap: 0.5rem;
+}
+
+.field-label {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.field-value {
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.blind-tag {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: color-mix(in srgb, #d97706 15%, transparent);
+  color: #d97706;
 }
 
 .draws-tag {

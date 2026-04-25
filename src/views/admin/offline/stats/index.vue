@@ -4,6 +4,7 @@
  * 依活動（與可選通路）查詢訂單金額總計與分頁清單
  */
 import { onMounted, ref } from 'vue'
+import type { QueryBonusRequirementStatsRes } from '@/services/api/stats/stats-api-interfaces'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
@@ -32,6 +33,9 @@ const isShowChannelSelect = ref(false)
 const eventTotals = ref<{ totalJpy: number; totalTwd: number } | null>(null)
 /** 通路金額總計 */
 const channelTotals = ref<{ totalJpy: number; totalTwd: number } | null>(null)
+
+/** 通路滿額需求統計 */
+const channelBonusData = ref<QueryBonusRequirementStatsRes | null>(null)
 
 /** 總覽表格資料 */
 const tableData = ref<StatsOverviewItem[]>([])
@@ -106,7 +110,18 @@ function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
 
 async function fetchAll() {
   if (!currentEventId.value) return
-  await Promise.all([fetchTotals(), fetchChannelTotals(), fetchOverview()])
+  await Promise.all([fetchTotals(), fetchChannelTotals(), fetchOverview(), fetchChannelBonusList()])
+}
+
+async function fetchChannelBonusList() {
+  if (!currentEventId.value || !currentChannelId.value) {
+    channelBonusData.value = null
+    return
+  }
+  channelBonusData.value = await statsApi.getBonusRequirementStats({
+    eventId: currentEventId.value,
+    channelId: currentChannelId.value,
+  })
 }
 
 async function fetchTotals() {
@@ -255,6 +270,19 @@ function onSort(field: string) {
       </div>
     </div>
 
+    <!-- 通路滿額需求 -->
+    <div v-if="channelBonusData" class="totals-section">
+      <div class="totals-group">
+        <div class="totals-label">滿額需求</div>
+        <div class="totals-cards">
+          <div class="stat-card jpy secondary">
+            <div class="stat-card-title">{{ channelBonusData.channelName }} 特典數量</div>
+            <div class="stat-card-value">{{ channelBonusData.bonusRequirement }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 總覽表格 -->
     <div v-if="currentEventId" class="table-section">
       <table-component
@@ -380,6 +408,81 @@ h3 {
   font-weight: 700;
   color: var(--color-text-primary);
   letter-spacing: 0.02em;
+}
+
+/* ── 通路滿額 ── */
+.bonus-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bonus-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.bonus-card {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  box-shadow: var(--shadow-sm);
+
+  &.reached {
+    border-color: color-mix(in srgb, #16a34a 40%, transparent);
+    background: color-mix(in srgb, #16a34a 4%, var(--color-surface));
+  }
+}
+
+.bonus-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.bonus-channel {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.bonus-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 99px;
+  background: color-mix(in srgb, #16a34a 15%, transparent);
+  color: #16a34a;
+}
+
+.bonus-progress-wrap {
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.bonus-progress-bar {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+
+  .reached & {
+    background: #16a34a;
+  }
+}
+
+.bonus-meta {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
 }
 
 /* ── 表格區 ── */

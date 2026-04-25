@@ -289,6 +289,7 @@ defineExpose({ editOrder, deleteOrder, insertOrder })
         <div class="row checkbox">
           <checkbox-input label="固定匯率" v-model="formIsFixedRate" />
           <checkbox-input label="非分潤對象" v-model="formNonCutTarget" />
+          <checkbox-input label="無特典對象" v-model="formNonBonusTarget" />
         </div>
       </div>
     </template>

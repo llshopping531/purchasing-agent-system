@@ -7,17 +7,20 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { queryApi } from '@/services/api/query/query-api'
 import { eventApi } from '@/services/api/events/events-api'
-import { formatTwd } from '@/utils/format'
+import { productsApi } from '@/services/api/products/products-api'
+import { formatTwd, formatJpy } from '@/utils/format'
+import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
 
 const PACKAGING_FEE = 10
 
 const now = new Date()
 import type { QueryOrderEnriched } from '@/services/api/query/query-api-interfaces'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
+import ModalComponent from '@/components/ModalComponent.vue'
 
 const headers: HeaderRow[] = [
   { name: '通路',     value: 'channelName',    sort: 1 },
-  { name: '商品名稱', value: 'productName',     sort: 2 },
+  { name: '商品名稱', value: 'productName',     sort: 2 ,mobileSpan:2},
   { name: '數量',    value: 'quantity',         sort: 3, width: '80px' },
   { name: '台幣小計', value: 'subtotalTwd',     sort: 4, width: '120px' },
   { name: '狀態',    value: 'orderStatusName',  sort: 5, width: '90px' },
@@ -57,6 +60,24 @@ const activeOrders = computed(() =>
 )
 
 /** 當前頁籤已購買台幣總計 */
+const productModal = ref<ProductsResBase | null>(null)
+
+const productModalHeaders: HeaderRow[] = [
+  { name: '日幣單價', value: 'priceJpy',    sort: 0 },
+  { name: '台幣單價', value: 'priceTwd',    sort: 1 },
+  { name: '匯率',    value: 'exchangeRate', sort: 2 },
+]
+
+const productModalRows = computed(() => {
+  const p = productModal.value
+  if (!p) return []
+  return [{ priceJpy: formatJpy(p.priceJpy), priceTwd: formatTwd(p.priceTwd), exchangeRate: p.exchangeRate }]
+})
+
+async function openProductModal(productId: number) {
+  productModal.value = await productsApi.getSingleProduct(productId)
+}
+
 const activeTabTotalTwd = computed(() =>
   activeOrders.value.filter((o) => o.orderStatusName === '已購買').reduce((s, o) => s + o.subtotalTwd, 0)
 )
@@ -143,6 +164,9 @@ onMounted(async () => {
             :isEdit="false"
             :rowClass="rowClass"
           >
+            <template #col-productName="{ row }">
+              <span class="product-link" @click.stop="openProductModal(row.productId)">{{ row.productName }}</span>
+            </template>
             <template #col-subtotalTwd="{ row }">{{ formatTwd(row.subtotalTwd) }}</template>
             <template #col-orderStatusName="{ row }">
               <span class="status-badge" :class="`status-${row.orderStatus}`">{{ row.orderStatusName }}</span>
@@ -157,6 +181,34 @@ onMounted(async () => {
       <div v-else class="state-msg">目前尚無訂單資料</div>
     </div>
   </div>
+
+  <modal-component
+    v-if="productModal"
+    name="商品資訊"
+    width="420px"
+    @confirm="productModal = null"
+    @cancel="productModal = null"
+  >
+    <template #content>
+      <div class="product-modal-content">
+        <div v-if="productModal.image" class="product-hero">
+          <img :src="productModal.image" class="product-img" />
+        </div>
+        <div class="product-modal-info">
+          <div class="product-modal-name">
+            {{ productModal.name }}
+            <span v-if="productModal.isBlindBox" class="blind-tag">盲抽</span>
+          </div>
+          <TableComponent
+            :headerRow="productModalHeaders"
+            :tableData="productModalRows"
+            :isEdit="false"
+            :isDelete="false"
+          />
+        </div>
+      </div>
+    </template>
+  </modal-component>
 </template>
 
 <style scoped>
@@ -367,6 +419,64 @@ onMounted(async () => {
     background: color-mix(in srgb, var(--color-danger, #e53e3e) 12%, transparent);
     color: var(--color-danger, #e53e3e);
   }
+}
+
+/* ── 商品連結 ── */
+.product-link {
+  cursor: pointer;
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  &:hover { opacity: 0.75; }
+}
+
+/* ── 商品彈窗 ── */
+.product-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.product-hero {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-background);
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.product-modal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.product-modal-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.blind-tag {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: color-mix(in srgb, #d97706 15%, transparent);
+  color: #d97706;
 }
 
 /* ── 狀態訊息 ── */

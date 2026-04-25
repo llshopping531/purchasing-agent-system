@@ -116,6 +116,28 @@ export interface QueryStatsChannelTotalsRes {
 }
 
 /**
+ * 查詢通路滿額需求統計 request
+ */
+export interface QueryBonusRequirementStatsReq {
+  /** 活動 ID */
+  eventId: string
+  /** 通路 ID */
+  channelId: string
+}
+
+/**
+ * 查詢通路滿額需求統計 response
+ */
+export interface QueryBonusRequirementStatsRes {
+  /** 通路 ID */
+  channelId: number
+  /** 通路名稱 */
+  channelName: string
+  /** 滿額需求金額（日幣） */
+  bonusRequirement: number
+}
+
+/**
  * 查詢分潤總計 request
  */
 export interface QueryStatsProfitShareSummaryReq {
