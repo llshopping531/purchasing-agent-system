@@ -39,14 +39,14 @@ const emit = defineEmits<{
 
 /** 表頭欄位定義 */
 const headerRow = ref<HeaderRow[]>([
-  { name: '購買者', value: 'customerName', sort: 0, width: '150px', sortable: true },
+  { name: '客戶', value: 'customerName', sort: 0, width: '150px', sortable: true },
   { name: '品項', value: 'productName', sort: 1, width: '300px', mobileSpan: 2, sortable: true },
   { name: '數量', value: 'quantity', sort: 2, width: '70px' },
   { name: '台幣小計', value: 'subtotalTwd', sort: 3, width: '90px' },
   { name: '訂單狀態', value: 'orderStatusName', sort: 4, width: '130px', sortable: true },
   { name: '購買確認', value: 'purchaseConfirm', sort: 5, width: '85px' },
   { name: '備註', value: 'note', sort: 6, sortable: true },
-  { name: '購買者', value: 'purchaser', sort: 7, width: '100px', sortable: true },
+  { name: '採購者', value: 'purchaser', sort: 7, width: '100px', sortable: true },
   { name: '更多', value: 'more', sort: 8, width: '230px' },
 ])
 

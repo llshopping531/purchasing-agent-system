@@ -17,11 +17,13 @@ import type { SelectOption } from '@/interfaces/common'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
 import { useSearchStore } from '@/stores/search'
+import PurchaserSelectComponent from '@/components/inputs/selects/PurchaserSelectComponent.vue'
 
 const searchStore = useSearchStore()
 
 const currentEventId = ref('')
 const currentChannelId = ref('')
+const currentPurchaser = ref<string | undefined>(undefined)
 const isShowChannelSelect = ref(false)
 
 const summary = ref<QueryStatsProfitShareSummaryRes | null>(null)
@@ -56,6 +58,7 @@ onMounted(() => {
 function selectEvent(data: SelectOption<EventsResBase | null>) {
   currentEventId.value = data.value?.id.toString() ?? ''
   currentChannelId.value = ''
+  currentPurchaser.value = undefined
   isShowChannelSelect.value = true
   summary.value = null
   tableData.value = []
@@ -66,6 +69,7 @@ function selectEvent(data: SelectOption<EventsResBase | null>) {
 
 function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
   currentChannelId.value = data.value?.id.toString() ?? ''
+  currentPurchaser.value = undefined
   summary.value = null
   currentPage.value = 0
   searchStore.setSearchStore({ name: 'PROFIT_SHARE', condition: { eventId: currentEventId.value, channelId: currentChannelId.value || null } })
@@ -81,6 +85,7 @@ async function fetchSummary() {
   summary.value = await statsApi.getStatsProfitShareSummary({
     eventId: Number(currentEventId.value),
     channelId: currentChannelId.value ? Number(currentChannelId.value) : undefined,
+    purchaser: currentPurchaser.value,
   })
 }
 
@@ -88,6 +93,7 @@ async function fetchDetail() {
   const res = await statsApi.getStatsProfitShare({
     eventId: Number(currentEventId.value),
     channelId: currentChannelId.value ? Number(currentChannelId.value) : undefined,
+    purchaser: currentPurchaser.value,
     page: currentPage.value,
     size: pageSize.value,
     sort: sortField.value,
@@ -120,6 +126,12 @@ function onSort(field: string) {
   fetchDetail()
 }
 
+function updatePurchaser(purchaser: string | undefined) {
+  currentPurchaser.value = purchaser
+  currentPage.value = 0
+  fetchSummary()
+  fetchDetail()
+}
 
 function formatPercent(val: number | null) {
   if (val == null) return '—'
@@ -144,6 +156,12 @@ function formatPercent(val: number | null) {
           :initialId="currentChannelId || undefined"
           :isShowAll="true"
           @selectOption="selectShop"
+        />
+      </div>
+      <div v-if="currentEventId" class="select-box">
+        <purchaser-select-component
+          :isDisplayAll="true"
+          @selectOption="updatePurchaser($event.value)"
         />
       </div>
     </div>

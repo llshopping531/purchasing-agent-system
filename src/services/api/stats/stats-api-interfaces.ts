@@ -14,6 +14,8 @@ export interface QueryStatsOverviewReq {
   customerId?: number
   /** 商品 ID（可選） */
   productId?: number
+  /** 採購者代碼（可選，多選用逗號分隔） */
+  purchaser?: string
   /** 第幾頁 */
   page?: number
   /** 一頁有幾筆資料 */
@@ -181,6 +183,8 @@ export interface QueryStatsProfitShareSummaryReq {
   eventId: number
   /** 通路 ID（可選） */
   channelId?: number
+  /** 採購者代碼（可選，多選用逗號分隔） */
+  purchaser?: string
 }
 
 /**
@@ -207,6 +211,8 @@ export interface QueryStatsProfitShareReq {
   eventId: number
   /** 通路 ID（可選） */
   channelId?: number
+  /** 採購者代碼（可選，多選用逗號分隔） */
+  purchaser?: string
   /** 第幾頁 */
   page?: number
   /** 一頁有幾筆資料 */

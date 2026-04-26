@@ -18,6 +18,7 @@ import { formatTwd, formatJpy } from '@/utils/format'
 import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
 import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
 import ProductSelectComponent from '@/components/inputs/selects/ProductSelectComponent.vue'
+import PurchaserSelectComponent from '@/components/inputs/selects/PurchaserSelectComponent.vue'
 import { isInactiveOrder } from '@/utils/order'
 import ModalComponent from '@/components/ModalComponent.vue'
 
@@ -53,6 +54,7 @@ const sortDirection = ref<'ASC' | 'DESC'>('DESC')
 const currentStatus = ref<string | undefined>(undefined)
 const currentCustomer = ref<number | undefined>(undefined)
 const currentProduct = ref<number | undefined>(undefined)
+const currentPurchaser = ref<string | undefined>(undefined)
 
 const headerRow: HeaderRow[] = [
   { name: '顧客名稱', value: 'customerName', sort: 0, width: '120px', sortable: true },
@@ -88,6 +90,7 @@ function selectEvent(data: SelectOption<EventsResBase | null>) {
   currentChannelId.value = ''
   currentCustomer.value = undefined
   currentProduct.value = undefined
+  currentPurchaser.value = undefined
   isShowChannelSelect.value = true
   eventTotals.value = null
   channelTotals.value = null
@@ -104,6 +107,7 @@ function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
   currentChannelId.value = data.value?.id.toString() ?? ''
   currentCustomer.value = undefined
   currentProduct.value = undefined
+  currentPurchaser.value = undefined
   channelTotals.value = null
   currentPage.value = 0
   searchStore.setSearchStore({
@@ -159,6 +163,12 @@ function updateProduct(product: number | undefined) {
   fetchOverview()
 }
 
+function updatePurchaser(purchaser: string | undefined) {
+  currentPurchaser.value = purchaser
+  currentPage.value = 0
+  fetchOverview()
+}
+
 async function fetchOverview() {
   if (!currentEventId.value) return
   const res = await statsApi.getStatsOverview({
@@ -167,6 +177,7 @@ async function fetchOverview() {
     orderStatus: currentStatus.value,
     customerId: currentCustomer.value,
     productId: currentProduct.value,
+    purchaser: currentPurchaser.value,
     page: currentPage.value,
     size: pageSize.value,
     sort: sortField.value,
@@ -253,6 +264,12 @@ function onSort(field: string) {
               :channelId="currentChannelId"
               :isDisplayAll="true"
               @onSelectProduct="updateProduct($event.value?.id)"
+            />
+          </div>
+          <div class="select-box">
+            <purchaser-select-component
+              :isDisplayAll="true"
+              @selectOption="updatePurchaser($event.value)"
             />
           </div>
         </div>

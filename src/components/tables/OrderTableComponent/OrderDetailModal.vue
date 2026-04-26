@@ -32,7 +32,7 @@ const emit = defineEmits<{
       <div class="detail-grid">
         <div class="detail-line">
           <div class="detail-row">
-            <span class="detail-label">購買者</span>
+            <span class="detail-label">客戶</span>
             <span class="detail-value">{{ order.customerName }}</span>
           </div>
           <div class="detail-row">
