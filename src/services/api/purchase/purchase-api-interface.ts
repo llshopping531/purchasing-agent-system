@@ -26,6 +26,8 @@ export interface PurchaseListData {
   blindBoxDrawn: number
   /** 盲抽未拆數量 */
   blindBoxNotDrawn: number
+  /** 負責此商品的採購者清單 */
+  purchasers?: string[]
 }
 
 /**

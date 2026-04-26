@@ -21,6 +21,7 @@ import { orderApi } from '@/services/api/order/order-api'
 
 const emit = defineEmits<{ refresh: [] }>()
 
+
 const pops = defineProps<{
   /** 通路名稱（作為標題顯示） */
   channelName: string
@@ -132,6 +133,17 @@ function openSummaryModal(e: MouseEvent) {
 }
 /** 當前查看的採購明細列表 */
 const currentDetail = ref<PurchaseDetail[]>([])
+
+/** 依採購者分組的明細 */
+const detailByPurchaser = computed(() => {
+  const map = new Map<string, PurchaseDetail[]>()
+  for (const d of currentDetail.value) {
+    const key = d.purchaserName || '無'
+    if (!map.has(key)) map.set(key, [])
+    map.get(key)!.push(d)
+  }
+  return map
+})
 /** 是否顯示詳細資料彈窗 */
 const isShowDetailModal = ref<boolean>(false)
 /** 是否顯示採購情況回報彈窗 */
@@ -157,6 +169,7 @@ function toggle() {
  * @param data 採購資料列
  */
 async function oponDetail(data: PurchaseListData) {
+  currentData.value = data
   getDetail(data)
   isShowDetailModal.value = true
 }
@@ -314,6 +327,11 @@ async function confirmAllPurchased() {
           <template #col-productName="{ row }">
             <div class="product-name-cell" @click="oponDetail(row)">
               {{ row.productName }}
+              <span
+                v-for="p in row.purchasers"
+                :key="p"
+                class="purchaser-tag"
+              >{{ p }}</span>
             </div>
           </template>
         </table-component>
@@ -346,6 +364,11 @@ async function confirmAllPurchased() {
           <template #col-productName="{ row }">
             <div class="product-name-cell" @click="oponDetail(row)">
               {{ row.productName }}
+              <span
+                v-for="p in row.purchasers"
+                :key="p"
+                class="purchaser-tag"
+              >{{ p }}</span>
             </div>
           </template>
         </table-component>
@@ -371,22 +394,28 @@ async function confirmAllPurchased() {
   </modal-component>
 
   <!-- 詳細資料彈窗 -->
-  <modal-component v-if="isShowDetailModal" name="詳細資料" @confirm="isShowDetailModal = false">
+  <modal-component v-if="isShowDetailModal" :name="`${currentData?.productName ?? ''}`" @confirm="isShowDetailModal = false">
     <template #content>
       <div class="modal-table-wrapper">
-        <table-component
-          :headerRow="detailHeaderRow"
-          :tableData="currentDetail"
-          :isDelete="false"
-          :isEdit="false"
-        >
-          <template #col-quantity="{ row }">
-            <span>{{ row.quantity }}</span>
-            <span v-if="Number(row.drawCount) > 0" class="draw-count"
-              >（已拆 {{ row.drawCount }}）</span
-            >
-          </template>
-        </table-component>
+        <template v-for="[purchaser, rows] in detailByPurchaser" :key="purchaser">
+          <div class="purchaser-group-label">
+            {{ purchaser }}
+            <span class="purchaser-qty">{{ rows.reduce((s, r) => s + r.quantity, 0) }}</span>
+          </div>
+          <table-component
+            :headerRow="detailHeaderRow"
+            :tableData="rows"
+            :isDelete="false"
+            :isEdit="false"
+          >
+            <template #col-quantity="{ row }">
+              <span>{{ row.quantity }}</span>
+              <span v-if="Number(row.drawCount) > 0" class="draw-count"
+                >（已拆 {{ row.drawCount }}）</span
+              >
+            </template>
+          </table-component>
+        </template>
       </div>
     </template>
   </modal-component>
@@ -418,33 +447,39 @@ async function confirmAllPurchased() {
         <p class="section-label">明細：</p>
         <div class="btn confirm-all-btn" @click="confirmAllPurchased">全部已購買</div>
       </div>
-      <table-component
-        :headerRow="checkDetailHeaderRow"
-        :tableData="currentDetail"
-        :isDelete="false"
-        :isEdit="false"
-      >
-        <template #col-quantity="{ row }">
-          <span>{{ row.quantity }}</span>
-          <span v-if="Number(row.drawCount) > 0" class="draw-count"
-            >（已拆 {{ row.drawCount }}）</span
-          >
-        </template>
-        <template #col-orderStatusName="{ row }">
-          <order-status-select-component
-            :defaultValue="row.orderStatus"
-            :isDisplayLable="false"
-            @selectOption="updateDetailOrderStatus(row, $event.value ?? '')"
-          />
-        </template>
-        <template #col-purchaseConfirm="{ row }">
-          <checkbox-input
-            :modelValue="row.purchaseConfirm"
-            label=""
-            @update:modelValue="updateDetailPurchaseConfirm(row, !!$event)"
-          />
-        </template>
-      </table-component>
+      <template v-for="[purchaser, rows] in detailByPurchaser" :key="purchaser">
+        <div class="purchaser-group-label">
+          {{ purchaser }}
+          <span class="purchaser-qty">{{ rows.reduce((s, r) => s + r.quantity, 0) }}</span>
+        </div>
+        <table-component
+          :headerRow="checkDetailHeaderRow"
+          :tableData="rows"
+          :isDelete="false"
+          :isEdit="false"
+        >
+          <template #col-quantity="{ row }">
+            <span>{{ row.quantity }}</span>
+            <span v-if="Number(row.drawCount) > 0" class="draw-count"
+              >（已拆 {{ row.drawCount }}）</span
+            >
+          </template>
+          <template #col-orderStatusName="{ row }">
+            <order-status-select-component
+              :defaultValue="row.orderStatus"
+              :isDisplayLable="false"
+              @selectOption="updateDetailOrderStatus(row, $event.value ?? '')"
+            />
+          </template>
+          <template #col-purchaseConfirm="{ row }">
+            <checkbox-input
+              :modelValue="row.purchaseConfirm"
+              label=""
+              @update:modelValue="updateDetailPurchaseConfirm(row, !!$event)"
+            />
+          </template>
+        </table-component>
+      </template>
     </template>
   </modal-component>
 
@@ -649,6 +684,41 @@ async function confirmAllPurchased() {
   display: flex;
   gap: 1rem;
   align-items: end;
+}
+
+/* 採購者 tag（商品名稱旁） */
+.purchaser-tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.1rem 0.4rem;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--color-secondary) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-secondary) 35%, transparent);
+  color: var(--color-secondary-dark, var(--color-secondary));
+  margin-left: 0.35rem;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* 採購者分組數量 */
+.purchaser-qty {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-left: 0.5rem;
+  opacity: 0.75;
+}
+
+/* 採購者分組標題 */
+.purchaser-group-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-primary-dark, var(--color-primary));
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  border-left: 3px solid var(--color-primary);
+  padding: 0.3rem 0.75rem;
+  margin: 0.75rem 0 0.25rem;
+  border-radius: 0 4px 4px 0;
 }
 
 /* 已拆數量標示 */
