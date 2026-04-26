@@ -238,6 +238,8 @@ export interface QueryStatsProfitShareRes {
 export interface ProfitShareItem {
   /** 訂單 ID */
   id: number
+  /** 商品 ID */
+  productId: number
   /** 顧客名稱 */
   customerName: string
   /** 採購者名稱 */

@@ -11,6 +11,7 @@ import PurchaseChannelItem from './PurchaseChannelItem.vue'
 import type { PurchaseListData } from '@/services/api/purchase/purchase-api-interface'
 import { purchaseListApi } from '@/services/api/purchase/purchase-api'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
+import PurchaserSelectComponent from '@/components/inputs/selects/PurchaserSelectComponent.vue'
 import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 import { useSearchStore } from '@/stores/search'
 import { useMenuStore } from '@/stores/menu'
@@ -27,6 +28,13 @@ const menuStore = useMenuStore()
 
 /** 當前活動 ID */
 const currentEventId = ref(0)
+/** 篩選的採購者 */
+const purchaser = ref<string | undefined>(undefined)
+
+function selectPurchaser(value: string | undefined) {
+  purchaser.value = value
+  if (currentEventId.value) fetchPurchaseList()
+}
 /** 依通路整理後的採購清單 */
 const purchaseList = ref<PurchaseList[]>([])
 /** 顯示用採購清單 */
@@ -43,7 +51,7 @@ const currentChannelFilter = ref<SelectOption<QueryChannelsAllRes | null> | null
  * @param option - 選取的活動 Option
  */
 async function fetchPurchaseList() {
-  const res = await purchaseListApi.getPurchaseListsAll(currentEventId.value)
+  const res = await purchaseListApi.getPurchaseListsAll(currentEventId.value, purchaser.value)
   purchaseList.value = Object.keys(res).map((key) => ({
     channelName: key,
     data: res[key] ?? [],
@@ -89,7 +97,10 @@ async function selectEvent(data: SelectOption<EventsResBase | null>) {
   currentEventId.value = data.value.id
   currentEventIsLocked.value = data.value.isLocked
   currentChannelFilter.value = null
-  searchStore.setSearchStore({ name: 'PURCHASE_LIST', condition: { eventId: currentEventId.value.toString(), channelId: null } })
+  searchStore.setSearchStore({
+    name: 'PURCHASE_LIST',
+    condition: { eventId: currentEventId.value.toString(), channelId: null },
+  })
   await fetchPurchaseList()
   isShowChannelSelect.value = true
 }
@@ -100,7 +111,13 @@ async function selectEvent(data: SelectOption<EventsResBase | null>) {
  */
 function selectChannel(option: SelectOption<QueryChannelsAllRes | null>) {
   currentChannelFilter.value = option
-  searchStore.setSearchStore({ name: 'PURCHASE_LIST', condition: { eventId: currentEventId.value.toString(), channelId: option.value?.id.toString() ?? null } })
+  searchStore.setSearchStore({
+    name: 'PURCHASE_LIST',
+    condition: {
+      eventId: currentEventId.value.toString(),
+      channelId: option.value?.id.toString() ?? null,
+    },
+  })
   applyChannelFilter()
 }
 </script>
@@ -109,7 +126,10 @@ function selectChannel(option: SelectOption<QueryChannelsAllRes | null>) {
   <div class="purchase">
     <h3>採購清單</h3>
     <div class="selectBox">
-      <event-select-component :initialId="currentEventId.toString()" @select-option="selectEvent"></event-select-component>
+      <event-select-component
+        :initialId="currentEventId.toString()"
+        @select-option="selectEvent"
+      ></event-select-component>
       <shop-select-component
         v-if="isShowChannelSelect"
         :key="currentEventId"
@@ -118,6 +138,11 @@ function selectChannel(option: SelectOption<QueryChannelsAllRes | null>) {
         :isShowAll="true"
         @select-option="selectChannel"
       ></shop-select-component>
+      <purchaser-select-component
+        v-if="isShowChannelSelect"
+        :isDisplayAll="true"
+        @selectOption="selectPurchaser($event.value)"
+      />
     </div>
     <purchase-channel-item
       v-for="purchase in displayPurchaseList"

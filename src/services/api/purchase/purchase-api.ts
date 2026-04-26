@@ -1,3 +1,4 @@
+import { string } from 'yup'
 import { getApi, patchApi, postApi } from '../base-api'
 import type {
   PurchaseCheckReq,
@@ -13,8 +14,8 @@ export const purchaseListApi = {
    * @param id - 活動 ID
    * @returns 以通路名稱為 key 的採購統計物件
    */
-  getPurchaseListsAll: async (id: number): Promise<PurchaseListAllRes> => {
-    return await getApi('/purchase/stats', { eventId: id })
+  getPurchaseListsAll: async (id: number, purchaser?: string): Promise<PurchaseListAllRes> => {
+    return await getApi('/purchase/stats', { eventId: id, purchaser: purchaser })
   },
 
   /**

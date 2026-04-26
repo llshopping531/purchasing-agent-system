@@ -18,6 +18,10 @@ import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
 import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
 import { useSearchStore } from '@/stores/search'
 import PurchaserSelectComponent from '@/components/inputs/selects/PurchaserSelectComponent.vue'
+import ModalComponent from '@/components/ModalComponent.vue'
+import { productsApi } from '@/services/api/products/products-api'
+import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
+import { formatJpy } from '@/utils/format'
 
 const searchStore = useSearchStore()
 
@@ -34,6 +38,20 @@ const totalPages = ref(0)
 const totalElements = ref(0)
 const sortField = ref('id')
 const sortDirection = ref<'ASC' | 'DESC'>('DESC')
+const selectedProduct = ref<ProductsResBase | null>(null)
+
+const productDetailHeaderRow: HeaderRow[] = [
+  { name: '商品名稱', value: 'name', sort: 0 },
+  { name: '日幣定價', value: 'priceJpy', sort: 1, width: '110px' },
+  { name: '匯率', value: 'exchangeRate', sort: 2, width: '70px' },
+  { name: '台幣定價', value: 'priceTwd', sort: 3, width: '110px' },
+  { name: '盲抽', value: 'isBlindBox', sort: 4, width: '70px' },
+  { name: '圖片', value: 'image', sort: 5, width: '80px' },
+]
+
+async function openProductDetail(row: ProfitShareItem) {
+  selectedProduct.value = await productsApi.getSingleProduct(row.productId)
+}
 
 const headerRow: HeaderRow[] = [
   { name: '顧客名稱', value: 'customerName', sort: 0, width: '150px', sortable: true },
@@ -210,6 +228,9 @@ function formatPercent(val: number | null) {
         @changeSize="onChangeSize"
         @sort="onSort"
       >
+        <template #col-productName="{ row }">
+          <span class="product-name-link" @click="openProductDetail(row)">{{ row.productName }}</span>
+        </template>
         <template #col-subtotalTwd="{ row }">
           {{ formatTwd(row.subtotalTwd) }}
         </template>
@@ -226,6 +247,30 @@ function formatPercent(val: number | null) {
     </div>
 
     <div v-else class="empty-hint">請先選取活動以查詢分潤資料</div>
+
+    <modal-component
+      v-if="selectedProduct"
+      :name="selectedProduct.name"
+      @confirm="selectedProduct = null"
+      @cancel="selectedProduct = null"
+    >
+      <template #content>
+        <table-component
+          :tableData="[selectedProduct]"
+          :headerRow="productDetailHeaderRow"
+          :isDelete="false"
+          :isEdit="false"
+        >
+          <template #col-priceJpy="{ row }">{{ formatJpy(row.priceJpy) }}</template>
+          <template #col-priceTwd="{ row }">{{ formatTwd(row.priceTwd) }}</template>
+          <template #col-isBlindBox="{ row }">{{ row.isBlindBox ? '是' : '否' }}</template>
+          <template #col-image="{ row }">
+            <img v-if="row.image" :src="row.image" class="product-image" />
+            <span v-else>—</span>
+          </template>
+        </table-component>
+      </template>
+    </modal-component>
   </div>
 </template>
 
@@ -329,6 +374,42 @@ h3 {
   font-weight: 600;
   background: color-mix(in srgb, var(--color-secondary) 12%, transparent);
   color: var(--color-secondary-dark);
+}
+
+.product-name-link {
+  cursor: pointer;
+  color: var(--color-primary);
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.detail-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.detail-label {
+  width: 90px;
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.product-image {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .empty-hint {
