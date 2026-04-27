@@ -54,10 +54,14 @@ async function openProductModal(productId: number) {
 /** 另開視窗並複製客戶的個人查詢連結 */
 async function copyQueryLink(customer: PackingListCustomer, event: MouseEvent) {
   event.stopPropagation()
-  const  queryUuid  = await customersApi.getQueryUuid(customer.id)
+  // 必須在同步的使用者手勢中呼叫 window.open，避免手機瀏覽器攔截彈出視窗
+  const newTab = window.open('', '_blank')
+  const queryUuid = await customersApi.getQueryUuid(customer.id)
   const tab = currentEventId.value ? `?tab=${currentEventId.value}` : ''
   const url = `${window.location.origin}/query/${queryUuid}${tab}`
-  window.open(url, '_blank')
+  if (newTab) {
+    newTab.location.href = url
+  }
   await navigator.clipboard.writeText(url)
   copiedCustomerId.value = customer.id
   setTimeout(() => { copiedCustomerId.value = null }, 1500)
