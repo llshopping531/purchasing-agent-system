@@ -5,10 +5,10 @@
  * 選取商品後除了 emit Option，也 emit 完整的 ProductsResBase 物件供父層取得商品詳細資訊
  */
 import { ref, watch } from 'vue'
-import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
+import type { ProductsResBase } from '@/services/api/offline/products/products-api-interfaces'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
-import { productsApi } from '@/services/api/products/products-api'
-import { orderApi } from '@/services/api/order/order-api'
+import { productsApi } from '@/services/api/offline/products/products-api'
+import { orderApi } from '@/services/api/offline/order/order-api'
 import type { SelectOption } from '@/interfaces/common';
 
 const props = defineProps<{

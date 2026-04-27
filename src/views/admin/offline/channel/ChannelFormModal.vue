@@ -9,7 +9,7 @@ import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
-import { channelApi, type ChannelContent } from '@/services/api/channels/channels-api'
+import { channelApi, type ChannelContent } from '@/services/api/offline/channels/channels-api'
 
 const props = defineProps<{
   /** 目前選取的活動 ID */

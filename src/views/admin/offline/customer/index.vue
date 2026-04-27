@@ -9,10 +9,10 @@ import BooleanTransformComponent from '@/components/BooleanTransformComponent.vu
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import CustomerFormModal from './CustomerFormModal.vue'
-import { customersApi } from '@/services/api/customers/customers-api'
-import type { CustomersResBase } from '@/services/api/customers/customers-api-interfaces'
-import { eventApi } from '@/services/api/events/events-api'
-import { packingListApi } from '@/services/api/packing-list/packing-list-api'
+import { customersApi } from '@/services/api/offline/customers/customers-api'
+import type { CustomersResBase } from '@/services/api/offline/customers/customers-api-interfaces'
+import { eventApi } from '@/services/api/offline/events/events-api'
+import { packingListApi } from '@/services/api/offline/packing-list/packing-list-api'
 import type { SelectOption } from '@/interfaces/common'
 
 /** CustomerFormModal 元件的 ref，用於呼叫其 createCustomer / editCustomer */

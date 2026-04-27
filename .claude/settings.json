@@ -9,7 +9,10 @@
       "Read(//Users/lily/Desktop/**)",
       "Bash(grep -rn \"#[0-9a-fA-F]\\\\{3,6\\\\}\" src/components/ src/views/ src/assets/ --include=\"*.vue\" --include=\"*.css\")",
       "Bash(npx tsc:*)",
-      "Bash(echo \"Exit code: $?\")"
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(mkdir -p offline online system)",
+      "Bash(mv channels:*)",
+      "Bash(grep -r \"from ''\\\\.\\\\.\" /Users/lily/Desktop/project/purchasing-agent-system/src/services/api/offline /Users/lily/Desktop/project/purchasing-agent-system/src/services/api/online /Users/lily/Desktop/project/purchasing-agent-system/src/services/api/system)"
     ]
   }
 }

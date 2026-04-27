@@ -13,10 +13,10 @@ import ModalComponent from '@/components/ModalComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import OrderFormModal from './OrderFormModal.vue'
 import BatchOrderFormModal from './BatchOrderFormModal.vue'
-import type { OrderQueryContent } from '@/services/api/order/order-api-interfaces'
-import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
+import type { OrderQueryContent } from '@/services/api/offline/order/order-api-interfaces'
+import type { QueryChannelsAllRes } from '@/services/api/offline/channels/channels-api-interfaces'
 import type { SelectOption } from '@/interfaces/common'
-import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
+import type { EventsResBase } from '@/services/api/offline/events/events-api-interfaces'
 import { useSearchStore } from '@/stores/search'
 
 /** 查詢結果快取 Store */

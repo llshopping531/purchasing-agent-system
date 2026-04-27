@@ -12,10 +12,10 @@ import ProductSelectComponent from '@/components/inputs/selects/ProductSelectCom
 import TextInput from '@/components/inputs/TextInput.vue'
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
 import type { SelectOption } from '@/interfaces/common'
-import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
-import type { CustomersResBase } from '@/services/api/customers/customers-api-interfaces'
-import { orderApi } from '@/services/api/order/order-api'
-import type { OrderQueryContent } from '@/services/api/order/order-api-interfaces'
+import type { ProductsResBase } from '@/services/api/offline/products/products-api-interfaces'
+import type { CustomersResBase } from '@/services/api/offline/customers/customers-api-interfaces'
+import { orderApi } from '@/services/api/offline/order/order-api'
+import type { OrderQueryContent } from '@/services/api/offline/order/order-api-interfaces'
 
 const props = defineProps<{
   /** 目前選取的活動 ID（字串形式） */

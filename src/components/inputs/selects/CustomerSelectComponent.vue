@@ -6,9 +6,9 @@
 import { ref, onMounted, watch } from 'vue'
 import type { SelectOption } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
-import { customersApi } from '@/services/api/customers/customers-api'
-import type { CustomersResBase } from '@/services/api/customers/customers-api-interfaces'
-import { orderApi } from '@/services/api/order/order-api'
+import { customersApi } from '@/services/api/offline/customers/customers-api'
+import type { CustomersResBase } from '@/services/api/offline/customers/customers-api-interfaces'
+import { orderApi } from '@/services/api/offline/order/order-api'
 const props = withDefaults(
   defineProps<{
     /** 預設選取的顧客 Option */

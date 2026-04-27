@@ -5,7 +5,7 @@
  */
 import { ref } from 'vue'
 import ModalComponent from '@/components/ModalComponent.vue'
-import { importApi, type ImportProductsRes } from '@/services/api/import/import-api'
+import { importApi, type ImportProductsRes } from '@/services/api/system/import/import-api'
 
 const props = defineProps<{
   /** 目前選取的活動 ID */

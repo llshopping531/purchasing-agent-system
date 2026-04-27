@@ -1,5 +1,5 @@
 import { useCryptoPublicKeyStore } from '@/stores/crypto-public-key'
-import { cryptoApiService } from './api/crypto/crypto-api'
+import { cryptoApiService } from '@/services/api/system/crypto/crypto-api'
 
 interface HybridPayload {
   key: string

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { THREADS_ACCESS_TOKEN } from '@/constants/threads.constant'
-import { threadsApi } from '@/services/api/threads/threads-api'
-import type { ThreadsItem } from '@/services/api/threads/threads-api-interfaces'
+import { threadsApi } from '@/services/api/system/threads/threads-api'
+import type { ThreadsItem } from '@/services/api/system/threads/threads-api-interfaces'
 import TableComponent from '@/components/tables/TableComponent.vue'
 import type { HeaderRow } from '@/components/tables/TableComponent.vue'
 import ModalComponent from '@/components/ModalComponent.vue'

@@ -6,7 +6,7 @@
 import BooleanTransformComponent from '@/components/BooleanTransformComponent.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
 import { formatTwd } from '@/utils/format'
-import type { OrderAllContent } from '@/services/api/order/order-api'
+import type { OrderAllContent } from '@/services/api/offline/order/order-api'
 
 defineProps<{
   /** 要顯示的訂單資料 */

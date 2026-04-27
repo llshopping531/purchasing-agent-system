@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { accountApi } from '@/services/api/account/account-api'
+import { accountApi } from '@/services/api/system/account/account-api'
 import { useUserStore } from '@/stores/user'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'

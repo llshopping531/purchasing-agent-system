@@ -10,8 +10,8 @@ import * as yup from 'yup'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
-import { eventApi } from '@/services/api/events/events-api'
-import type { QueryEventsContent } from '@/services/api/events/events-api-interfaces'
+import { eventApi } from '@/services/api/offline/events/events-api'
+import type { QueryEventsContent } from '@/services/api/offline/events/events-api-interfaces'
 
 const emit = defineEmits<{
   /** 新增、修改或刪除成功後觸發，通知父層重新整理活動列表 */

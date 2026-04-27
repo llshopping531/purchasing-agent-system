@@ -9,8 +9,8 @@ import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import NewCustomerForm from '@/components/forms/NewCustomerForm.vue'
-import { customersApi } from '@/services/api/customers/customers-api'
-import type { CustomersResBase } from '@/services/api/customers/customers-api-interfaces'
+import { customersApi } from '@/services/api/offline/customers/customers-api'
+import type { CustomersResBase } from '@/services/api/offline/customers/customers-api-interfaces'
 
 const emit = defineEmits<{
   /** 新增或修改成功後觸發，通知父層重新整理顧客列表 */

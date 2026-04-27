@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import { customersApi } from '@/services/api/customers/customers-api'
+import { customersApi } from '@/services/api/offline/customers/customers-api'
 import type { SelectOption } from '@/interfaces/common'
-import type { CustomersResBase } from '@/services/api/customers/customers-api-interfaces'
+import type { CustomersResBase } from '@/services/api/offline/customers/customers-api-interfaces'
 
 /**
  * 老闆客戶清單快取 Store

@@ -4,10 +4,10 @@
  * 顯示所有活動的列表，並透過 EventFormModal ref 處理新增／編輯／刪除操作
  */
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
-import { eventApi } from '@/services/api/events/events-api'
+import { eventApi } from '@/services/api/offline/events/events-api'
 import { onMounted, ref } from 'vue'
 import EventFormModal from './EventFormModal.vue'
-import type { QueryEventsContent } from '@/services/api/events/events-api-interfaces'
+import type { QueryEventsContent } from '@/services/api/offline/events/events-api-interfaces'
 import BooleanTransformComponent from '@/components/BooleanTransformComponent.vue'
 
 /** 活動列表資料 */

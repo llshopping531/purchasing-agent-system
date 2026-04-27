@@ -4,9 +4,9 @@
  * 顯示所有通販活動的列表
  */
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
-import { onlineEventApi } from '@/services/api/online-events/online-events-api'
+import { onlineEventApi } from '@/services/api/online/online-events/online-events-api'
 import { onMounted, ref } from 'vue'
-import type { QueryOnlineEventsContent } from '@/services/api/online-events/online-events-api-interfaces'
+import type { QueryOnlineEventsContent } from '@/services/api/online/online-events/online-events-api-interfaces'
 import BooleanTransformComponent from '@/components/BooleanTransformComponent.vue'
 
 /** 通販活動列表資料 */

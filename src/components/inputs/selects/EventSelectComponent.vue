@@ -7,7 +7,7 @@ import { useMenuStore } from '@/stores/menu'
 import { onMounted, ref } from 'vue'
 import type { SelectOption } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
-import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
+import type { EventsResBase } from '@/services/api/offline/events/events-api-interfaces'
 
 const props = defineProps<{
   /** 是否為必填欄位 */

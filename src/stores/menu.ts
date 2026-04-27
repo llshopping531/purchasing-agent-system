@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { eventApi } from '@/services/api/events/events-api'
-import { channelApi } from '@/services/api/channels/channels-api'
-import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
-import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
+import { eventApi } from '@/services/api/offline/events/events-api'
+import { channelApi } from '@/services/api/offline/channels/channels-api'
+import type { EventsResBase } from '@/services/api/offline/events/events-api-interfaces'
+import type { QueryChannelsAllRes } from '@/services/api/offline/channels/channels-api-interfaces'
 
 /**
  * 選單快取 Store

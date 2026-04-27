@@ -7,7 +7,7 @@
 import { ref, reactive, watch, computed, onMounted, onUnmounted } from 'vue'
 import MaskComponent from '@/components/MaskComponent.vue'
 import NewProductForm from '@/components/forms/NewProductForm.vue'
-import { productsApi } from '@/services/api/products/products-api'
+import { productsApi } from '@/services/api/offline/products/products-api'
 import { useModalLayer } from '@/composables/useModalLayer'
 
 const props = defineProps<{

@@ -1,13 +1,10 @@
 import { ERROR_MESSAGE } from '@/constants/error-message.constant'
-import { useCryptoPublicKeyStore } from '@/stores/crypto-public-key'
 import { useErrorStore } from '@/stores/error'
 import { useLoadingStore } from '@/stores/loading'
 import { useUserStore } from '@/stores/user'
 import { useWarnStore } from '@/stores/warn'
 import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
 import axios from 'axios'
-import { cryptoService } from '../crypto-service'
-import { cryptoApiService } from './crypto/crypto-api'
 
 // 重複請求偵測：記錄上一次的請求 key 與時間
 let lastRequestKey: string | null = null

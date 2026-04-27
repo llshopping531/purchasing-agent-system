@@ -5,14 +5,14 @@
  */
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import type { SelectOption } from '@/interfaces/common'
-import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
+import type { QueryChannelsAllRes } from '@/services/api/offline/channels/channels-api-interfaces'
 import { onMounted, ref } from 'vue'
 import PurchaseChannelItem from './PurchaseChannelItem.vue'
-import type { PurchaseListData } from '@/services/api/purchase/purchase-api-interface'
-import { purchaseListApi } from '@/services/api/purchase/purchase-api'
+import type { PurchaseListData } from '@/services/api/offline/purchase/purchase-api-interface'
+import { purchaseListApi } from '@/services/api/offline/purchase/purchase-api'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import PurchaserSelectComponent from '@/components/inputs/selects/PurchaserSelectComponent.vue'
-import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
+import type { EventsResBase } from '@/services/api/offline/events/events-api-interfaces'
 import { useSearchStore } from '@/stores/search'
 import { useMenuStore } from '@/stores/menu'
 

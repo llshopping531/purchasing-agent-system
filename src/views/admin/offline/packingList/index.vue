@@ -11,21 +11,21 @@ import IconCopy from '@/components/icons/IconCopy.vue'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
-import { packingListApi } from '@/services/api/packing-list/packing-list-api'
-import { customersApi } from '@/services/api/customers/customers-api'
-import { productsApi } from '@/services/api/products/products-api'
-import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
+import { packingListApi } from '@/services/api/offline/packing-list/packing-list-api'
+import { customersApi } from '@/services/api/offline/customers/customers-api'
+import { productsApi } from '@/services/api/offline/products/products-api'
+import type { ProductsResBase } from '@/services/api/offline/products/products-api-interfaces'
 import type { SelectOption } from '@/interfaces/common'
 import type {
   PackingListCustomer,
   CustomerOrder,
   ChannelBonus,
-} from '@/services/api/packing-list/packing-list-api-interfaces'
-import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
+} from '@/services/api/offline/packing-list/packing-list-api-interfaces'
+import type { EventsResBase } from '@/services/api/offline/events/events-api-interfaces'
 import { useSearchStore } from '@/stores/search'
 import { isInactiveOrder } from '@/utils/order'
-import { orderApi } from '@/services/api/order/order-api'
-import type { DrawsData } from '@/services/api/order/order-api-interfaces'
+import { orderApi } from '@/services/api/offline/order/order-api'
+import type { DrawsData } from '@/services/api/offline/order/order-api-interfaces'
 
 const searchStore = useSearchStore()
 

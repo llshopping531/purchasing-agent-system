@@ -9,8 +9,8 @@ import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import NewProductForm from '@/components/forms/NewProductForm.vue'
-import { productsApi } from '@/services/api/products/products-api'
-import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
+import { productsApi } from '@/services/api/offline/products/products-api'
+import type { ProductsResBase } from '@/services/api/offline/products/products-api-interfaces'
 
 const props = defineProps<{
   /** 目前選取的活動 ID（字串形式） */

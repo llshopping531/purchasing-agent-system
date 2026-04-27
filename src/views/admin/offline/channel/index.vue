@@ -8,9 +8,9 @@ import EventSelectComponent from '@/components/inputs/selects/EventSelectCompone
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import PaginationComponent from '@/components/PaginationComponent.vue'
 import ChannelFormModal from './ChannelFormModal.vue'
-import { channelApi, type ChannelContent } from '@/services/api/channels/channels-api'
+import { channelApi, type ChannelContent } from '@/services/api/offline/channels/channels-api'
 import type { SelectOption } from '@/interfaces/common'
-import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
+import type { EventsResBase } from '@/services/api/offline/events/events-api-interfaces'
 import { useSearchStore } from '@/stores/search'
 import { useMenuStore } from '@/stores/menu'
 

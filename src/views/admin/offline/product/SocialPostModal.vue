@@ -7,8 +7,8 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { formatTwd, formatJpy } from '@/utils/format'
 import MaskComponent from '@/components/MaskComponent.vue'
-import { productsApi } from '@/services/api/products/products-api'
-import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
+import { productsApi } from '@/services/api/offline/products/products-api'
+import type { ProductsResBase } from '@/services/api/offline/products/products-api-interfaces'
 import { useModalLayer } from '@/composables/useModalLayer'
 import { SOCIAL_DEFAULT_TEMPLATE } from '@/constants/common.constant'
 

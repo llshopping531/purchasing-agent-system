@@ -5,16 +5,16 @@
  */
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { queryApi } from '@/services/api/query/query-api'
-import { eventApi } from '@/services/api/events/events-api'
-import { productsApi } from '@/services/api/products/products-api'
+import { queryApi } from '@/services/api/system/query/query-api'
+import { eventApi } from '@/services/api/offline/events/events-api'
+import { productsApi } from '@/services/api/offline/products/products-api'
 import { formatTwd, formatJpy } from '@/utils/format'
-import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
+import type { ProductsResBase } from '@/services/api/offline/products/products-api-interfaces'
 
 const PACKAGING_FEE = 10
 
 const now = new Date()
-import type { QueryOrderEnriched } from '@/services/api/query/query-api-interfaces'
+import type { QueryOrderEnriched } from '@/services/api/system/query/query-api-interfaces'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
 

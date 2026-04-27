@@ -7,7 +7,7 @@ import { ref, watch } from 'vue'
 import type { SelectOption } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { useMenuStore } from '@/stores/menu'
-import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
+import type { QueryChannelsAllRes } from '@/services/api/offline/channels/channels-api-interfaces'
 
 const pop = defineProps<{
   /** 目前選取的活動 ID（字串形式），變更時自動重新查詢通路 */

@@ -10,14 +10,14 @@ import type {
   PurchaseDetail,
   PurchaseListData,
   QueryPurchaseDetailReq,
-} from '@/services/api/purchase/purchase-api-interface'
+} from '@/services/api/offline/purchase/purchase-api-interface'
 import { computed, ref, watch } from 'vue'
-import { purchaseListApi } from '@/services/api/purchase/purchase-api'
+import { purchaseListApi } from '@/services/api/offline/purchase/purchase-api'
 import ModalComponent from '@/components/ModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
-import { orderApi } from '@/services/api/order/order-api'
+import { orderApi } from '@/services/api/offline/order/order-api'
 
 const emit = defineEmits<{ refresh: [] }>()
 

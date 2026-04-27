@@ -8,19 +8,19 @@ import { formatTwd } from '@/utils/format'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent.vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
-import { statsApi } from '@/services/api/stats/stats-api'
+import { statsApi } from '@/services/api/offline/stats/stats-api'
 import type {
   ProfitShareItem,
   QueryStatsProfitShareSummaryRes,
-} from '@/services/api/stats/stats-api-interfaces'
+} from '@/services/api/offline/stats/stats-api-interfaces'
 import type { SelectOption } from '@/interfaces/common'
-import type { EventsResBase } from '@/services/api/events/events-api-interfaces'
-import type { QueryChannelsAllRes } from '@/services/api/channels/channels-api-interfaces'
+import type { EventsResBase } from '@/services/api/offline/events/events-api-interfaces'
+import type { QueryChannelsAllRes } from '@/services/api/offline/channels/channels-api-interfaces'
 import { useSearchStore } from '@/stores/search'
 import PurchaserSelectComponent from '@/components/inputs/selects/PurchaserSelectComponent.vue'
 import ModalComponent from '@/components/ModalComponent.vue'
-import { productsApi } from '@/services/api/products/products-api'
-import type { ProductsResBase } from '@/services/api/products/products-api-interfaces'
+import { productsApi } from '@/services/api/offline/products/products-api'
+import type { ProductsResBase } from '@/services/api/offline/products/products-api-interfaces'
 import { formatJpy } from '@/utils/format'
 
 const searchStore = useSearchStore()
