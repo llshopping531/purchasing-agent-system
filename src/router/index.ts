@@ -114,6 +114,17 @@ const router = createRouter({
           path: 'online',
           name: 'online',
           component: () => import('../views/admin/onlineView.vue'),
+          children: [
+            {
+              path: '',
+              redirect: '/admin/online/event',
+            },
+            {
+              path: 'event',
+              name: 'OnlineEventView',
+              component: () => import('../views/admin/online/event/index.vue'),
+            },
+          ],
         },
         {
           /** 出貨單 */
