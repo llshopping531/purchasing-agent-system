@@ -34,6 +34,10 @@ export const PATH = {
   online: '/admin/online',
   /** 通販－活動管理 */
   onlineEvent: '/admin/online/event',
+  /** 通販－商品管理 */
+  onlineProduct: '/admin/online/product',
+  /** 通販－訂單管理 */
+  onlineOrder: '/admin/online/order',
 
   /** 系統專區入口 */
   system: '/admin/system',

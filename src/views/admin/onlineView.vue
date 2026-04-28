@@ -4,11 +4,17 @@ import { PATH } from '@/constants/route.constant'
 import { useUiStore } from '@/stores/ui'
 import SidebarComponent from '@/components/SidebarComponent.vue'
 import IconCalendarDays from '@/components/icons/IconCalendarDays.vue'
+import IconCartShopping from '@/components/icons/IconCartShopping.vue'
+import IconReceipt from '@/components/icons/IconReceipt.vue'
 
 const uiStore = useUiStore()
 const router = useRouter()
 
-const eventItem = { name: '活動管理', path: PATH.onlineEvent }
+const navItems = [
+  { name: '活動管理', path: PATH.onlineEvent, icon: IconCalendarDays },
+  { name: '商品管理', path: PATH.onlineProduct, icon: IconCartShopping },
+  { name: '訂單管理', path: PATH.onlineOrder, icon: IconReceipt },
+]
 
 router.afterEach(() => {
   uiStore.closeSidebar()
@@ -21,8 +27,9 @@ router.afterEach(() => {
       <template #default="{ isCollapsed }">
         <div class="nav-group">
           <div class="nav-group-label">通<span v-if="!isCollapsed">販專區</span></div>
-          <router-link :to="eventItem.path" class="nav-item">
-            <icon-calendar-days class="nav-icon" /><span class="nav-item-name" v-if="!isCollapsed">{{ eventItem.name }}</span>
+          <router-link v-for="item in navItems" :key="item.path" :to="item.path" class="nav-item">
+            <component :is="item.icon" class="nav-icon" />
+            <span class="nav-item-name" v-if="!isCollapsed">{{ item.name }}</span>
           </router-link>
         </div>
       </template>

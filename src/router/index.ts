@@ -124,6 +124,16 @@ const router = createRouter({
               name: 'OnlineEventView',
               component: () => import('../views/admin/online/event/index.vue'),
             },
+            {
+              path: 'product',
+              name: 'OnlineProductView',
+              component: () => import('../views/admin/online/product/index.vue'),
+            },
+            {
+              path: 'order',
+              name: 'OnlineOrderView',
+              component: () => import('../views/admin/online/order/index.vue'),
+            },
           ],
         },
         {

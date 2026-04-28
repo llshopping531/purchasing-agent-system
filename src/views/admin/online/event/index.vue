@@ -1,13 +1,14 @@
 <script setup lang="ts">
 /**
  * 通販活動管理頁面
- * 顯示所有通販活動的列表
+ * 顯示所有通販活動的列表，並透過 OnlineEventFormModal 處理新增／編輯／刪除操作
  */
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import { onlineEventApi } from '@/services/api/online/online-events/online-events-api'
 import { onMounted, ref } from 'vue'
 import type { QueryOnlineEventsContent } from '@/services/api/online/online-events/online-events-api-interfaces'
 import BooleanTransformComponent from '@/components/BooleanTransformComponent.vue'
+import OnlineEventFormModal from './OnlineEventFormModal.vue'
 
 /** 通販活動列表資料 */
 const eventList = ref<QueryOnlineEventsContent[]>([])
@@ -22,6 +23,7 @@ const headerRow = ref<HeaderRow[]>([
   { name: '是否鎖定', value: 'isLocked', sort: 0, width: '100px' },
 ])
 
+const eventFormModal = ref<InstanceType<typeof OnlineEventFormModal>>()
 /** 當前頁碼（0-based） */
 const currentPage = ref(0)
 /** 每頁筆數 */
@@ -35,9 +37,6 @@ onMounted(() => {
   getEventList()
 })
 
-/**
- * 從 API 取得通販活動並更新列表
- */
 async function getEventList() {
   const res = await onlineEventApi.getOnlineEvents({
     page: currentPage.value,
@@ -48,19 +47,11 @@ async function getEventList() {
   totalElements.value = res.totalElements
 }
 
-/**
- * 換頁
- * @param page - 目標頁碼（0-based）
- */
 function onChangePage(page: number) {
   currentPage.value = page
   getEventList()
 }
 
-/**
- * 更改每頁筆數
- * @param size - 新的每頁筆數
- */
 function onChangeSize(size: number) {
   pageSize.value = size
   currentPage.value = 0
@@ -72,6 +63,9 @@ function onChangeSize(size: number) {
   <div class="online-event">
     <div class="eventHeader">
       <h3>通販活動管理</h3>
+      <div class="operateBox">
+        <div class="btn" @click="eventFormModal?.createEvent()">新增</div>
+      </div>
     </div>
     <table-component
       :headerRow="headerRow"
@@ -80,7 +74,8 @@ function onChangeSize(size: number) {
       :currentPage="currentPage"
       :totalElements="totalElements"
       :pageSize="pageSize"
-      :showActions="false"
+      @edit="eventFormModal?.editEvent($event)"
+      @delete="eventFormModal?.deleteEvent($event)"
       @change-page="onChangePage"
       @change-size="onChangeSize"
     >
@@ -88,6 +83,7 @@ function onChangeSize(size: number) {
         <boolean-transform-component :value="row.isLocked"></boolean-transform-component>
       </template>
     </table-component>
+    <online-event-form-modal ref="eventFormModal" @confirmed="getEventList" />
   </div>
 </template>
 
@@ -97,6 +93,15 @@ function onChangeSize(size: number) {
     display: flex;
     gap: 1rem;
     margin-bottom: 1rem;
+    .operateBox {
+      display: flex;
+      justify-content: end;
+      align-items: center;
+      gap: 0.5rem;
+      .btn {
+        margin: 0;
+      }
+    }
   }
 }
 </style>
