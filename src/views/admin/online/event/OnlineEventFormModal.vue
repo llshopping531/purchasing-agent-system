@@ -9,6 +9,7 @@ import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
+import DateInput from '@/components/inputs/DateInput.vue'
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
 import { onlineEventApi } from '@/services/api/online/online-events/online-events-api'
 import type { QueryOnlineEventsContent } from '@/services/api/online/online-events/online-events-api-interfaces'
@@ -127,10 +128,10 @@ defineExpose({ createEvent, editEvent, deleteEvent })
           <text-input label="活動名稱" v-model:value="currentName" required :error-message="errors.name" />
         </div>
         <div class="formItem">
-          <text-input label="開團日期" v-model:value="currentStartDate" required :error-message="errors.startDate" />
+          <date-input label="開團日期" v-model:value="currentStartDate" required :error-message="errors.startDate" />
         </div>
         <div class="formItem">
-          <text-input label="官方出貨日期" v-model:value="currentDeliveryDate" />
+          <date-input label="官方出貨日期" v-model:value="currentDeliveryDate" />
         </div>
         <div class="formItem">
           <text-input label="進度" v-model:value="currentProgress" />

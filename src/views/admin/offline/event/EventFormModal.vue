@@ -9,6 +9,7 @@ import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
+import DateInput from '@/components/inputs/DateInput.vue'
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
 import { eventApi } from '@/services/api/offline/events/events-api'
 import type { QueryEventsContent } from '@/services/api/offline/events/events-api-interfaces'
@@ -158,7 +159,7 @@ defineExpose({ createEvent, editEvent, deleteEvent })
           <checkbox-input label="是否鎖定" v-model="currentIsLocked" style="margin-top: auto" />
         </div>
         <div class="formItem">
-          <text-input
+          <date-input
             label="開始日期"
             v-model:value="currentStartDate"
             required
@@ -166,7 +167,7 @@ defineExpose({ createEvent, editEvent, deleteEvent })
           />
         </div>
         <div class="formItem">
-          <text-input
+          <date-input
             label="結束日期"
             v-model:value="currentEndDate"
             required
