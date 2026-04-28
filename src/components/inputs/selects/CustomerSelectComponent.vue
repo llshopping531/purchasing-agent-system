@@ -78,7 +78,6 @@ async function getCustomerList() {
 }
 
 async function getDistinctCustomers(enentId: number, chaanelId?: number) {
-  localDefault.value = undefined
   const res = await orderApi.getDistinctCustomers(enentId, chaanelId)
   const list = res.map((customer) => ({ name: customer.name, value: customer }))
   customerList.value = props.isDisplayAll ? [allOption, ...list] : list

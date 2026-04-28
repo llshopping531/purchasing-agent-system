@@ -6,6 +6,8 @@ import type {
   QueryStatsOverviewRes,
   QueryStatsTotalsReq,
   QueryStatsTotalsRes,
+  QueryStatsTotalsWithFiltersReq,
+  QueryStatsTotalsWithFiltersRes,
   QueryStatsProfitShareSummaryReq,
   QueryStatsProfitShareSummaryRes,
   QueryStatsProfitShareReq,
@@ -30,6 +32,13 @@ export const statsApi = {
    */
   getStatsTotals: async (req: QueryStatsTotalsReq): Promise<QueryStatsTotalsRes> => {
     return await getApi('/stats/totals', req)
+  },
+
+  /**
+   * 查詢活動訂單金額總計（含篩選條件）
+   */
+  getStatsTotalsWithFilters: async (req: QueryStatsTotalsWithFiltersReq): Promise<QueryStatsTotalsWithFiltersRes> => {
+    return await getApi('/stats/totals-with-filters', req)
   },
 
   /**

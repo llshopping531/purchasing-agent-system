@@ -90,6 +90,34 @@ export interface QueryStatsTotalsReq {
 }
 
 /**
+ * 查詢活動訂單金額總計（含篩選）request
+ */
+export interface QueryStatsTotalsWithFiltersReq {
+  /** 活動 ID */
+  eventId: number
+  /** 通路 ID（可選） */
+  channelId?: number
+  /** 客戶 ID（可選，多選用逗號分隔） */
+  customerId?: string
+  /** 商品 ID（可選，多選用逗號分隔） */
+  productId?: string
+  /** 訂單狀態（可選，多選用逗號分隔） */
+  orderStatus?: string
+  /** 採購者代碼（可選，多選用逗號分隔） */
+  purchaser?: string
+}
+
+/**
+ * 查詢活動訂單金額總計（含篩選）response
+ */
+export interface QueryStatsTotalsWithFiltersRes {
+  /** 日幣總計 */
+  totalJpy: number
+  /** 台幣總計 */
+  totalTwd: number
+}
+
+/**
  * 查詢活動訂單金額總計 response
  */
 export interface QueryStatsTotalsRes {

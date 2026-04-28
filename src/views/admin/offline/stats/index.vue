@@ -33,10 +33,8 @@ const isShowChannelSelect = ref(false)
 /** 是否展開篩選列 */
 const isFilterExpanded = ref(false)
 
-/** 活動金額總計 */
-const eventTotals = ref<{ totalJpy: number; totalTwd: number } | null>(null)
-/** 通路金額總計 */
-const channelTotals = ref<{ totalJpy: number; totalTwd: number } | null>(null)
+/** 當前篩選條件下的金額總計 */
+const currentTotals = ref<{ totalJpy: number; totalTwd: number } | null>(null)
 
 /** 通路滿額需求統計 */
 const channelBonusData = ref<QueryBonusRequirementStatsRes | null>(null)
@@ -91,9 +89,9 @@ function selectEvent(data: SelectOption<EventsResBase | null>) {
   currentCustomer.value = undefined
   currentProduct.value = undefined
   currentPurchaser.value = undefined
+  currentStatus.value = undefined
   isShowChannelSelect.value = true
-  eventTotals.value = null
-  channelTotals.value = null
+  currentTotals.value = null
   tableData.value = []
   currentPage.value = 0
   searchStore.setSearchStore({
@@ -105,10 +103,7 @@ function selectEvent(data: SelectOption<EventsResBase | null>) {
 
 function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
   currentChannelId.value = data.value?.id.toString() ?? ''
-  currentCustomer.value = undefined
-  currentProduct.value = undefined
   currentPurchaser.value = undefined
-  channelTotals.value = null
   currentPage.value = 0
   searchStore.setSearchStore({
     name: 'STATS',
@@ -119,7 +114,7 @@ function selectShop(data: SelectOption<QueryChannelsAllRes | null>) {
 
 async function fetchAll() {
   if (!currentEventId.value) return
-  await Promise.all([fetchTotals(), fetchChannelTotals(), fetchOverview(), fetchChannelBonusList()])
+  await Promise.all([fetchCurrentTotals(), fetchOverview(), fetchChannelBonusList()])
 }
 
 async function fetchChannelBonusList() {
@@ -133,40 +128,43 @@ async function fetchChannelBonusList() {
   })
 }
 
-async function fetchTotals() {
-  eventTotals.value = await statsApi.getStatsTotals({ eventId: Number(currentEventId.value) })
-}
-
-async function fetchChannelTotals() {
-  if (!currentChannelId.value) {
-    channelTotals.value = null
-    return
-  }
-  channelTotals.value = await statsApi.getStatsChannelTotals({
-    channelId: Number(currentChannelId.value),
+async function fetchCurrentTotals() {
+  if (!currentEventId.value) return
+  currentTotals.value = await statsApi.getStatsTotalsWithFilters({
+    eventId: Number(currentEventId.value),
+    channelId: currentChannelId.value ? Number(currentChannelId.value) : undefined,
+    customerId: currentCustomer.value?.toString(),
+    productId: currentProduct.value?.toString(),
+    orderStatus: currentStatus.value,
+    purchaser: currentPurchaser.value,
   })
 }
 
 function updateOrderStatus(status: string | undefined) {
   currentStatus.value = status
   fetchOverview()
+  fetchCurrentTotals()
 }
 
 function updateCustomer(customer: number | undefined) {
   currentCustomer.value = customer
   currentPage.value = 0
   fetchOverview()
+  fetchCurrentTotals()
 }
+
 function updateProduct(product: number | undefined) {
   currentProduct.value = product
   currentPage.value = 0
   fetchOverview()
+  fetchCurrentTotals()
 }
 
 function updatePurchaser(purchaser: string | undefined) {
   currentPurchaser.value = purchaser
   currentPage.value = 0
   fetchOverview()
+  fetchCurrentTotals()
 }
 
 async function fetchOverview() {
@@ -277,33 +275,17 @@ function onSort(field: string) {
     </div>
 
     <!-- 統計卡片 -->
-    <div v-if="eventTotals" class="totals-section">
-      <!-- 活動總計（選取通路後隱藏） -->
-      <div v-if="!currentChannelId" class="totals-group">
-        <div class="totals-label">活動總計</div>
+    <div v-if="currentTotals" class="totals-section">
+      <div class="totals-group">
+        <div class="totals-label">總計</div>
         <div class="totals-cards">
           <div class="stat-card jpy">
             <div class="stat-card-title">日幣總計</div>
-            <div class="stat-card-value">{{ formatJpy(eventTotals.totalJpy) }}</div>
+            <div class="stat-card-value">{{ formatJpy(currentTotals.totalJpy) }}</div>
           </div>
           <div class="stat-card twd">
             <div class="stat-card-title">台幣總計</div>
-            <div class="stat-card-value">{{ formatTwd(eventTotals.totalTwd) }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 通路總計（選取通路後顯示） -->
-      <div v-if="channelTotals" class="totals-group">
-        <div class="totals-label">通路總計</div>
-        <div class="totals-cards">
-          <div class="stat-card jpy secondary">
-            <div class="stat-card-title">日幣總計</div>
-            <div class="stat-card-value">{{ formatJpy(channelTotals.totalJpy) }}</div>
-          </div>
-          <div class="stat-card twd secondary">
-            <div class="stat-card-title">台幣總計</div>
-            <div class="stat-card-value">{{ formatTwd(channelTotals.totalTwd) }}</div>
+            <div class="stat-card-value">{{ formatTwd(currentTotals.totalTwd) }}</div>
           </div>
           <div
             class="stat-card jpy secondary clickable"
@@ -311,15 +293,14 @@ function onSort(field: string) {
             @click="bonusModalDetails = channelBonusData.details"
           >
             <div class="stat-card-title">特典數量 <span class="click-hint">點擊查看明細</span></div>
-            <div class="stat-card-value">{{ channelBonusData.bonusRequirement }}</div>
+            <div class="stat-card-value">{{
+              currentCustomer
+                ? (channelBonusData.details.find(d => d.customerId === currentCustomer)?.bonusCount ?? 0)
+                : channelBonusData.bonusRequirement
+            }}</div>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- 通路滿額需求 -->
-    <div v-if="channelBonusData" class="totals-section">
-      <div class="totals-group"></div>
     </div>
 
     <!-- 總覽表格 -->
@@ -702,6 +683,16 @@ h3 {
     &.secondary.twd {
       border-color: color-mix(in srgb, var(--color-secondary-dark) 30%, transparent);
       background: color-mix(in srgb, var(--color-secondary-dark) 5%, var(--color-surface));
+    }
+
+    &.filtered.jpy {
+      border-color: color-mix(in srgb, #0891b2 30%, transparent);
+      background: color-mix(in srgb, #0891b2 5%, var(--color-surface));
+    }
+
+    &.filtered.twd {
+      border-color: color-mix(in srgb, #0e7490 25%, transparent);
+      background: color-mix(in srgb, #0e7490 4%, var(--color-surface));
     }
   }
 }
