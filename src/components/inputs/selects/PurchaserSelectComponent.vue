@@ -2,7 +2,7 @@
 /**
  * 採購者下拉選取元件（固定清單：莉莉、嵐嵐、小幫手）
  */
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import type { SelectOption } from '@/interfaces/common'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
 
@@ -13,14 +13,18 @@ const props = withDefaults(
     /** 預設選取的採購者名稱 */
     defaultValue?: string
     isDisplayLabel?: boolean
+    /** 是否為複選模式 */
+    multiple?: boolean
   }>(),
   {
     isDisplayLabel: true,
+    multiple: false,
   },
 )
 
 const emit = defineEmits<{
   (e: 'selectOption', data: SelectOption<string | undefined>): void
+  (e: 'selectOptions', data: SelectOption<string | undefined>[]): void
 }>()
 
 const PURCHASERS: SelectOption<string>[] = [
@@ -29,12 +33,6 @@ const PURCHASERS: SelectOption<string>[] = [
   { name: '小幫手', value: '3' },
 ]
 
-const allOption: SelectOption<undefined> = { value: undefined, name: '全部' }
-const options = computed<SelectOption<string | undefined>[]>(() =>
-  props.isDisplayAll
-    ? [allOption, ...PURCHASERS]
-    : [...PURCHASERS, { name: '無', value: undefined }],
-)
 
 const localDefault = ref<SelectOption<string | undefined> | undefined>(
   PURCHASERS.find((o) => o.value === props.defaultValue),
@@ -57,8 +55,10 @@ function selectOption(opt: SelectOption<string | undefined>) {
   <select-component
     label="採購者"
     :isDisplayLable="isDisplayLabel"
-    :optionList="options"
-    :defaultValue="localDefault"
+    :optionList="PURCHASERS"
+    :defaultValue="multiple ? undefined : localDefault"
+    :multiple="multiple"
     @selectOption="selectOption($event)"
+    @selectOptions="emit('selectOptions', $event)"
   />
 </template>

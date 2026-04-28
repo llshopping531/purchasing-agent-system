@@ -21,16 +21,20 @@ const props = withDefaults(
     channelId?: string
     /** 是否顯示「全部」選項 */
     isDisplayAll?: boolean
+    /** 是否為複選模式 */
+    multiple?: boolean
   }>(),
   {
-    /** 標題 */
     title: '顧客',
+    multiple: false,
   },
 )
 
 const emit = defineEmits<{
-  /** 使用者選取顧客時觸發，帶出顧客對應的 Option */
+  /** 單選：使用者選取顧客時觸發 */
   (e: 'selectOption', data: SelectOption<CustomersResBase | undefined>): void
+  /** 複選：選取項目變更時觸發 */
+  (e: 'selectOptions', data: SelectOption<CustomersResBase | undefined>[]): void
 }>()
 
 /** 轉換為 Option 格式的顧客清單 */
@@ -87,6 +91,10 @@ function selectOption($event: SelectOption<CustomersResBase | undefined>) {
   localDefault.value = $event
   emit('selectOption', $event)
 }
+
+function selectOptions($event: SelectOption<CustomersResBase | undefined>[]) {
+  emit('selectOptions', $event)
+}
 </script>
 
 <template>
@@ -95,6 +103,8 @@ function selectOption($event: SelectOption<CustomersResBase | undefined>) {
     :optionList="customerList"
     :defaultValue="localDefault"
     :required="required"
+    :multiple="multiple"
     @selectOption="selectOption($event)"
+    @selectOptions="selectOptions($event)"
   />
 </template>

@@ -13,6 +13,8 @@ import type { StatsOverviewItem } from '@/services/api/offline/stats/stats-api-i
 import type { SelectOption } from '@/interfaces/common'
 import type { EventsResBase } from '@/services/api/offline/events/events-api-interfaces'
 import type { QueryChannelsAllRes } from '@/services/api/offline/channels/channels-api-interfaces'
+import type { CustomersResBase } from '@/services/api/offline/customers/customers-api-interfaces'
+import type { ProductsResBase } from '@/services/api/offline/products/products-api-interfaces'
 import { useSearchStore } from '@/stores/search'
 import { formatTwd, formatJpy } from '@/utils/format'
 import OrderStatusSelectComponent from '@/components/inputs/selects/OrderStatusSelectComponent.vue'
@@ -50,8 +52,8 @@ const totalElements = ref(0)
 const sortField = ref('id')
 const sortDirection = ref<'ASC' | 'DESC'>('DESC')
 const currentStatus = ref<string | undefined>(undefined)
-const currentCustomer = ref<number | undefined>(undefined)
-const currentProduct = ref<number | undefined>(undefined)
+const currentCustomer = ref<string | undefined>(undefined)
+const currentProduct = ref<string | undefined>(undefined)
 const currentPurchaser = ref<string | undefined>(undefined)
 
 const headerRow: HeaderRow[] = [
@@ -140,21 +142,24 @@ async function fetchCurrentTotals() {
   })
 }
 
-function updateOrderStatus(status: string | undefined) {
-  currentStatus.value = status
+function updateOrderStatus(statuses: (string | undefined)[]) {
+  const vals = statuses.filter(Boolean) as string[]
+  currentStatus.value = vals.length ? vals.join(',') : undefined
   fetchOverview()
   fetchCurrentTotals()
 }
 
-function updateCustomer(customer: number | undefined) {
-  currentCustomer.value = customer
+function updateCustomer(customers: (CustomersResBase | undefined)[]) {
+  const ids = customers.map((c) => c?.id).filter(Boolean) as number[]
+  currentCustomer.value = ids.length ? ids.join(',') : undefined
   currentPage.value = 0
   fetchOverview()
   fetchCurrentTotals()
 }
 
-function updateProduct(product: number | undefined) {
-  currentProduct.value = product
+function updateProduct(products: (ProductsResBase | undefined)[]) {
+  const ids = products.map((p) => p?.id).filter(Boolean) as number[]
+  currentProduct.value = ids.length ? ids.join(',') : undefined
   currentPage.value = 0
   fetchOverview()
   fetchCurrentTotals()
@@ -242,9 +247,9 @@ function onSort(field: string) {
         <div class="filter-bar-row">
           <div class="select-box">
             <order-status-select-component
-              :defaultValue="currentStatus"
-              @selectOption="updateOrderStatus($event.value)"
-              :isDisplayAll="true"
+              :defaultValue="undefined"
+              :multiple="true"
+              @selectOptions="updateOrderStatus($event.map(o => o.value))"
             ></order-status-select-component>
           </div>
           <div class="select-box">
@@ -252,16 +257,16 @@ function onSort(field: string) {
               title="顧客"
               :eventId="currentEventId"
               :channelId="currentChannelId"
-              :isDisplayAll="true"
-              @selectOption="updateCustomer($event.value?.id)"
+              :multiple="true"
+              @selectOptions="updateCustomer($event.map(o => o.value).filter(Boolean))"
             ></customer-select-component>
           </div>
           <div class="select-box">
             <product-select-component
               :eventId="currentEventId"
               :channelId="currentChannelId"
-              :isDisplayAll="true"
-              @onSelectProduct="updateProduct($event.value?.id)"
+              :multiple="true"
+              @onSelectProducts="updateProduct($event.map(o => o.value).filter(Boolean))"
             />
           </div>
           <div class="select-box">

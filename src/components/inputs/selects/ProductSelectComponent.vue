@@ -22,11 +22,15 @@ const props = defineProps<{
   required?: boolean
   /** 是否顯示「全部」選項 */
   isDisplayAll?: boolean
+  /** 是否為複選模式 */
+  multiple?: boolean
 }>()
 
 const emit = defineEmits<{
-  /** 使用者選取商品時觸發，帶出商品對應的 Option */
+  /** 單選：使用者選取商品時觸發 */
   (e: 'onSelectProduct', data: SelectOption<ProductsResBase | undefined>): void
+  /** 複選：選取項目變更時觸發 */
+  (e: 'onSelectProducts', data: SelectOption<ProductsResBase | undefined>[]): void
 }>()
 
 /** 轉換為 Option 格式的商品清單 */
@@ -84,6 +88,10 @@ function onSelect(option: SelectOption<ProductsResBase | undefined>) {
   localDefault.value = option
   emit('onSelectProduct', option)
 }
+
+function onSelectMultiple(options: SelectOption<ProductsResBase | undefined>[]) {
+  emit('onSelectProducts', options)
+}
 </script>
 
 <template>
@@ -92,6 +100,8 @@ function onSelect(option: SelectOption<ProductsResBase | undefined>) {
     :optionList="productOptions"
     :defaultValue="localDefault"
     :required="props.required"
+    :multiple="props.multiple"
     @selectOption="onSelect"
+    @selectOptions="onSelectMultiple"
   />
 </template>

@@ -10,10 +10,10 @@ export interface QueryStatsOverviewReq {
   channelId?: number
   /** 訂單狀態（可選，多選用逗號分隔，'1'=已喊單 '2'=已購買 '3'=已取消 '4'=缺貨） */
   orderStatus?: string
-  /** 顧客 ID（可選） */
-  customerId?: number
-  /** 商品 ID（可選） */
-  productId?: number
+  /** 顧客 ID（可選，多選用逗號分隔） */
+  customerId?: string
+  /** 商品 ID（可選，多選用逗號分隔） */
+  productId?: string
   /** 採購者代碼（可選，多選用逗號分隔） */
   purchaser?: string
   /** 第幾頁 */

@@ -15,15 +15,20 @@ const pops = withDefaults(
     isDisplayLable?: boolean
     /** 是否顯示全部 */
     isDisplayAll?: boolean
+    /** 是否為複選模式 */
+    multiple?: boolean
   }>(),
   {
     isDisplayLable: true,
+    multiple: false,
   },
 )
 
 const emit = defineEmits<{
-  /** 使用者選取訂單狀態時觸發，帶出對應的 Option */
+  /** 單選：使用者選取訂單狀態時觸發 */
   (e: 'selectOption', data: SelectOption<string | undefined>): void
+  /** 複選：選取項目變更時觸發 */
+  (e: 'selectOptions', data: SelectOption<string | undefined>[]): void
 }>()
 
 /** 訂單狀態靜態選項清單 */
@@ -53,9 +58,11 @@ function getOrderStatusOption(orderStatus: string | undefined) {
   <select-component
     label="訂單狀態"
     :isDisplayLable="isDisplayLable"
-    :optionList="isDisplayAll ? orderStatusAllOptions : orderStatusOptions"
-    :defaultValue="getOrderStatusOption(defaultValue)"
+    :optionList="isDisplayAll && !multiple ? orderStatusAllOptions : orderStatusOptions"
+    :defaultValue="multiple ? undefined : getOrderStatusOption(defaultValue)"
     :required="required"
+    :multiple="multiple"
     @selectOption="emit('selectOption', $event)"
+    @selectOptions="emit('selectOptions', $event)"
   />
 </template>
