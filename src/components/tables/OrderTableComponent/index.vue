@@ -12,8 +12,7 @@ import { orderApi, type OrderAllContent } from '@/services/api/offline/order/ord
 import { onMounted, ref, watch } from 'vue'
 import { isInactiveOrder } from '@/utils/order'
 import { formatTwd } from '@/utils/format'
-import SelectComponent from '@/components/inputs/SelectComponent.vue'
-import { useBossCustomersStore } from '@/stores/bossCustomers'
+import PurchaserSelectComponent from '@/components/inputs/selects/PurchaserSelectComponent.vue'
 import OrderDetailModal from './OrderDetailModal.vue'
 import DrawsResultModal from './DrawsResultModal.vue'
 
@@ -96,11 +95,9 @@ function openDraws(data: OrderAllContent) {
   isShowDrawsModal.value = true
 }
 
-const bossCustomersStore = useBossCustomersStore()
 
 onMounted(() => {
   getFieldDefsApi()
-  bossCustomersStore.ensure()
 })
 
 defineExpose({ refresh: getOrderList })
@@ -314,12 +311,10 @@ function filterCustomer() {
         </span>
       </template>
       <template #col-purchaser="{ row }">
-        <select-component
-          label=""
-          :isDisplayLable="false"
-          :optionList="[...bossCustomersStore.options, { name: '無', value: null as any }]"
-          :defaultValue="bossCustomersStore.options.find(o => o.name === row.purchaser)"
-          @selectOption="updateOrderPurchaser(row, $event.value?.name ?? '')"
+        <purchaser-select-component
+          :is-display-label="false"
+          :defaultValue="row.purchaser"
+          @selectOption="updateOrderPurchaser(row, $event.value ?? '')"
         />
       </template>
       <template #col-subtotalTwd="{ row }">
