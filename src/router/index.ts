@@ -119,7 +119,7 @@ const router = createRouter({
           children: [
             {
               path: '',
-              redirect: '/admin/online/event',
+              redirect: PATH.onlineOrder,
             },
             {
               path: 'event',
@@ -158,7 +158,7 @@ const router = createRouter({
           children: [
             {
               path: '',
-              redirect: '/admin/system/threads',
+              redirect: PATH.systemThreads,
             },
             {
               path: 'threads',

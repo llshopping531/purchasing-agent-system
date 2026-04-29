@@ -12,6 +12,7 @@ import IconChevronLeft from '@/components/icons/IconChevronLeft.vue'
 import IconHouse from '@/components/icons/IconHouse.vue'
 import IconFlag from '@/components/icons/IconFlag.vue'
 import IconChartSimple from '@/components/icons/IconChartSimple.vue'
+import { PATH } from '@/constants/route.constant'
 
 interface Zone {
   name: string
@@ -20,9 +21,9 @@ interface Zone {
 }
 
 const ZONES: Zone[] = [
-  { name: '通販專區', path: '/admin/online', icon: markRaw(IconHouse) },
-  { name: '場販專區', path: '/admin/offline', icon: markRaw(IconFlag) },
-  { name: '系統專區', path: '/admin/system', icon: markRaw(IconChartSimple) },
+  { name: '通販專區', path: PATH.online, icon: markRaw(IconHouse) },
+  { name: '場販專區', path: PATH.offline, icon: markRaw(IconFlag) },
+  { name: '系統專區', path: PATH.system, icon: markRaw(IconChartSimple) },
 ]
 
 const route = useRoute()
@@ -56,8 +57,8 @@ const otherZones = computed(() => ZONES.filter((z) => z.path !== currentZone.val
     <div class="zone-switcher" v-if="currentZone">
       <button class="zone-current" @click="isZoneOpen = !isZoneOpen" :title="currentZone.name">
         <component :is="currentZone.icon" class="zone-icon" />
-        <span class="zone-current-name"  v-if="!isCollapsed">{{ currentZone.name }}</span>
-        <span class="zone-arrow" :class="{ open: isZoneOpen }"  v-if="!isCollapsed">▾</span>
+        <span class="zone-current-name" v-if="!isCollapsed">{{ currentZone.name }}</span>
+        <span class="zone-arrow" :class="{ open: isZoneOpen }" v-if="!isCollapsed">▾</span>
       </button>
 
       <transition name="zone-slide">
