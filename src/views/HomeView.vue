@@ -12,7 +12,7 @@ import AppGreetings from "../components/AppGreetings.vue";
 
       <nav class="home-nav">
         <router-link :to="PATH.user">使用者前台系統</router-link>
-        <router-link :to="PATH.admin">管理者後台系統</router-link>
+        <router-link :to="PATH.offline">管理者後台系統</router-link>
       </nav>
     </div>
   </div>
