@@ -1,46 +1,52 @@
+/** 全站路由根路徑，修改此處即可同步所有路由 */
+export const BASE = '/LLShoppingjpAdmin'
+export const BASE_ADMIN = `${BASE}/admin`
+
 /** 全站路由路徑常數，統一管理避免硬編碼字串散落各處 */
 export const PATH = {
   /** 首頁 */
-  home: '/',
+  home: BASE,
+  /** 登入頁 */
+  login: `${BASE}/login`,
   /** 使用者前台 */
   user: '/user',
   /** 管理者後台入口 */
-  admin: '/admin',
+  admin: BASE_ADMIN,
 
   /** 場販專區入口 */
-  offline: '/admin/offline',
+  offline: `${BASE_ADMIN}/offline`,
   /** 場販－活動管理 */
-  offlineEvent: '/admin/offline/event',
+  offlineEvent: `${BASE_ADMIN}/offline/event`,
   /** 場販－訂單管理 */
-  offlineOrder: '/admin/offline/order',
+  offlineOrder: `${BASE_ADMIN}/offline/order`,
   /** 場販－採購清單 */
-  offlinePurchaseList: '/admin/offline/purchaseList',
+  offlinePurchaseList: `${BASE_ADMIN}/offline/purchaseList`,
   /** 場販－顧客管理 */
-  offlineCustomer: '/admin/offline/customer',
+  offlineCustomer: `${BASE_ADMIN}/offline/customer`,
   /** 場販－商品管理 */
-  offlineProduct: '/admin/offline/product',
+  offlineProduct: `${BASE_ADMIN}/offline/product`,
   /** 場販－包貨清單 */
-  offlinePackingList: '/admin/offline/packingList',
+  offlinePackingList: `${BASE_ADMIN}/offline/packingList`,
   /** 場販－通路管理 */
-  offlineChannel: '/admin/offline/channel',
+  offlineChannel: `${BASE_ADMIN}/offline/channel`,
   /** 場販－訂單總覽 */
-  offlineStats: '/admin/offline/stats',
+  offlineStats: `${BASE_ADMIN}/offline/stats`,
   /** 場販－分潤查詢 */
-  offlineProfitShare: '/admin/offline/profitShare',
+  offlineProfitShare: `${BASE_ADMIN}/offline/profitShare`,
   /** 場販－活動結算 */
-  offlineSettlement: '/admin/offline/settlement',
+  offlineSettlement: `${BASE_ADMIN}/offline/settlement`,
 
   /** 通販專區入口 */
-  online: '/admin/online',
+  online: `${BASE_ADMIN}/online`,
   /** 通販－活動管理 */
-  onlineEvent: '/admin/online/event',
+  onlineEvent: `${BASE_ADMIN}/online/event`,
   /** 通販－商品管理 */
-  onlineProduct: '/admin/online/product',
+  onlineProduct: `${BASE_ADMIN}/online/product`,
   /** 通販－訂單管理 */
-  onlineOrder: '/admin/online/order',
+  onlineOrder: `${BASE_ADMIN}/online/order`,
 
   /** 系統專區入口 */
-  system: '/admin/system',
+  system: `${BASE_ADMIN}/system`,
   /** 系統－Threads 留言查詢 */
-  systemThreads: '/admin/system/threads',
+  systemThreads: `${BASE_ADMIN}/system/threads`,
 }

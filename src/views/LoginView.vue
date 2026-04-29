@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/user'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import TextInput from '../components/inputs/TextInput.vue'
+import { PATH } from '@/constants/route.constant'
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -14,7 +15,7 @@ const password = ref('')
 async function login() {
   const data = await accountApi.login({ account: account.value, password: password.value })
   userStore.login({ token: data.token, role: data.role })
-  router.push('/admin/offline')
+  router.push(PATH.offline)
 }
 </script>
 
@@ -33,7 +34,7 @@ async function login() {
       <button class="btn login-btn" type="button" @click="login()">登入</button>
 
       <div class="linkBox">
-        <router-link to="/"> 回首頁 </router-link>
+        <router-link :to="PATH.home"> 回首頁 </router-link>
       </div>
     </div>
   </div>

@@ -1,7 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
+import NotFoundView from '../views/NotFoundView.vue'
 import { useUserStore } from '@/stores/user'
+import { BASE, PATH } from '@/constants/route.constant'
 
 /**
  * Vue Router 實例
@@ -11,12 +13,12 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      path: BASE,
       name: 'home',
       component: HomeView,
     },
     {
-      path: '/login',
+      path: `${BASE}/login`,
       name: 'login',
       component: LoginView,
     },
@@ -42,7 +44,7 @@ const router = createRouter({
     },
     {
       /** 管理者後台，需登入且具管理員身分 */
-      path: '/admin',
+      path: `${BASE}/admin`,
       name: 'admin',
       meta: { requiresAuth: true, requiresAdmin: true },
       component: () => import('../views/AdminView.vue'),
@@ -55,7 +57,7 @@ const router = createRouter({
           children: [
             {
               path: '',
-              redirect: '/admin/offline/order',
+              redirect: PATH.offlineOrder,
             },
             {
               path: 'order',
@@ -167,6 +169,11 @@ const router = createRouter({
         },
       ],
     },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'notFound',
+      component: NotFoundView,
+    },
   ],
 })
 
@@ -179,7 +186,7 @@ router.beforeEach((to) => {
   const userStore = useUserStore()
   if (to.meta.requiresAuth && !userStore.isLogin) {
     userStore.setRedirect(to.fullPath)
-    return '/login'
+    return PATH.login
   }
 })
 
