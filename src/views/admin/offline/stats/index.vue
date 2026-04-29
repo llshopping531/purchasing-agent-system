@@ -300,7 +300,7 @@ function onSort(field: string) {
             <div class="stat-card-title">特典數量 <span class="click-hint">點擊查看明細</span></div>
             <div class="stat-card-value">{{
               currentCustomer
-                ? (channelBonusData.details.find(d => d.customerId === currentCustomer)?.bonusCount ?? 0)
+                ? (channelBonusData.details.find(d => d.customerId.toString() === currentCustomer)?.bonusCount ?? 0)
                 : channelBonusData.bonusRequirement
             }}</div>
           </div>

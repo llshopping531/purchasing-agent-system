@@ -26,16 +26,27 @@ function updateCalendarPosition() {
   const rect = wrapperRef.value.getBoundingClientRect()
   const calendarHeight = 300
   const spaceBelow = window.innerHeight - rect.bottom
-  const top = spaceBelow >= calendarHeight
-    ? rect.bottom + 6
-    : rect.top - calendarHeight - 6
+  const top = spaceBelow >= calendarHeight ? rect.bottom + 6 : rect.top - calendarHeight - 6
   calendarStyle.value = {
     top: `${top}px`,
     left: `${rect.left}px`,
   }
 }
 
-const MONTH_NAMES = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+const MONTH_NAMES = [
+  '1月',
+  '2月',
+  '3月',
+  '4月',
+  '5月',
+  '6月',
+  '7月',
+  '8月',
+  '9月',
+  '10月',
+  '11月',
+  '12月',
+]
 const DAY_NAMES = ['一', '二', '三', '四', '五', '六', '日']
 
 const daysInMonth = computed(() => new Date(displayYear.value, displayMonth.value + 1, 0).getDate())
@@ -57,7 +68,11 @@ const parsedValue = computed(() => {
   if (!value.value) return null
   const parts = value.value.split('-')
   if (parts.length !== 3) return null
-  return { year: parseInt(parts[0]), month: parseInt(parts[1]) - 1, day: parseInt(parts[2]) }
+  return {
+    year: parseInt(parts[0] ?? ''),
+    month: parseInt(parts[1] ?? '') - 1,
+    day: parseInt(parts[2] ?? ''),
+  }
 })
 
 function open() {
@@ -83,29 +98,43 @@ function selectDay(day: number | null) {
 }
 
 function prevMonth() {
-  if (displayMonth.value === 0) { displayMonth.value = 11; displayYear.value-- }
-  else displayMonth.value--
+  if (displayMonth.value === 0) {
+    displayMonth.value = 11
+    displayYear.value--
+  } else displayMonth.value--
 }
 
 function nextMonth() {
-  if (displayMonth.value === 11) { displayMonth.value = 0; displayYear.value++ }
-  else displayMonth.value++
+  if (displayMonth.value === 11) {
+    displayMonth.value = 0
+    displayYear.value++
+  } else displayMonth.value++
 }
 
-function prevYear() { displayYear.value-- }
-function nextYear() { displayYear.value++ }
+function prevYear() {
+  displayYear.value--
+}
+function nextYear() {
+  displayYear.value++
+}
 
 function isToday(day: number | null) {
   if (!day) return false
   const t = new Date()
-  return t.getFullYear() === displayYear.value && t.getMonth() === displayMonth.value && t.getDate() === day
+  return (
+    t.getFullYear() === displayYear.value &&
+    t.getMonth() === displayMonth.value &&
+    t.getDate() === day
+  )
 }
 
 function isSelected(day: number | null) {
   if (!day || !parsedValue.value) return false
-  return parsedValue.value.year === displayYear.value &&
+  return (
+    parsedValue.value.year === displayYear.value &&
     parsedValue.value.month === displayMonth.value &&
     parsedValue.value.day === day
+  )
 }
 
 function clearValue(e: Event) {
@@ -141,9 +170,7 @@ onUnmounted(() => {
 <template>
   <div class="date-input-wrap" ref="wrapperRef">
     <label class="label">
-      <span class="title">
-        {{ label }}<span v-if="required" class="required-mark">*</span>
-      </span>
+      <span class="title"> {{ label }}<span v-if="required" class="required-mark">*</span> </span>
       <div
         class="input-box"
         :class="{ 'input-error': errorMessage, disabled, active: isOpen }"
@@ -154,9 +181,17 @@ onUnmounted(() => {
         </span>
         <span v-if="value && !disabled" class="clear-btn" @click="clearValue">✕</span>
         <svg class="calendar-icon" viewBox="0 0 20 20" fill="none">
-          <rect x="2" y="4" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M2 8h16" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M6 2v3M14 2v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <rect
+            x="2"
+            y="4"
+            width="16"
+            height="14"
+            rx="2"
+            stroke="currentColor"
+            stroke-width="1.5"
+          />
+          <path d="M2 8h16" stroke="currentColor" stroke-width="1.5" />
+          <path d="M6 2v3M14 2v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
         </svg>
       </div>
       <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
@@ -164,43 +199,43 @@ onUnmounted(() => {
 
     <!-- 日曆下拉（Teleport 至 body 避免被父層 overflow 截斷） -->
     <Teleport to="body">
-    <Transition name="calendar">
-      <div v-if="isOpen" class="calendar-dropdown" :style="calendarStyle">
-        <!-- 年月導覽 -->
-        <div class="cal-header">
-          <button class="nav-btn" @click.stop="prevYear" title="上一年">«</button>
-          <button class="nav-btn" @click.stop="prevMonth" title="上個月">‹</button>
-          <span class="cal-title">{{ displayYear }} 年 {{ MONTH_NAMES[displayMonth] }}</span>
-          <button class="nav-btn" @click.stop="nextMonth" title="下個月">›</button>
-          <button class="nav-btn" @click.stop="nextYear" title="下一年">»</button>
-        </div>
+      <Transition name="calendar">
+        <div v-if="isOpen" class="calendar-dropdown" :style="calendarStyle">
+          <!-- 年月導覽 -->
+          <div class="cal-header">
+            <button class="nav-btn" @click.stop="prevYear" title="上一年">«</button>
+            <button class="nav-btn" @click.stop="prevMonth" title="上個月">‹</button>
+            <span class="cal-title">{{ displayYear }} 年 {{ MONTH_NAMES[displayMonth] }}</span>
+            <button class="nav-btn" @click.stop="nextMonth" title="下個月">›</button>
+            <button class="nav-btn" @click.stop="nextYear" title="下一年">»</button>
+          </div>
 
-        <!-- 週頭 -->
-        <div class="cal-grid">
-          <div v-for="d in DAY_NAMES" :key="d" class="day-header">{{ d }}</div>
+          <!-- 週頭 -->
+          <div class="cal-grid">
+            <div v-for="d in DAY_NAMES" :key="d" class="day-header">{{ d }}</div>
 
-          <!-- 日期格 -->
-          <div
-            v-for="(cell, i) in calendarCells"
-            :key="i"
-            class="day-cell"
-            :class="{
-              empty: !cell,
-              today: isToday(cell),
-              selected: isSelected(cell),
-            }"
-            @click.stop="selectDay(cell)"
-          >
-            {{ cell ?? '' }}
+            <!-- 日期格 -->
+            <div
+              v-for="(cell, i) in calendarCells"
+              :key="i"
+              class="day-cell"
+              :class="{
+                empty: !cell,
+                today: isToday(cell),
+                selected: isSelected(cell),
+              }"
+              @click.stop="selectDay(cell)"
+            >
+              {{ cell ?? '' }}
+            </div>
+          </div>
+
+          <!-- 今天快捷 -->
+          <div class="cal-footer">
+            <button class="today-btn" @click.stop="selectToday">今天</button>
           </div>
         </div>
-
-        <!-- 今天快捷 -->
-        <div class="cal-footer">
-          <button class="today-btn" @click.stop="selectToday">今天</button>
-        </div>
-      </div>
-    </Transition>
+      </Transition>
     </Teleport>
   </div>
 </template>
@@ -239,7 +274,9 @@ onUnmounted(() => {
   border: 1.5px solid rgba(124, 111, 224, 0.3);
   background: var(--color-surface);
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
   min-height: 38px;
 
   &:hover:not(.disabled) {
@@ -282,7 +319,9 @@ onUnmounted(() => {
   line-height: 1;
   padding: 0.1rem 0.2rem;
   border-radius: 50%;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
 
   &:hover {
     color: #888;
@@ -312,7 +351,9 @@ onUnmounted(() => {
   background: var(--color-surface);
   border: 1.5px solid rgba(124, 111, 224, 0.2);
   border-radius: var(--radius-lg, 12px);
-  box-shadow: 0 8px 32px rgba(124, 111, 224, 0.12), 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow:
+    0 8px 32px rgba(124, 111, 224, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 0.75rem;
   min-width: 260px;
   user-select: none;
@@ -344,7 +385,9 @@ onUnmounted(() => {
   font-size: 0.9rem;
   color: var(--color-text-secondary, #666);
   line-height: 1;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 
   &:hover {
     background: color-mix(in srgb, var(--color-primary) 10%, transparent);
@@ -374,7 +417,9 @@ onUnmounted(() => {
   border-radius: var(--radius-md, 8px);
   cursor: pointer;
   color: var(--color-text-primary, #333);
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
   line-height: 1.6;
 
   &:not(.empty):hover {
@@ -430,7 +475,9 @@ onUnmounted(() => {
   color: var(--color-primary);
   cursor: pointer;
   font-weight: 600;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 
   &:hover {
     background: color-mix(in srgb, var(--color-primary) 8%, transparent);
@@ -441,7 +488,9 @@ onUnmounted(() => {
 /* 動畫 */
 .calendar-enter-active,
 .calendar-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .calendar-enter-from,
 .calendar-leave-to {

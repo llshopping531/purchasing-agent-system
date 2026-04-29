@@ -48,7 +48,7 @@ const filterText = ref('')
 /** 複選：tag input 的 DOM ref */
 const tagInputRef = ref<HTMLInputElement>()
 /** 複選：已選項目 */
-const selectedItems = ref<SelectOption<T>[]>(pop.selectedValues ? [...pop.selectedValues] : [])
+const selectedItems = shallowRef<SelectOption<T>[]>(pop.selectedValues ? [...pop.selectedValues] : [])
 
 watch(() => pop.optionList, (newList) => {
   currentOptionList.value = [...newList]
