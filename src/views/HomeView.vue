@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { PATH } from "@/constants/route.constant";
-import AppGreetings from "../components/AppGreetings.vue";
 </script>
 
 <template>
   <div class="home">
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="100" height="100" />
+
 
     <div class="wrapper">
-      <app-greetings name="ㄌㄌ代購" />
-
+      <img alt="logo" class="logo" src="@/assets/logo.png" />
       <nav class="home-nav">
         <router-link :to="PATH.user">使用者前台系統</router-link>
         <router-link :to="PATH.offline">管理者後台系統</router-link>
@@ -28,6 +26,10 @@ import AppGreetings from "../components/AppGreetings.vue";
   align-items: center;
   justify-content: center;
   gap: 2.5rem;
+  .wrapper{
+    width: 380px;
+    max-width: 90vw;
+  }
 }
 
 .home-nav {

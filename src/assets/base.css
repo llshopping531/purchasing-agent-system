@@ -173,3 +173,8 @@ html.no-scroll {
   font-weight: 700;
   margin-left: 0.25rem;
 }
+
+img.logo {
+  width: 100%;
+  height: auto;
+}

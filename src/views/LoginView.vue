@@ -23,7 +23,7 @@ async function login() {
   <div class="login">
     <div class="wrapper">
       <div class="logo-area">
-        <img alt="Vue logo" src="@/assets/logo.svg" width="52" height="52" />
+        <img alt="logo" src="@/assets/logo.png"/>
       </div>
       <h1>會員登入</h1>
       <p class="subtitle">歡迎回來，請登入您的帳號</p>

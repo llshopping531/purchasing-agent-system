@@ -46,8 +46,9 @@ function logout() {
 <template>
   <header>
     <div class="logo-group">
-      <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="36" height="36" />
-
+      <div class="logo-box">
+        <img alt="logo" class="logo" src="@/assets/logo.png" />
+      </div>
       <!-- 手機版：漢堡選單 + 功能 icon 按鈕 -->
       <div class="mobile-actions">
         <button class="menu-btn" @click="uiStore.openSidebar()" title="開啟選單">
@@ -81,7 +82,12 @@ function logout() {
         <icon-house />
         <span>登入</span>
       </a>
-      <router-link v-for="(btn, index) in buttonList" :to="btn.link" :key="index" class="action-btn frontend">
+      <router-link
+        v-for="(btn, index) in buttonList"
+        :to="btn.link"
+        :key="index"
+        class="action-btn frontend"
+      >
         <icon-house />
         <span>{{ btn.name }}</span>
       </router-link>
@@ -105,6 +111,10 @@ header {
   border-bottom: 1px solid var(--color-border);
   gap: 0.75rem;
   width: 100vw;
+  .logo-box{
+    width: 150px;
+    max-width: 100%;
+  }
 }
 
 .logo-group {
@@ -132,7 +142,9 @@ header {
   border-radius: var(--radius-md);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 
   svg {
     width: 16px;
