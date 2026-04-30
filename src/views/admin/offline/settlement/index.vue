@@ -15,7 +15,6 @@ import type { EventsResBase } from '@/services/api/offline/events/events-api-int
 import type { SelectOption } from '@/interfaces/common'
 import { customersApi } from '@/services/api/offline/customers/customers-api'
 
-
 const PACKAGING_FEE = 10
 
 const selectedEvent = ref<EventsResBase | null>(null)
@@ -85,7 +84,14 @@ function resetTemplate() {
 }
 
 // ── 自動填入參數 ───────────────────────────────────────────────
-const AUTO_TOKENS = ['customerName', 'eventName', 'totalTwd', 'totalWithFee','remittance', 'queryLink']
+const AUTO_TOKENS = [
+  'customerName',
+  'eventName',
+  'totalTwd',
+  'totalWithFee',
+  'remittance',
+  'queryLink',
+]
 
 const autoParams = [
   { label: '顧客名稱', token: '{{customerName}}' },
@@ -151,12 +157,25 @@ async function onEventSelect(data: SelectOption<EventsResBase | null>) {
     const first = customers.value[0] ?? null
     selectedCustomer.value = first
     selectedCustomerOption.value = first
-      ? { name: `${first.name}（${formatTwd(customerTotalMap.value.get(first.id) ?? 0)}）`, value: first }
+      ? {
+          name: `${first.name}（${formatTwd(customerTotalMap.value.get(first.id) ?? 0)}）`,
+          value: first,
+        }
       : undefined
   } finally {
     isLoading.value = false
   }
 }
+
+// ── 總收款額（所有顧客加總） ───────────────────────────────────
+const totalRevenue = computed(() => {
+  let sum = 0
+  for (const val of customerTotalMap.value.values()) sum += val
+  return sum
+})
+
+const totalPackagingFee = computed(() => customers.value.length * PACKAGING_FEE)
+const grandTotal = computed(() => totalRevenue.value + totalPackagingFee.value)
 
 // ── 取得每位顧客已購買金額 ─────────────────────────────────────
 function getCustomerTotal(customerId: number): number {
@@ -170,7 +189,7 @@ function escapeRegex(s: string): string {
 
 async function renderForCustomer(customer: PackingListCustomer): Promise<string> {
   const total = getCustomerTotal(customer.id)
-  const  queryUuid  = await customersApi.getQueryUuid(customer.id)
+  const queryUuid = await customersApi.getQueryUuid(customer.id)
   const queryLink = `${window.location.origin}/query/${queryUuid}?tab=${selectedEvent.value?.id ?? ''}`
 
   let text = template.value
@@ -217,11 +236,14 @@ async function copyMessage() {
 <template>
   <div class="settlement-page">
     <!-- 頁首 -->
-    <div class="page-header">
-      <h2 class="page-title">活動結算</h2>
-      <div class="event-select-wrap">
-        <event-select-component @selectOption="onEventSelect" />
-      </div>
+    <h2 class="page-title">活動結算</h2>
+    <div class="event-select-wrap">
+      <event-select-component @selectOption="onEventSelect" />
+    </div>
+    <div v-if="selectedEvent">
+      <p>總收款金額:{{ formatTwd(totalRevenue) }} + {{ formatTwd(totalPackagingFee) }} 包材費 =
+      {{ formatTwd(grandTotal) }}</p>
+      <p>總人數:{{ customers.length }}</p>
     </div>
 
     <!-- 空狀態 -->
@@ -329,12 +351,6 @@ async function copyMessage() {
 }
 
 /* ── 頁首 ── */
-.page-header {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  flex-wrap: wrap;
-}
 
 .page-title {
   font-size: 1.15rem;
