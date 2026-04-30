@@ -10,4 +10,6 @@ export interface SelectOption<T> {
   name: string
   /** 選項顏色（可選，例如 '#e53e3e'） */
   color?: string
+  /** 是否顯示刪除線 */
+  strikethrough?: boolean
 }

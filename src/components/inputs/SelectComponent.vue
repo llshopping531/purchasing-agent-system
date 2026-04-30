@@ -166,7 +166,10 @@ function filter() {
         :class="{ selected: pop.multiple && isSelected(option) }"
         v-for="option in currentOptionList"
         :key="option.name"
-        :style="option.color ? { borderLeft: `3px solid ${option.color}`, color: option.color } : {}"
+        :style="{
+          ...(option.color ? { borderLeft: `3px solid ${option.color}`, color: option.color } : {}),
+          ...(option.strikethrough ? { textDecoration: 'line-through', color: 'var(--color-danger, #e53e3e)' } : {}),
+        }"
         @mousedown.prevent="selectOption(option)"
       >
         <span v-if="pop.multiple" class="check-mark">{{ isSelected(option) ? '✓' : '' }}</span>

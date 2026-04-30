@@ -7,6 +7,8 @@ import { ref, computed, watch } from 'vue'
 import { formatTwd } from '@/utils/format'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
+import ModalComponent from '@/components/ModalComponent.vue'
+import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import { packingListApi } from '@/services/api/offline/packing-list/packing-list-api'
 import { statsApi } from '@/services/api/offline/stats/stats-api'
 import type { PackingListCustomer } from '@/services/api/offline/packing-list/packing-list-api-interfaces'
@@ -26,10 +28,14 @@ const selectedCustomerOption = ref<SelectOption<PackingListCustomer> | undefined
 const isCopied = ref(false)
 
 const customerOptions = computed<SelectOption<PackingListCustomer>[]>(() =>
-  customers.value.map((c) => ({
-    name: `${c.name}（${formatTwd(customerTotalMap.value.get(c.id) ?? 0)}）`,
-    value: c,
-  })),
+  customers.value.map((c) => {
+    const total = customerTotalMap.value.get(c.id) ?? 0
+    return {
+      name: `${c.name}（${formatTwd(total)}）`,
+      value: c,
+      strikethrough: total === 0,
+    }
+  }),
 )
 
 function onSelectCustomer(opt: SelectOption<PackingListCustomer>) {
@@ -174,7 +180,13 @@ const totalRevenue = computed(() => {
   return sum
 })
 
-const totalPackagingFee = computed(() => customers.value.length * PACKAGING_FEE)
+const zeroAmountCount = computed(() =>
+  customers.value.filter((c) => (customerTotalMap.value.get(c.id) ?? 0) === 0).length
+)
+
+const totalPackagingFee = computed(() =>
+  (customers.value.length - zeroAmountCount.value) * PACKAGING_FEE
+)
 const grandTotal = computed(() => totalRevenue.value + totalPackagingFee.value)
 
 // ── 取得每位顧客已購買金額 ─────────────────────────────────────
@@ -196,8 +208,8 @@ async function renderForCustomer(customer: PackingListCustomer): Promise<string>
   text = text.replace(/\{\{customerName\}\}/g, customer.name)
   text = text.replace(/\{\{eventName\}\}/g, selectedEvent.value?.name ?? '')
   text = text.replace(/\{\{totalTwd\}\}/g, formatTwd(total))
-  text = text.replace(/\{\{totalWithFee\}\}/g, formatTwd(total + PACKAGING_FEE))
-  text = text.replace(/\{\{remittance\}\}/g, formatTwd(total - 10))
+  text = text.replace(/\{\{totalWithFee\}\}/g, formatTwd(total > 0 ? total + PACKAGING_FEE : 0))
+  text = text.replace(/\{\{remittance\}\}/g, formatTwd(total > 0 ? total - 10 : 0))
   text = text.replace(/\{\{queryLink\}\}/g, queryLink)
 
   for (const [key, val] of Object.entries(globalValues.value)) {
@@ -231,6 +243,43 @@ async function copyMessage() {
     isCopied.value = false
   }, 1500)
 }
+
+const isSettlementModalOpen = ref(false)
+const isListCopied = ref(false)
+
+function openSettlementModal() {
+  isSettlementModalOpen.value = true
+}
+
+async function copySettlementList() {
+  const lines: string[] = []
+  settlementTableData.value.forEach((r, i) => {
+    if (i > 0 && i % 50 === 0) lines.push('')
+    lines.push(`${r.name}\t${r.totalTwd}\t${r.grandTotal}`)
+  })
+  await navigator.clipboard.writeText(lines.join('\n'))
+  isListCopied.value = true
+  setTimeout(() => { isListCopied.value = false }, 1500)
+}
+
+const settlementHeaders: HeaderRow[] = [
+  { name: '顧客', value: 'name', sort: 0 },
+  { name: '商品金額', value: 'totalTwd', sort: 1 },
+  { name: '含包材', value: 'grandTotal', sort: 2 },
+]
+
+const settlementTableData = computed(() =>
+  [...customers.value]
+    .sort((a, b) => {
+      const aTotal = customerTotalMap.value.get(a.id) ?? 0
+      const bTotal = customerTotalMap.value.get(b.id) ?? 0
+      return (aTotal === 0 ? 1 : 0) - (bTotal === 0 ? 1 : 0)
+    })
+    .map((c) => {
+      const total = customerTotalMap.value.get(c.id) ?? 0
+      return { name: c.name, totalTwd: formatTwd(total), grandTotal: formatTwd(total > 0 ? total + PACKAGING_FEE : 0) }
+    })
+)
 </script>
 
 <template>
@@ -241,9 +290,15 @@ async function copyMessage() {
       <event-select-component @selectOption="onEventSelect" />
     </div>
     <div v-if="selectedEvent">
-      <p>總收款金額:{{ formatTwd(totalRevenue) }} + {{ formatTwd(totalPackagingFee) }} 包材費 =
-      {{ formatTwd(grandTotal) }}</p>
-      <p>總人數:{{ customers.length }}</p>
+      <div></div>
+      <p>
+        總收款金額:{{ formatTwd(totalRevenue) }} + {{ formatTwd(totalPackagingFee) }} 包材費 =
+        {{ formatTwd(grandTotal) }}
+      </p>
+      <p>總人數:{{ customers.length }}<span v-if="zeroAmountCount > 0">（{{ zeroAmountCount }} 人訂單為 $ 0）</span></p>
+      <div>
+        <button class="list-btn" @click="openSettlementModal">顯示名單</button>
+      </div>
     </div>
 
     <!-- 空狀態 -->
@@ -310,7 +365,14 @@ async function copyMessage() {
         <!-- 右：付款訊息 -->
         <div class="panel messages-panel">
           <div class="panel-header">
-            <span class="panel-title">付款訊息</span>
+            <span class="panel-title">
+              付款訊息
+              <span
+                v-if="selectedCustomer && getCustomerTotal(selectedCustomer.id) === 0"
+                class="zero-warn"
+                title="此客戶消費金額為 $0"
+              >!</span>
+            </span>
             <span v-if="isLoading" class="loading-hint">載入中…</span>
             <div v-else-if="customers.length > 0" class="customer-select-wrap">
               <select-component
@@ -340,6 +402,33 @@ async function copyMessage() {
       </div>
     </template>
   </div>
+
+  <!-- 名單彈窗 -->
+  <modal-component
+    v-if="isSettlementModalOpen"
+    :name="`${selectedEvent?.name ?? ''} 收款名單`"
+    width="480px"
+    @confirm="isSettlementModalOpen = false"
+    @cancel="isSettlementModalOpen = false"
+  >
+    <template #content>
+      <div class="settlement-modal-toolbar">
+        <button
+          class="copy-btn"
+          :class="{ copied: isListCopied }"
+          @click="copySettlementList"
+        >
+          {{ isListCopied ? '已複製' : '複製名單' }}
+        </button>
+      </div>
+      <table-component
+        :headerRow="settlementHeaders"
+        :tableData="settlementTableData"
+        :isEdit="false"
+        :isDelete="false"
+      />
+    </template>
+  </modal-component>
 </template>
 
 <style scoped>
@@ -364,6 +453,32 @@ async function copyMessage() {
   flex: 1;
   min-width: 220px;
   max-width: 320px;
+}
+
+/* ── 顯示名單按鈕 ── */
+.list-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: var(--radius-md, 8px);
+  border: 1.5px solid color-mix(in srgb, var(--color-primary) 50%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &::before {
+    content: '📋';
+    font-size: 0.8rem;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+    border-color: var(--color-primary);
+  }
 }
 
 /* ── 空狀態 ── */
@@ -652,6 +767,94 @@ async function copyMessage() {
 
   .messages-panel {
     max-height: none;
+  }
+}
+
+/* ── 金額為零警示 ── */
+.zero-warn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-danger, #e53e3e);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-left: 0.35rem;
+}
+
+/* ── 名單彈窗 ── */
+.settlement-modal-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.settlement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  font-size: 0.875rem;
+}
+
+.settlement-list-header,
+.settlement-list-row,
+.settlement-list-footer {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px;
+  gap: 0.5rem;
+  padding: 0.5rem 0.25rem;
+  align-items: center;
+}
+
+.settlement-list-header {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  border-bottom: 1.5px solid var(--color-border);
+  padding-bottom: 0.4rem;
+
+  span:not(:first-child) {
+    text-align: right;
+  }
+}
+
+.settlement-list-row {
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+
+  span:not(:first-child) {
+    text-align: right;
+    color: var(--color-text-secondary);
+  }
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.settlement-customer-name {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.settlement-total {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.settlement-list-footer {
+  border-top: 1.5px solid var(--color-border);
+  margin-top: 0.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+
+  span:not(:first-child) {
+    text-align: right;
   }
 }
 </style>
