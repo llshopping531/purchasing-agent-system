@@ -1,6 +1,13 @@
 /**
  * 客戶查詢連結的訂單（充實後）資料
  */
+export interface OrderDraw {
+  id: number
+  orderId: number
+  result: string
+  note: string
+}
+
 export interface QueryOrderEnriched {
   /** 活動 ID */
   eventId: number
@@ -14,8 +21,8 @@ export interface QueryOrderEnriched {
   productName: string
   /** 數量 */
   quantity: number
-  /** 日幣小計 */
-  subtotalJpy: number
+  /** 日幣單價 */
+  priceJpy: number
   /** 台幣小計 */
   subtotalTwd: number
   /** 匯率 */
@@ -26,6 +33,8 @@ export interface QueryOrderEnriched {
   orderStatus: string
   /** 訂單狀態名稱 */
   orderStatusName: string
+  /** 盲抽結果 */
+  orderDraws: OrderDraw[]
 }
 
 /** 查詢客戶充實後訂單列表 response */

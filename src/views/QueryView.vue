@@ -7,9 +7,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { queryApi } from '@/services/api/system/query/query-api'
 import { eventApi } from '@/services/api/offline/events/events-api'
-import { productsApi } from '@/services/api/offline/products/products-api'
 import { formatTwd, formatJpy } from '@/utils/format'
-import type { ProductsResBase } from '@/services/api/offline/products/products-api-interfaces'
 
 const PACKAGING_FEE = 10
 
@@ -19,11 +17,11 @@ import TableComponent, { type HeaderRow } from '@/components/tables/TableCompone
 import ModalComponent from '@/components/ModalComponent.vue'
 
 const headers: HeaderRow[] = [
-  { name: '通路',     value: 'channelName',    sort: 1 },
-  { name: '商品名稱', value: 'productName',     sort: 2 ,mobileSpan:2},
-  { name: '數量',    value: 'quantity',         sort: 3, width: '80px' },
-  { name: '台幣小計', value: 'subtotalTwd',     sort: 4, width: '120px' },
-  { name: '狀態',    value: 'orderStatusName',  sort: 5, width: '90px' },
+  { name: '通路', value: 'channelName', sort: 1 },
+  { name: '商品名稱', value: 'productName', sort: 2, mobileSpan: 2 },
+  { name: '數量', value: 'quantity', sort: 3, width: '80px' },
+  { name: '台幣小計', value: 'subtotalTwd', sort: 4, width: '120px' },
+  { name: '狀態', value: 'orderStatusName', sort: 5, width: '90px' },
 ]
 
 function rowClass(row: QueryOrderEnriched) {
@@ -58,7 +56,8 @@ const INACTIVE_STATUSES = ['已取消', '缺貨']
 
 /** 當前頁籤的訂單清單（無效狀態排到最下面） */
 const activeOrders = computed(() => {
-  const list = activeEventId.value !== null ? (groupedOrders.value.get(activeEventId.value) ?? []) : []
+  const list =
+    activeEventId.value !== null ? (groupedOrders.value.get(activeEventId.value) ?? []) : []
   return [...list].sort((a, b) => {
     const aInactive = INACTIVE_STATUSES.includes(a.orderStatusName) ? 1 : 0
     const bInactive = INACTIVE_STATUSES.includes(b.orderStatusName) ? 1 : 0
@@ -67,28 +66,47 @@ const activeOrders = computed(() => {
 })
 
 /** 當前頁籤已購買台幣總計 */
-const productModal = ref<ProductsResBase | null>(null)
+interface ProductModalData {
+  name: string
+  priceJpy: number
+  priceTwd: number
+  exchangeRate: number
+}
+
+const productModal = ref<ProductModalData | null>(null)
 
 const productModalHeaders: HeaderRow[] = [
-  { name: '日幣單價', value: 'priceJpy',    sort: 0 },
-  { name: '台幣單價', value: 'priceTwd',    sort: 1 },
-  { name: '匯率',    value: 'exchangeRate', sort: 2 },
+  { name: '日幣單價', value: 'priceJpy', sort: 0 },
+  { name: '台幣單價', value: 'priceTwd', sort: 2 },
+  { name: '匯率', value: 'exchangeRate', sort: 1 },
 ]
 
 const productModalRows = computed(() => {
   const p = productModal.value
   if (!p) return []
-  return [{ priceJpy: formatJpy(p.priceJpy), priceTwd: formatTwd(p.priceTwd), exchangeRate: p.exchangeRate }]
+  return [
+    {
+      priceJpy: formatJpy(p.priceJpy),
+      priceTwd: formatTwd(p.priceTwd),
+      exchangeRate: p.exchangeRate,
+    },
+  ]
 })
 
-async function openProductModal(productId: number) {
-  productModal.value = await productsApi.getSingleProduct(productId)
+function openProductModal(row: QueryOrderEnriched) {
+  productModal.value = {
+    name: row.productName,
+    priceJpy: row.priceJpy,
+    priceTwd: row.unitTwd,
+    exchangeRate: row.exchangeRate,
+  }
 }
 
 const activeTabTotalTwd = computed(() =>
-  activeOrders.value.filter((o) => o.orderStatusName === '已購買').reduce((s, o) => s + o.subtotalTwd, 0)
+  activeOrders.value
+    .filter((o) => o.orderStatusName === '已購買')
+    .reduce((s, o) => s + o.subtotalTwd, 0),
 )
-
 
 function selectTab(eventId: number) {
   activeEventId.value = eventId
@@ -115,7 +133,7 @@ onMounted(async () => {
       ids.map(async (id) => {
         const event = await eventApi.getEventById(id)
         eventNames.value = new Map(eventNames.value).set(id, event.name)
-      })
+      }),
     )
   } catch {
     isError.value = true
@@ -135,7 +153,6 @@ onMounted(async () => {
       <div v-else-if="isError" class="state-msg error">查無資料，請確認連結是否正確</div>
 
       <template v-else-if="orders.length > 0">
-
         <!-- 活動頁籤 -->
         <div class="tab-bar">
           <button
@@ -152,7 +169,9 @@ onMounted(async () => {
         <!-- 當前活動內容 -->
         <div class="tab-panel">
           <div class="tab-panel-header">
-            <span class="tab-panel-title">{{ eventNames.get(activeEventId!) ?? `活動 #${activeEventId}` }}</span>
+            <span class="tab-panel-title">{{
+              eventNames.get(activeEventId!) ?? `活動 #${activeEventId}`
+            }}</span>
             <div class="tab-panel-right">
               <span class="tab-panel-total">
                 合計 {{ formatTwd(activeTabTotalTwd) }}
@@ -160,7 +179,6 @@ onMounted(async () => {
                 <strong>{{ formatTwd(activeTabTotalTwd + PACKAGING_FEE) }}</strong>
               </span>
               <span class="query-time">查詢時間 {{ now.toLocaleString('zh-TW') }}</span>
-
             </div>
           </div>
 
@@ -172,16 +190,27 @@ onMounted(async () => {
             :rowClass="rowClass"
           >
             <template #col-productName="{ row }">
-              <span class="product-link" @click.stop="openProductModal(row.productId)">{{ row.productName }}</span>
+              <span class="product-name-cell">
+                <span class="product-link" @click.stop="openProductModal(row)">{{
+                  row.productName
+                }}</span>
+                <span v-for="d in row.orderDraws" :key="d.id" class="draws-tag">{{
+                  d.result
+                }}</span>
+              </span>
             </template>
-            <template #col-subtotalTwd="{ row }">{{ formatTwd(['已取消', '缺貨'].includes(row.orderStatusName) ? 0 : row.subtotalTwd) }}</template>
+            <template #col-subtotalTwd="{ row }"
+              ><span>{{
+                formatTwd(['已取消', '缺貨'].includes(row.orderStatusName) ? 0 : row.subtotalTwd)
+              }}</span></template
+            >
             <template #col-orderStatusName="{ row }">
-              <span class="status-badge" :class="`status-${row.orderStatus}`">{{ row.orderStatusName }}</span>
+              <span class="status-badge" :class="`status-${row.orderStatus}`">{{
+                row.orderStatusName
+              }}</span>
             </template>
           </TableComponent>
-
-          <p class="contact-hint">
-          ** 若有任何疑問，歡迎私訊官方詢問 **</p>
+          <p class="contact-hint">** 若有任何疑問，歡迎私訊官方詢問 **</p>
         </div>
       </template>
 
@@ -198,14 +227,8 @@ onMounted(async () => {
   >
     <template #content>
       <div class="product-modal-content">
-        <div v-if="productModal.image" class="product-hero">
-          <img :src="productModal.image" class="product-img" />
-        </div>
         <div class="product-modal-info">
-          <div class="product-modal-name">
-            {{ productModal.name }}
-            <span v-if="productModal.isBlindBox" class="blind-tag">盲抽</span>
-          </div>
+          <div class="product-modal-name">{{ productModal.name }}</div>
           <TableComponent
             :headerRow="productModalHeaders"
             :tableData="productModalRows"
@@ -309,7 +332,10 @@ onMounted(async () => {
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--color-text-muted, #888);
-  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  transition:
+    background 0.18s,
+    color 0.18s,
+    box-shadow 0.18s;
   white-space: nowrap;
 
   &:hover {
@@ -377,7 +403,9 @@ onMounted(async () => {
   flex-direction: column;
   align-items: flex-end;
   gap: 0.2rem;
-  width: 100%;
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 }
 
 .query-time {
@@ -429,13 +457,33 @@ onMounted(async () => {
   }
 }
 
+/* ── 商品名稱欄 ── */
+.product-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.draws-tag {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--color-secondary, #7c6fe0) 15%, transparent);
+  color: var(--color-secondary-dark, var(--color-primary));
+}
+
 /* ── 商品連結 ── */
 .product-link {
   cursor: pointer;
   color: var(--color-primary);
   text-decoration: underline;
   text-underline-offset: 2px;
-  &:hover { opacity: 0.75; }
+  &:hover {
+    opacity: 0.75;
+  }
 }
 
 /* ── 商品彈窗 ── */

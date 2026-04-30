@@ -158,7 +158,12 @@ function displayValue(val: unknown): unknown {
         <div class="header-item operate" v-if="isDelete || isEdit">操作</div>
       </div>
       <div class="body">
-        <div class="body-item" v-for="(dataRow, index) in pop.tableData" :key="index" :class="pop.rowClass?.(dataRow)">
+        <div
+          class="body-item"
+          v-for="(dataRow, index) in pop.tableData"
+          :key="index"
+          :class="pop.rowClass?.(dataRow)"
+        >
           <div
             class="item-col"
             v-for="header in sortedHeaderRow"
@@ -168,7 +173,9 @@ function displayValue(val: unknown): unknown {
             :data-label="header.name"
           >
             <slot :name="`col-${header.value}`" :row="dataRow">
-              {{ displayValue(dataRow[header.value]) }}
+              <span>
+                {{ displayValue(dataRow[header.value]) }}
+              </span>
             </slot>
           </div>
           <div
@@ -289,7 +296,7 @@ function displayValue(val: unknown): unknown {
         border-bottom-right-radius: var(--radius-md);
       }
 
-      &.inactive .item-col {
+      &.inactive .item-col :deep(span){
         color: var(--color-danger, #e53e3e);
         text-decoration: line-through;
       }
