@@ -266,6 +266,7 @@ const settlementHeaders: HeaderRow[] = [
   { name: '顧客', value: 'name', sort: 0 },
   { name: '商品金額', value: 'totalTwd', sort: 1 },
   { name: '含包材', value: 'grandTotal', sort: 2 },
+  { name: '備註', value: 'remark', sort: 3 },
 ]
 
 const settlementTableData = computed(() =>
@@ -277,7 +278,11 @@ const settlementTableData = computed(() =>
     })
     .map((c) => {
       const total = customerTotalMap.value.get(c.id) ?? 0
-      return { name: c.name, totalTwd: formatTwd(total), grandTotal: formatTwd(total > 0 ? total + PACKAGING_FEE : 0) }
+      const remark =
+        total === 0 ? '金額為 $0' :
+        total > 10000 ? '金額超過萬元' :
+        total > 8000 ? '金額超過 $8,000' : ''
+      return { name: c.name, totalTwd: formatTwd(total), grandTotal: formatTwd(total > 0 ? total + PACKAGING_FEE : 0), remark }
     })
 )
 </script>
@@ -369,9 +374,16 @@ const settlementTableData = computed(() =>
               付款訊息
               <span
                 v-if="selectedCustomer && getCustomerTotal(selectedCustomer.id) === 0"
-                class="zero-warn"
-                title="此客戶消費金額為 $0"
-              >!</span>
+                class="amount-badge zero-badge"
+              >金額為 $0</span>
+              <span
+                v-else-if="selectedCustomer && getCustomerTotal(selectedCustomer.id) > 10000"
+                class="amount-badge over10k-badge"
+              >金額超過萬元</span>
+              <span
+                v-else-if="selectedCustomer && getCustomerTotal(selectedCustomer.id) > 8000"
+                class="amount-badge over8k-badge"
+              >金額超過 $8,000</span>
             </span>
             <span v-if="isLoading" class="loading-hint">載入中…</span>
             <div v-else-if="customers.length > 0" class="customer-select-wrap">
@@ -407,7 +419,7 @@ const settlementTableData = computed(() =>
   <modal-component
     v-if="isSettlementModalOpen"
     :name="`${selectedEvent?.name ?? ''} 收款名單`"
-    width="480px"
+    width="600px"
     @confirm="isSettlementModalOpen = false"
     @cancel="isSettlementModalOpen = false"
   >
@@ -426,7 +438,19 @@ const settlementTableData = computed(() =>
         :tableData="settlementTableData"
         :isEdit="false"
         :isDelete="false"
-      />
+      >
+        <template #col-remark="{ row }">
+          <span
+            v-if="row.remark"
+            class="remark-badge"
+            :class="{
+              'remark-zero': row.remark === '金額為 $0',
+              'remark-over10k': row.remark === '金額超過萬元',
+              'remark-over8k': row.remark === '金額超過 $8,000',
+            }"
+          >{{ row.remark }}</span>
+        </template>
+      </table-component>
     </template>
   </modal-component>
 </template>
@@ -770,20 +794,64 @@ const settlementTableData = computed(() =>
   }
 }
 
-/* ── 金額為零警示 ── */
-.zero-warn {
+/* ── 金額警示 ── */
+.amount-badge {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--color-danger, #e53e3e);
-  color: #fff;
-  font-size: 0.65rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 99px;
+  font-size: 0.68rem;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.4;
   margin-left: 0.35rem;
+  white-space: nowrap;
+}
+
+.zero-badge {
+  background: color-mix(in srgb, var(--color-danger, #e53e3e) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-danger, #e53e3e) 40%, transparent);
+  color: var(--color-danger, #e53e3e);
+}
+
+.over8k-badge {
+  background: color-mix(in srgb, #d97706 12%, transparent);
+  border: 1px solid color-mix(in srgb, #d97706 40%, transparent);
+  color: #b45309;
+}
+
+.over10k-badge {
+  background: color-mix(in srgb, #dc2626 12%, transparent);
+  border: 1px solid color-mix(in srgb, #dc2626 40%, transparent);
+  color: #dc2626;
+}
+
+/* ── 名單備註標籤 ── */
+.remark-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.5rem;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.remark-zero {
+  background: color-mix(in srgb, #e53e3e 12%, transparent);
+  border: 1px solid color-mix(in srgb, #e53e3e 40%, transparent);
+  color: #e53e3e;
+}
+
+.remark-over8k {
+  background: color-mix(in srgb, #d97706 12%, transparent);
+  border: 1px solid color-mix(in srgb, #d97706 40%, transparent);
+  color: #b45309;
+}
+
+.remark-over10k {
+  background: color-mix(in srgb, #dc2626 12%, transparent);
+  border: 1px solid color-mix(in srgb, #dc2626 40%, transparent);
+  color: #dc2626;
 }
 
 /* ── 名單彈窗 ── */
