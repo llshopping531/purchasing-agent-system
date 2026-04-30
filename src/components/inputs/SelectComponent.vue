@@ -57,6 +57,7 @@ watch(() => pop.optionList, (newList) => {
 watch(() => pop.defaultValue, (newDefault) => {
   inputValue.value = newDefault?.name ?? ''
   currentColor.value = newDefault?.color ?? ''
+  selectedSingleName.value = newDefault?.name ?? ''
 })
 
 watch(() => pop.selectedValues, (vals) => {
@@ -65,6 +66,8 @@ watch(() => pop.selectedValues, (vals) => {
 
 /** 目前選取項目的顏色（單選用） */
 const currentColor = ref(pop.defaultValue?.color ?? '')
+/** 單選：記錄已選項目名稱，供下拉清單 highlight 用 */
+const selectedSingleName = ref(pop.defaultValue?.name ?? '')
 
 function openOptionList() {
   isOpenOption.value = true
@@ -94,6 +97,7 @@ function selectOption(selectedOption: SelectOption<T>) {
     isOpenOption.value = false
     inputValue.value = selectedOption.name
     currentColor.value = selectedOption.color ?? ''
+    selectedSingleName.value = selectedOption.name
     currentOptionList.value = pop.optionList
     emit('selectOption', selectedOption)
   }
@@ -163,7 +167,7 @@ function filter() {
       <div v-if="currentOptionList.length === 0" class="optionItem empty">— 無資料 —</div>
       <div
         class="optionItem"
-        :class="{ selected: pop.multiple && isSelected(option) }"
+        :class="{ selected: pop.multiple ? isSelected(option) : option.name === selectedSingleName }"
         v-for="option in currentOptionList"
         :key="option.name"
         :style="{
