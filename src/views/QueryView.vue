@@ -54,10 +54,17 @@ const groupedOrders = computed(() => {
 /** 活動 ID 清單（依插入順序） */
 const eventIds = computed(() => [...groupedOrders.value.keys()])
 
-/** 當前頁籤的訂單清單 */
-const activeOrders = computed(() =>
-  activeEventId.value !== null ? (groupedOrders.value.get(activeEventId.value) ?? []) : []
-)
+const INACTIVE_STATUSES = ['已取消', '缺貨']
+
+/** 當前頁籤的訂單清單（無效狀態排到最下面） */
+const activeOrders = computed(() => {
+  const list = activeEventId.value !== null ? (groupedOrders.value.get(activeEventId.value) ?? []) : []
+  return [...list].sort((a, b) => {
+    const aInactive = INACTIVE_STATUSES.includes(a.orderStatusName) ? 1 : 0
+    const bInactive = INACTIVE_STATUSES.includes(b.orderStatusName) ? 1 : 0
+    return aInactive - bInactive
+  })
+})
 
 /** 當前頁籤已購買台幣總計 */
 const productModal = ref<ProductsResBase | null>(null)
@@ -167,7 +174,7 @@ onMounted(async () => {
             <template #col-productName="{ row }">
               <span class="product-link" @click.stop="openProductModal(row.productId)">{{ row.productName }}</span>
             </template>
-            <template #col-subtotalTwd="{ row }">{{ formatTwd(row.subtotalTwd) }}</template>
+            <template #col-subtotalTwd="{ row }">{{ formatTwd(['已取消', '缺貨'].includes(row.orderStatusName) ? 0 : row.subtotalTwd) }}</template>
             <template #col-orderStatusName="{ row }">
               <span class="status-badge" :class="`status-${row.orderStatus}`">{{ row.orderStatusName }}</span>
             </template>
@@ -370,6 +377,7 @@ onMounted(async () => {
   flex-direction: column;
   align-items: flex-end;
   gap: 0.2rem;
+  width: 100%;
 }
 
 .query-time {
