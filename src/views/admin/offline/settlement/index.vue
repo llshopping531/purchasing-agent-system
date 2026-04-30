@@ -234,6 +234,20 @@ watch(
   { deep: true, immediate: true },
 )
 
+// ── 切換到下一位顧客 ──────────────────────────────────────────
+function nextCustomer() {
+  if (!selectedCustomer.value || customers.value.length === 0) return
+  const idx = customers.value.findIndex((c) => c.id === selectedCustomer.value!.id)
+  const next = customers.value[(idx + 1) % customers.value.length]
+  if (!next) return
+  const total = customerTotalMap.value.get(next.id) ?? 0
+  selectedCustomer.value = next
+  selectedCustomerOption.value = {
+    name: `${next.name}（${formatTwd(total)}）`,
+    value: next,
+  }
+}
+
 // ── 複製當前訊息 ──────────────────────────────────────────────
 async function copyMessage() {
   if (!renderedMessage.value) return
@@ -403,6 +417,12 @@ const settlementTableData = computed(() =>
             >
               {{ isCopied ? '已複製' : '複製' }}
             </button>
+            <button
+              class="next-btn"
+              :disabled="isLoading || customers.length === 0"
+              @click="nextCustomer"
+              title="下一位"
+            >▶</button>
           </div>
 
           <div class="messages-body">
@@ -727,6 +747,28 @@ const settlementTableData = computed(() =>
 .customer-select-wrap {
   flex: 1;
   min-width: 0;
+}
+
+.next-btn {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
 }
 
 .copy-btn {
