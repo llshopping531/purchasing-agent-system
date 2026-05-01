@@ -12,6 +12,7 @@ import IconChevronLeft from '@/components/icons/IconChevronLeft.vue'
 import IconHouse from '@/components/icons/IconHouse.vue'
 import IconFlag from '@/components/icons/IconFlag.vue'
 import IconChartSimple from '@/components/icons/IconChartSimple.vue'
+import IconBox from '@/components/icons/IconBox.vue'
 import { PATH } from '@/constants/route.constant'
 
 interface Zone {
@@ -23,6 +24,7 @@ interface Zone {
 const ZONES: Zone[] = [
   { name: '通販專區', path: PATH.online, icon: markRaw(IconHouse) },
   { name: '場販專區', path: PATH.offline, icon: markRaw(IconFlag) },
+  { name: '包貨清單', path: PATH.packing, icon: markRaw(IconBox) },
   { name: '系統專區', path: PATH.system, icon: markRaw(IconChartSimple) },
 ]
 

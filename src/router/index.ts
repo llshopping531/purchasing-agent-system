@@ -139,6 +139,19 @@ const router = createRouter({
           ],
         },
         {
+          /** 包貨清單專區（場販 + 通販合併） */
+          path: 'packing',
+          name: 'packing',
+          component: () => import('../views/admin/packingView.vue'),
+          children: [
+            {
+              path: '',
+              name: 'PackingView',
+              component: () => import('../views/admin/packing/index.vue'),
+            },
+          ],
+        },
+        {
           /** 出貨單 */
           path: 'shipping',
           name: 'shipping',

@@ -45,6 +45,9 @@ export const PATH = {
   /** 通販－訂單管理 */
   onlineOrder: `${BASE_ADMIN}/online/order`,
 
+  /** 包貨清單專區 */
+  packing: `${BASE_ADMIN}/packing`,
+
   /** 系統專區入口 */
   system: `${BASE_ADMIN}/system`,
   /** 系統－Threads 留言查詢 */

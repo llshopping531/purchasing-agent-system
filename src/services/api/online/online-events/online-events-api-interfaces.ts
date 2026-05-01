@@ -68,6 +68,9 @@ export interface OnlineEventsReqBase {
   isLocked?: boolean
 }
 
+/** 查詢所有通販活動（不分頁） response */
+export type GetAllOnlineEventsRes = OnlineEventsResBase[]
+
 /**
  *  通販活動資料共用欄位 base
  */

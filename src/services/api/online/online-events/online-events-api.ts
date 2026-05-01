@@ -2,6 +2,7 @@ import { deleteApi, getApi, patchApi, postApi } from '../../base-api'
 import type {
   CreateOnlineEventsReq,
   CreateOnlineEventsRes,
+  GetAllOnlineEventsRes,
   GetOnlineEventByIdRes,
   ModifyOnlineEventsReq,
   ModifyOnlineEventsRes,
@@ -17,6 +18,14 @@ export const onlineEventApi = {
    */
   getOnlineEvents: async (req: QueryOnlineEventsReq): Promise<QueryOnlineEventsRes> => {
     return await getApi('/online-events', req)
+  },
+
+  /**
+   * 取得所有通販活動（不分頁）
+   * @returns 完整通販活動清單
+   */
+  getAllOnlineEvents: async (): Promise<GetAllOnlineEventsRes> => {
+    return await getApi('/online-events/all')
   },
 
   /**
