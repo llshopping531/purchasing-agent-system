@@ -60,6 +60,10 @@ export interface OnlineProductsReqBase {
   eventId: number
   /** 商品名稱 */
   name: string
+  /** 日幣價格 */
+  priceJpy?: number
+  /** 匯率 */
+  exchangeRate?: number
   /** 台幣價格 */
   priceTwd?: number
   /** 重量（公斤） */
@@ -76,6 +80,10 @@ export interface OnlineProductsResBase {
   eventId: number
   /** 商品名稱 */
   name: string
+  /** 日幣價格 */
+  priceJpy: number
+  /** 匯率 */
+  exchangeRate: number
   /** 台幣價格 */
   priceTwd: number
   /** 重量（公斤） */

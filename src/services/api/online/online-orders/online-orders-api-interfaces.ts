@@ -66,8 +66,6 @@ export interface OnlineOrdersReqBase {
   officialOrderId?: number
   /** 數量 */
   quantity: number
-  /** 小計 (TWD) */
-  subtotalTwd?: number
   /** 日本境內運費 */
   domesticShipping?: number
   /** 國際運費 */

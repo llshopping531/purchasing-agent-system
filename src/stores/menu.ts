@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
 import { eventApi } from '@/services/api/offline/events/events-api'
 import { channelApi } from '@/services/api/offline/channels/channels-api'
+import { onlineEventApi } from '@/services/api/online/online-events/online-events-api'
 import type { EventsResBase } from '@/services/api/offline/events/events-api-interfaces'
 import type { QueryChannelsAllRes } from '@/services/api/offline/channels/channels-api-interfaces'
+import type { OnlineEventsResBase } from '@/services/api/online/online-events/online-events-api-interfaces'
 
 /**
  * 選單快取 Store
@@ -14,6 +16,8 @@ export const useMenuStore = defineStore('menu', {
     eventsAll: null as EventsResBase[] | null,
     /** 各活動 ID 對應的通路清單，key 為 eventId */
     channelsAllMap: {} as Record<number, QueryChannelsAllRes[]>,
+    /** 全部通販活動清單，null 表示尚未載入 */
+    onlineEventsAll: null as OnlineEventsResBase[] | null,
   }),
   actions: {
     /** 取得全部活動（有快取則直接回傳） */
@@ -31,6 +35,13 @@ export const useMenuStore = defineStore('menu', {
       return result
     },
 
+    /** 取得全部通販活動（有快取則直接回傳） */
+    async fetchOnlineEventsAll(): Promise<OnlineEventsResBase[]> {
+      if (this.onlineEventsAll !== null) return this.onlineEventsAll
+      this.onlineEventsAll = await onlineEventApi.getAllOnlineEvents()
+      return this.onlineEventsAll
+    },
+
     /** 清除活動快取（資料異動後呼叫） */
     clearEventsCache() {
       this.eventsAll = null
@@ -39,6 +50,11 @@ export const useMenuStore = defineStore('menu', {
     /** 清除指定活動的通路快取（資料異動後呼叫） */
     clearChannelsCache(eventId: number) {
       delete this.channelsAllMap[eventId]
+    },
+
+    /** 清除通販活動快取（資料異動後呼叫） */
+    clearOnlineEventsCache() {
+      this.onlineEventsAll = null
     },
   },
 })

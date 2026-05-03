@@ -39,7 +39,6 @@ const productOptions = ref<SelectOption<OnlineProductsResBase | null>[]>([
 const formCustomerOption = ref<SelectOption<CustomersResBase | undefined> | undefined>(undefined)
 const formProductOption = ref<SelectOption<OnlineProductsResBase | null> | undefined>(undefined)
 const formQuantity = ref<number | null>(null)
-const formSubtotalTwd = ref<number | null>(null)
 const formDomesticShipping = ref<number | null>(null)
 const formInternationalShipping = ref<number | null>(null)
 const formNote = ref('')
@@ -83,7 +82,6 @@ function editOrder(data: QueryOnlineOrdersContent) {
   const product = productOptions.value.find((p) => p.value?.id === data.productId)
   formProductOption.value = product ?? { name: data.productName, value: null }
   formQuantity.value = data.quantity
-  formSubtotalTwd.value = data.subtotalTwd ?? null
   formDomesticShipping.value = data.domesticShipping ?? null
   formInternationalShipping.value = data.internationalShipping ?? null
   formNote.value = data.note ?? ''
@@ -128,7 +126,6 @@ async function confirm() {
     productId: formProductOption.value?.value?.id ?? 0,
     officialOrderId: formOfficialOrderId.value ?? undefined,
     quantity: formQuantity.value ?? 0,
-    subtotalTwd: formSubtotalTwd.value ?? undefined,
     domesticShipping: formDomesticShipping.value ?? undefined,
     internationalShipping: formInternationalShipping.value ?? undefined,
     note: formNote.value || undefined,
@@ -145,7 +142,6 @@ function resetFields() {
   formCustomerOption.value = undefined
   formProductOption.value = undefined
   formQuantity.value = null
-  formSubtotalTwd.value = null
   formDomesticShipping.value = null
   formInternationalShipping.value = null
   formNote.value = ''
@@ -217,16 +213,13 @@ defineExpose({ createOrder, editOrder, deleteOrder })
         </div>
         <div class="row">
           <div class="text-input">
-            <text-input label="小計（TWD）" v-model:value="formSubtotalTwd" />
-          </div>
-          <div class="text-input">
             <text-input label="日本境內運費" v-model:value="formDomesticShipping" />
           </div>
-        </div>
-        <div class="row">
           <div class="text-input">
             <text-input label="國際運費" v-model:value="formInternationalShipping" />
           </div>
+        </div>
+        <div class="row">
           <div class="text-input">
             <text-input label="備註" v-model:value="formNote" />
           </div>

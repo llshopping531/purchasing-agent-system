@@ -4,15 +4,18 @@
  * 透過 defineExpose 提供 createEvent / editEvent / deleteEvent 方法供父層呼叫
  * 操作完成後 emit confirmed 通知父層重新載入活動列表
  */
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import DateInput from '@/components/inputs/DateInput.vue'
 import CheckboxInput from '@/components/inputs/CheckboxInput.vue'
+import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { onlineEventApi } from '@/services/api/online/online-events/online-events-api'
 import type { QueryOnlineEventsContent } from '@/services/api/online/online-events/online-events-api-interfaces'
+import { menusApi } from '@/services/api/system/menu/menus-api'
+import type { SelectOption } from '@/interfaces/common'
 
 const emit = defineEmits<{
   (e: 'confirmed'): void
@@ -42,6 +45,22 @@ const [currentDeliveryDate] = defineField('deliveryDate')
 const [currentProgress] = defineField('progress')
 const [currentNote] = defineField('note')
 const currentIsLocked = ref(false)
+
+// ── 進度下拉選單 ──────────────────────────────────────────────
+const progressOptions = ref<SelectOption<string>[]>([])
+
+onMounted(async () => {
+  const res = await menusApi.getMenus({ keyword: 'ONLINE_PROGRESS', size: 100 })
+  progressOptions.value = res.content.map((m) => ({ name: m.menuName, value: m.menuValue }))
+})
+
+const selectedProgressOption = computed<SelectOption<string> | undefined>(() =>
+  progressOptions.value.find((o) => o.value === currentProgress.value),
+)
+
+function onSelectProgress(opt: SelectOption<string>) {
+  currentProgress.value = opt.value
+}
 
 function createEvent() {
   modalMode.value = 1
@@ -134,7 +153,12 @@ defineExpose({ createEvent, editEvent, deleteEvent })
           <date-input label="官方出貨日期" v-model:value="currentDeliveryDate" />
         </div>
         <div class="formItem">
-          <text-input label="進度" v-model:value="currentProgress" />
+          <select-component
+            label="進度"
+            :optionList="progressOptions"
+            :defaultValue="selectedProgressOption"
+            @selectOption="onSelectProgress"
+          />
         </div>
         <div class="formItem full">
           <text-input label="備註" v-model:value="currentNote" />

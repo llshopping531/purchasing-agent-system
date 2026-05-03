@@ -14,6 +14,10 @@ defineProps<{
   exchangeRateError?: string
   /** 台幣定價驗證錯誤訊息 */
   priceTwdError?: string
+  /** 日幣定價是否必填 */
+  priceJpyRequired?: boolean
+  /** 台幣定價是否必填 */
+  priceTwdRequired?: boolean
 }>()
 
 /** 日幣定價（雙向綁定） */
@@ -55,7 +59,7 @@ function onBlurTwd() {
 </script>
 
 <template>
-  <text-input label="日幣定價" v-model:value="priceJpy"  :error-message="priceJpyError" @blur="onBlurJpy" />
-  <text-input label="匯率" v-model:value="exchangeRate"  :error-message="exchangeRateError" @blur="onBlurRate" />
-  <text-input label="台幣定價" v-model:value="priceTwd"  :error-message="priceTwdError" @blur="onBlurTwd" />
+  <text-input label="日幣定價" v-model:value="priceJpy" :required="priceJpyRequired" :error-message="priceJpyError" @blur="onBlurJpy" />
+  <text-input label="匯率" v-model:value="exchangeRate" :error-message="exchangeRateError" @blur="onBlurRate" />
+  <text-input label="台幣定價" v-model:value="priceTwd" :required="priceTwdRequired" :error-message="priceTwdError" @blur="onBlurTwd" />
 </template>

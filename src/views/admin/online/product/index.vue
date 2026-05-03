@@ -7,15 +7,19 @@ import { onMounted, ref } from 'vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
-import { onlineEventApi } from '@/services/api/online/online-events/online-events-api'
 import { onlineProductsApi } from '@/services/api/online/online-products/online-products-api'
 import type { QueryOnlineProductsContent } from '@/services/api/online/online-products/online-products-api-interfaces'
 import type { QueryOnlineEventsContent } from '@/services/api/online/online-events/online-events-api-interfaces'
 import type { SelectOption } from '@/interfaces/common'
 import { formatTwd } from '@/utils/format'
+import { useMenuStore } from '@/stores/menu'
 import OnlineProductFormModal from './OnlineProductFormModal.vue'
+import OnlineBatchProductFormModal from './OnlineBatchProductFormModal.vue'
+
+const menuStore = useMenuStore()
 
 const productFormModal = ref<InstanceType<typeof OnlineProductFormModal>>()
+const isBatchModalOpen = ref(false)
 
 /** 通販活動下拉選項 */
 const eventOptions = ref<SelectOption<QueryOnlineEventsContent | null>[]>([
@@ -37,15 +41,17 @@ const isTableQueried = ref(false)
 
 const headerRow: HeaderRow[] = [
   { name: '商品名稱', value: 'name', sort: 0, mobileSpan: 2 },
+  { name: '日幣價格', value: 'priceJpy', sort: 0, width: '120px' },
+  { name: '匯率', value: 'exchangeRate', sort: 0, width: '100px' },
   { name: '台幣價格', value: 'priceTwd', sort: 0, width: '120px' },
   { name: '重量（kg）', value: 'weight', sort: 0, width: '120px' },
 ]
 
 onMounted(async () => {
-  const res = await onlineEventApi.getOnlineEvents({ size: 1000 })
+  const events = await menuStore.fetchOnlineEventsAll()
   eventOptions.value = [
     { name: '請選擇通販活動', value: null },
-    ...res.content.map((e) => ({ name: e.name, value: e })),
+    ...events.map((e) => ({ name: e.name, value: e })),
   ]
 })
 
@@ -109,7 +115,7 @@ function onSearch() {
         <div
           class="btn"
           v-if="isTableQueried && !currentEventIsLocked"
-          @click="productFormModal?.createProduct()"
+          @click="isBatchModalOpen = true"
         >
           新增
         </div>
@@ -140,6 +146,12 @@ function onSearch() {
       ref="productFormModal"
       :eventId="currentEventId"
       @confirmed="getProductList"
+    />
+    <online-batch-product-form-modal
+      v-if="isBatchModalOpen"
+      :eventId="currentEventId"
+      @confirmed="getProductList"
+      @close="isBatchModalOpen = false"
     />
   </div>
 </template>

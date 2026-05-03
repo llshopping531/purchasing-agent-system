@@ -6,15 +6,19 @@
 import { onMounted, ref } from 'vue'
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import SelectComponent from '@/components/inputs/SelectComponent.vue'
-import { onlineEventApi } from '@/services/api/online/online-events/online-events-api'
 import { onlineOrdersApi } from '@/services/api/online/online-orders/online-orders-api'
 import type { QueryOnlineOrdersContent } from '@/services/api/online/online-orders/online-orders-api-interfaces'
 import type { QueryOnlineEventsContent } from '@/services/api/online/online-events/online-events-api-interfaces'
 import type { SelectOption } from '@/interfaces/common'
 import { formatTwd } from '@/utils/format'
+import { useMenuStore } from '@/stores/menu'
 import OnlineOrderFormModal from './OnlineOrderFormModal.vue'
+import OnlineBatchOrderFormModal from './OnlineBatchOrderFormModal.vue'
+
+const menuStore = useMenuStore()
 
 const orderFormModal = ref<InstanceType<typeof OnlineOrderFormModal>>()
+const isBatchModalOpen = ref(false)
 
 /** 通販活動下拉選項 */
 const eventOptions = ref<SelectOption<QueryOnlineEventsContent | null>[]>([
@@ -35,17 +39,19 @@ const headerRow: HeaderRow[] = [
   { name: '客戶名稱', value: 'customerName', sort: 0, width: '120px', mobileSpan: 2 },
   { name: '商品名稱', value: 'productName', sort: 0 },
   { name: '數量', value: 'quantity', sort: 0, width: '70px' },
-  { name: '小計（TWD）', value: 'subtotalTwd', sort: 0, width: '120px' },
+  { name: '小計（TWD）', value: 'subtotalTwd', sort: 0, width: '110px' },
+  { name: '重量（g）', value: 'productWeight', sort: 0, width: '90px' },
   { name: '境內運費', value: 'domesticShipping', sort: 0, width: '100px' },
   { name: '國際運費', value: 'internationalShipping', sort: 0, width: '100px' },
   { name: '備註', value: 'note', sort: 0 },
+  { name: '官方訂單', value: 'officialOrderName', sort: 0 },
 ]
 
 onMounted(async () => {
-  const res = await onlineEventApi.getOnlineEvents({ size: 1000 })
+  const events = await menuStore.fetchOnlineEventsAll()
   eventOptions.value = [
     { name: '請選擇通販活動', value: null },
-    ...res.content.map((e) => ({ name: e.name, value: e })),
+    ...events.map((e) => ({ name: e.name, value: e })),
   ]
 })
 
@@ -98,7 +104,7 @@ function onChangeSize(size: number) {
         <div
           class="btn"
           v-if="isTableQueried && !currentEventIsLocked"
-          @click="orderFormModal?.createOrder()"
+          @click="isBatchModalOpen = true"
         >
           新增
         </div>
@@ -136,6 +142,12 @@ function onChangeSize(size: number) {
       :eventId="currentEventId"
       :key="currentEventId"
       @confirmed="getOrderList"
+    />
+    <online-batch-order-form-modal
+      v-if="isBatchModalOpen"
+      :eventId="currentEventId"
+      @confirmed="getOrderList"
+      @close="isBatchModalOpen = false"
     />
   </div>
 </template>

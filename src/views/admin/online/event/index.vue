@@ -16,9 +16,9 @@ const eventList = ref<QueryOnlineEventsContent[]>([])
 /** 表格欄位定義 */
 const headerRow = ref<HeaderRow[]>([
   { name: '活動名稱', value: 'name', sort: 0, mobileSpan: 3 },
-  { name: '開團日期', value: 'startDate', sort: 0, width: '120px' },
-  { name: '進度', value: 'progressName', sort: 0, width: '100px' },
-  { name: '官方出貨日', value: 'deliveryDate', sort: 0, width: '120px' },
+  { name: '開團日期', value: 'startDate', sort: 0, width: '200px' },
+  { name: '進度', value: 'progressName', sort: 0, width: '200px' },
+  { name: '官方出貨日', value: 'deliveryDate', sort: 0, width: '200px' },
   { name: '備註', value: 'note', sort: 0 },
   { name: '是否鎖定', value: 'isLocked', sort: 0, width: '100px' },
 ])

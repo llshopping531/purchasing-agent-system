@@ -9,6 +9,7 @@ import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
+import PriceRateInputComponent from '@/components/inputs/PriceRateInputComponent.vue'
 import { onlineProductsApi } from '@/services/api/online/online-products/online-products-api'
 import type { QueryOnlineProductsContent } from '@/services/api/online/online-products/online-products-api-interfaces'
 
@@ -27,30 +28,43 @@ const modalMode = ref<1 | 2 | 3>(1)
 const currentId = ref(0)
 const currentDeleteName = ref('')
 
+const numField = yup
+  .number()
+  .transform((v, o) => (o === '' ? null : v))
+  .typeError('請輸入數字')
+  .positive('請輸入正數')
+  .nullable()
+  .optional()
+
+const requiredNumField = yup
+  .number()
+  .transform((v, o) => (o === '' ? null : v))
+  .typeError('請輸入數字')
+  .positive('請輸入正數')
+  .required('此欄位為必填')
+
 const schema = yup.object({
   name: yup.string().required('商品名稱為必填'),
-  priceTwd: yup
-    .number()
-    .transform((v, o) => (o === '' ? null : v))
-    .typeError('請輸入數字')
-    .positive('請輸入正數')
-    .nullable()
-    .optional(),
-  weight: yup
-    .number()
-    .transform((v, o) => (o === '' ? null : v))
-    .typeError('請輸入數字')
-    .positive('請輸入正數')
-    .nullable()
-    .optional(),
+  priceJpy: requiredNumField,
+  exchangeRate: numField,
+  priceTwd: requiredNumField,
+  weight: numField,
 })
 
 const { defineField, errors, validate, resetForm } = useForm({
   validationSchema: schema,
-  initialValues: { name: '', priceTwd: null as number | null, weight: null as number | null },
+  initialValues: {
+    name: '',
+    priceJpy: null as number | null,
+    exchangeRate: null as number | null,
+    priceTwd: null as number | null,
+    weight: null as number | null,
+  },
 })
 
 const [name] = defineField('name')
+const [priceJpy] = defineField('priceJpy')
+const [exchangeRate] = defineField('exchangeRate')
 const [priceTwd] = defineField('priceTwd')
 const [weight] = defineField('weight')
 
@@ -66,6 +80,8 @@ function editProduct(data: QueryOnlineProductsContent) {
   resetForm({
     values: {
       name: data.name,
+      priceJpy: data.priceJpy ?? null,
+      exchangeRate: data.exchangeRate ?? null,
       priceTwd: data.priceTwd ?? null,
       weight: data.weight ?? null,
     },
@@ -90,6 +106,8 @@ async function confirm() {
   const payload = {
     eventId: Number(props.eventId),
     name: name.value ?? '',
+    priceJpy: priceJpy.value ?? undefined,
+    exchangeRate: exchangeRate.value ?? undefined,
     priceTwd: priceTwd.value ?? undefined,
     weight: weight.value ?? undefined,
   }
@@ -132,8 +150,17 @@ defineExpose({ createProduct, editProduct, deleteProduct })
         <div class="formItem full">
           <text-input label="商品名稱" v-model:value="name" required :error-message="errors.name" />
         </div>
-        <div class="formItem">
-          <text-input label="台幣價格" v-model:value="priceTwd" :error-message="errors.priceTwd" />
+        <div class="formItem full price-row">
+          <price-rate-input-component
+            v-model:priceJpy="priceJpy"
+            v-model:exchangeRate="exchangeRate"
+            v-model:priceTwd="priceTwd"
+            :priceJpyError="errors.priceJpy"
+            :exchangeRateError="errors.exchangeRate"
+            :priceTwdError="errors.priceTwd"
+            :priceJpyRequired="true"
+            :priceTwdRequired="true"
+          />
         </div>
         <div class="formItem">
           <text-input label="重量（公斤）" v-model:value="weight" :error-message="errors.weight" />
@@ -156,6 +183,17 @@ defineExpose({ createProduct, editProduct, deleteProduct })
   }
   .formItem.full {
     width: 100%;
+  }
+  .price-row {
+    display: flex;
+    gap: 1rem;
+    :deep(.label) {
+      flex: 1;
+      min-width: 0;
+    }
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
   }
   @media (max-width: 768px) {
     gap: 0.25rem;
