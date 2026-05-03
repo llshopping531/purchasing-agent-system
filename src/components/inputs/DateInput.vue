@@ -19,6 +19,7 @@ const isOpen = ref(false)
 const displayYear = ref(new Date().getFullYear())
 const displayMonth = ref(new Date().getMonth())
 const wrapperRef = ref<HTMLElement>()
+const calendarRef = ref<HTMLElement>()
 const calendarStyle = ref({ top: '0px', left: '0px' })
 
 function updateCalendarPosition() {
@@ -150,7 +151,9 @@ function selectToday() {
 }
 
 function onClickOutside(e: MouseEvent) {
-  if (wrapperRef.value && !wrapperRef.value.contains(e.target as Node)) {
+  const inWrapper = wrapperRef.value?.contains(e.target as Node)
+  const inCalendar = calendarRef.value?.contains(e.target as Node)
+  if (!inWrapper && !inCalendar) {
     isOpen.value = false
   }
 }
@@ -200,7 +203,7 @@ onUnmounted(() => {
     <!-- 日曆下拉（Teleport 至 body 避免被父層 overflow 截斷） -->
     <Teleport to="body">
       <Transition name="calendar">
-        <div v-if="isOpen" class="calendar-dropdown" :style="calendarStyle">
+        <div v-if="isOpen" class="calendar-dropdown" :style="calendarStyle" ref="calendarRef">
           <!-- 年月導覽 -->
           <div class="cal-header">
             <button class="nav-btn" @click.stop="prevYear" title="上一年">«</button>
