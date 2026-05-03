@@ -44,6 +44,8 @@ export const PATH = {
   onlineProduct: `${BASE_ADMIN}/online/product`,
   /** 通販－訂單管理 */
   onlineOrder: `${BASE_ADMIN}/online/order`,
+  /** 通販－官方訂單管理 */
+  onlineOfficialOrder: `${BASE_ADMIN}/online/official-order`,
 
   /** 包貨清單專區 */
   packing: `${BASE_ADMIN}/packing`,

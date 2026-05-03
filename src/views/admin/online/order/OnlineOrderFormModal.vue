@@ -11,8 +11,10 @@ import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
 import { onlineProductsApi } from '@/services/api/online/online-products/online-products-api'
 import { onlineOrdersApi } from '@/services/api/online/online-orders/online-orders-api'
+import { onlineOfficialOrdersApi } from '@/services/api/online/online-official-orders/online-official-orders-api'
 import type { QueryOnlineOrdersContent } from '@/services/api/online/online-orders/online-orders-api-interfaces'
 import type { OnlineProductsResBase } from '@/services/api/online/online-products/online-products-api-interfaces'
+import type { OnlineOfficialOrdersResBase } from '@/services/api/online/online-official-orders/online-official-orders-api-interfaces'
 import type { CustomersResBase } from '@/services/api/offline/customers/customers-api-interfaces'
 import type { SelectOption } from '@/interfaces/common'
 
@@ -35,14 +37,19 @@ const productOptions = ref<SelectOption<OnlineProductsResBase | null>[]>([
   { name: '請選擇商品', value: null },
 ])
 
+/** 官方訂單下拉選項 */
+const officialOrderOptions = ref<SelectOption<OnlineOfficialOrdersResBase | null>[]>([
+  { name: '無', value: null },
+])
+
 // ── 表單欄位 ────────────────────────────────────────────────────
 const formCustomerOption = ref<SelectOption<CustomersResBase | undefined> | undefined>(undefined)
 const formProductOption = ref<SelectOption<OnlineProductsResBase | null> | undefined>(undefined)
+const formOfficialOrderOption = ref<SelectOption<OnlineOfficialOrdersResBase | null>>({ name: '無', value: null })
 const formQuantity = ref<number | null>(null)
 const formDomesticShipping = ref<number | null>(null)
 const formInternationalShipping = ref<number | null>(null)
 const formNote = ref('')
-const formOfficialOrderId = ref<number | null>(null)
 
 const formErrors = reactive({ customer: '', product: '', quantity: '' })
 watch(formCustomerOption, () => { formErrors.customer = '' })
@@ -51,10 +58,12 @@ watch(formQuantity, () => { formErrors.quantity = '' })
 
 onMounted(() => {
   loadProductOptions()
+  loadOfficialOrderOptions()
 })
 
 watch(() => props.eventId, () => {
   loadProductOptions()
+  loadOfficialOrderOptions()
 })
 
 async function loadProductOptions() {
@@ -63,6 +72,15 @@ async function loadProductOptions() {
   productOptions.value = [
     { name: '請選擇商品', value: null },
     ...res.content.map((p) => ({ name: p.name, value: p })),
+  ]
+}
+
+async function loadOfficialOrderOptions() {
+  if (!props.eventId) return
+  const res = await onlineOfficialOrdersApi.getOnlineOfficialOrdersByEvent(Number(props.eventId))
+  officialOrderOptions.value = [
+    { name: '無', value: null },
+    ...res.map((o) => ({ name: o.name, value: o })),
   ]
 }
 
@@ -85,7 +103,7 @@ function editOrder(data: QueryOnlineOrdersContent) {
   formDomesticShipping.value = data.domesticShipping ?? null
   formInternationalShipping.value = data.internationalShipping ?? null
   formNote.value = data.note ?? ''
-  formOfficialOrderId.value = data.officialOrderId ?? null
+  formOfficialOrderOption.value = officialOrderOptions.value.find((o) => o.value?.id === data.officialOrderId) ?? { name: '無', value: null }
   isVisible.value = true
 }
 
@@ -120,11 +138,12 @@ async function beforeConfirm(): Promise<boolean> {
 }
 
 async function confirm() {
+  console.log(formOfficialOrderOption)
   const payload = {
     eventId: Number(props.eventId),
     customerId: formCustomerOption.value?.value?.id ?? 0,
     productId: formProductOption.value?.value?.id ?? 0,
-    officialOrderId: formOfficialOrderId.value ?? undefined,
+    officialOrderId: formOfficialOrderOption.value.value?.id ?? undefined,
     quantity: formQuantity.value ?? 0,
     domesticShipping: formDomesticShipping.value ?? undefined,
     internationalShipping: formInternationalShipping.value ?? undefined,
@@ -145,7 +164,7 @@ function resetFields() {
   formDomesticShipping.value = null
   formInternationalShipping.value = null
   formNote.value = ''
-  formOfficialOrderId.value = null
+  formOfficialOrderOption.value = { name: '無', value: null }
   formErrors.customer = ''
   formErrors.product = ''
   formErrors.quantity = ''
@@ -208,7 +227,12 @@ defineExpose({ createOrder, editOrder, deleteOrder })
             />
           </div>
           <div class="text-input">
-            <text-input label="官方訂單 ID" v-model:value="formOfficialOrderId" />
+            <select-component
+              label="官方訂單"
+              :optionList="officialOrderOptions"
+              :defaultValue="formOfficialOrderOption"
+              @selectOption="formOfficialOrderOption = $event"
+            />
           </div>
         </div>
         <div class="row">

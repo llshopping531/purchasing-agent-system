@@ -6,6 +6,7 @@ import SidebarComponent from '@/components/SidebarComponent.vue'
 import IconCalendarDays from '@/components/icons/IconCalendarDays.vue'
 import IconCartShopping from '@/components/icons/IconCartShopping.vue'
 import IconReceipt from '@/components/icons/IconReceipt.vue'
+import IconFlag from '@/components/icons/IconFlag.vue'
 
 const uiStore = useUiStore()
 const router = useRouter()
@@ -14,6 +15,7 @@ const navItems = [
   { name: '活動管理', path: PATH.onlineEvent, icon: IconCalendarDays },
   { name: '商品管理', path: PATH.onlineProduct, icon: IconCartShopping },
   { name: '訂單管理', path: PATH.onlineOrder, icon: IconReceipt },
+  { name: '官方訂單', path: PATH.onlineOfficialOrder, icon: IconFlag },
 ]
 
 router.afterEach(() => {
