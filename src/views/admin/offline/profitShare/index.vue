@@ -189,15 +189,23 @@ function formatPercent(val: number | null) {
       <div class="summary-label">分潤總計</div>
       <div class="summary-cards">
         <div class="stat-card">
-          <div class="stat-card-title">台幣總額</div>
+          <div class="stat-card-title">台幣銷售總額</div>
           <div class="stat-card-value">{{ formatTwd(summary.totalTwd) }}</div>
         </div>
         <div class="stat-card profit">
-          <div class="stat-card-title">獲利金額</div>
+          <div class="stat-card-title">獲利總額</div>
           <div class="stat-card-value">{{ formatTwd(summary.totalProfit) }}</div>
         </div>
+        <div class="stat-card cost">
+          <div class="stat-card-title">活動成本</div>
+          <div class="stat-card-value">{{ formatTwd(summary.totalEventCost) }}</div>
+        </div>
+        <div class="stat-card final">
+          <div class="stat-card-title">最終獲利</div>
+          <div class="stat-card-value">{{ formatTwd(summary.finalProfit) }}</div>
+        </div>
         <div class="stat-card share">
-          <div class="stat-card-title">分潤金額</div>
+          <div class="stat-card-title">分潤總額</div>
           <div class="stat-card-value">{{ formatTwd(summary.totalProfitShare) }}</div>
         </div>
         <div class="stat-card ratio">
@@ -205,8 +213,12 @@ function formatPercent(val: number | null) {
           <div class="stat-card-value">{{ formatPercent(summary.ratio) }}</div>
         </div>
         <div class="stat-card ratio">
-          <div class="stat-card-title">成本比率</div>
+          <div class="stat-card-title">成本匯率</div>
           <div class="stat-card-value">{{ formatPercent(summary.costRate) }}</div>
+        </div>
+        <div class="stat-card ratio">
+          <div class="stat-card-title">販售基本匯率</div>
+          <div class="stat-card-value">{{ formatPercent(summary.baseSellRate) }}</div>
         </div>
       </div>
     </div>
@@ -340,6 +352,16 @@ h3 {
   &.profit {
     border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
     background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+  }
+
+  &.cost {
+    border-color: color-mix(in srgb, #d97706 35%, transparent);
+    background: color-mix(in srgb, #d97706 6%, var(--color-surface));
+  }
+
+  &.final {
+    border-color: color-mix(in srgb, #16a34a 35%, transparent);
+    background: color-mix(in srgb, #16a34a 6%, var(--color-surface));
   }
 
   &.share {

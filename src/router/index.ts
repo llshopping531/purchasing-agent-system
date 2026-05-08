@@ -109,6 +109,11 @@ const router = createRouter({
               name: 'SettlementView',
               component: () => import('../views/admin/offline/settlement/index.vue'),
             },
+            {
+              path: 'eventCosts',
+              name: 'EventCostsView',
+              component: () => import('../views/admin/offline/eventCosts/index.vue'),
+            },
           ],
         },
         {

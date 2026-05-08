@@ -219,16 +219,22 @@ export interface QueryStatsProfitShareSummaryReq {
  * 查詢分潤總計 response
  */
 export interface QueryStatsProfitShareSummaryRes {
-  /** 台幣總額 */
+  /** 台幣銷售總額 */
   totalTwd: number
-  /** 獲利金額 */
+  /** 獲利總額：所有訂單獲利之和 */
   totalProfit: number
-  /** 分潤金額 */
+  /** 活動成本 */
+  totalEventCost: number
+  /** 最終獲利：獲利總額 − 活動成本 */
+  finalProfit: number
+  /** 分潤總額：最終獲利 × 分潤比 */
   totalProfitShare: number
-  /** 分潤比例 */
+  /** 分潤比（PROFIT_SHARE_RATIO） */
   ratio: number
-  /** 成本匯率 */
+  /** 成本匯率（COST_RATE） */
   costRate: number
+  /** 販售基本匯率（BASE_SELL_RATE） */
+  baseSellRate: number
 }
 
 /**

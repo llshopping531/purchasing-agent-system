@@ -35,6 +35,8 @@ export const PATH = {
   offlineProfitShare: `${BASE_ADMIN}/offline/profitShare`,
   /** 場販－活動結算 */
   offlineSettlement: `${BASE_ADMIN}/offline/settlement`,
+  /** 場販－活動成本 */
+  offlineEventCosts: `${BASE_ADMIN}/offline/eventCosts`,
 
   /** 通販專區入口 */
   online: `${BASE_ADMIN}/online`,
