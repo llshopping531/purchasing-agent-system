@@ -9,6 +9,7 @@ import ShopSelectComponent from '@/components/inputs/selects/ShopSelectComponent
 import TableComponent, { type HeaderRow } from '@/components/tables/TableComponent.vue'
 import PaginationComponent from '@/components/PaginationComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
+import ConfirmModalComponent from '@/components/ConfirmModalComponent.vue'
 import ProductFormModal from './ProductFormModal.vue'
 import BatchProductFormModal from './BatchProductFormModal.vue'
 import SocialPostModal from './SocialPostModal.vue'
@@ -54,6 +55,7 @@ const isShowChannelSelect = ref(false)
 
 /** 表格欄位定義 */
 const headerRow: HeaderRow[] = [
+  { name: '', value: '_check', sort: -1, width: '44px' },
   { name: '商品名稱', value: 'name', sort: 0, width: '250px', mobileSpan: 2 },
   { name: '日幣定價', value: 'priceJpy', sort: 1, width: '100px', sortable: true },
   { name: '台幣定價', value: 'priceTwd', sort: 2, width: '100px', sortable: true },
@@ -61,6 +63,36 @@ const headerRow: HeaderRow[] = [
   { name: '盲抽', value: 'isBlindBox', sort: 4, width: '70px' },
   { name: '圖片', value: 'image', sort: 5 },
 ]
+
+/** 已選取的商品 ID 列表 */
+const selectedIds = ref<number[]>([])
+/** 批次刪除進行中 */
+const isBatchDeleting = ref(false)
+/** 是否顯示批次刪除確認彈窗 */
+const showBatchConfirm = ref(false)
+
+function toggleSelect(id: number) {
+  const idx = selectedIds.value.indexOf(id)
+  if (idx === -1) selectedIds.value = [...selectedIds.value, id]
+  else selectedIds.value = selectedIds.value.filter((v) => v !== id)
+}
+
+function toggleSelectAll() {
+  if (selectedIds.value.length === tableData.value.length) {
+    selectedIds.value = []
+  } else {
+    selectedIds.value = tableData.value.map((p) => p.id)
+  }
+}
+
+async function confirmBatchDelete() {
+  showBatchConfirm.value = false
+  isBatchDeleting.value = true
+  await Promise.all(selectedIds.value.map((id) => productsApi.deleteProducts(id)))
+  selectedIds.value = []
+  isBatchDeleting.value = false
+  getProductList()
+}
 
 /** 當前頁的商品資料 */
 const tableData = ref<ProductsResBase[]>([])
@@ -189,6 +221,7 @@ async function getProductList() {
  */
 function onChangePage(page: number) {
   currentPage.value = page
+  selectedIds.value = []
   getProductList()
 }
 
@@ -272,6 +305,19 @@ function onSearch() {
         </div>
       </div>
     </div>
+    <!-- 批次操作工具列 -->
+    <div v-if="isTableQueried && !currentEventIsLocked" class="batch-bar">
+      <button class="btn btn-select-all" @click="toggleSelectAll">
+        {{ selectedIds.length === tableData.length && tableData.length > 0 ? '取消全選' : '全選本頁' }}
+      </button>
+      <template v-if="selectedIds.length">
+        <span class="batch-count">已選取 {{ selectedIds.length }} 筆</span>
+        <button class="btn btn-batch-delete" :disabled="isBatchDeleting" @click="showBatchConfirm = true">
+          {{ isBatchDeleting ? '刪除中…' : '批次刪除' }}
+        </button>
+      </template>
+    </div>
+
     <table-component
       v-if="isTableQueried"
       :headerRow="headerRow"
@@ -284,6 +330,15 @@ function onSearch() {
       @edit="productFormModalRef?.editProduct($event)"
       @delete="productFormModalRef?.deleteProduct($event)"
     >
+      <template #col-_check="{ row }">
+        <input
+          v-if="!currentEventIsLocked"
+          type="checkbox"
+          class="row-checkbox"
+          :checked="selectedIds.includes(row.id)"
+          @change="toggleSelect(row.id)"
+        />
+      </template>
       <template #col-priceTwd="{ row }">
         <span>
           <span
@@ -326,6 +381,14 @@ function onSearch() {
       :eventId="currentEventId"
       :shopId="currentShopId"
       @confirmed="getProductList"
+    />
+    <confirm-modal-component
+      v-if="showBatchConfirm"
+      name="批次刪除"
+      :confirmText="`確定要刪除已選取的 ${selectedIds.length} 筆商品？`"
+      :isDelete="true"
+      @confirm="confirmBatchDelete"
+      @cancel="showBatchConfirm = false"
     />
     <product-import-modal
       v-if="isShowImportModal"
@@ -419,6 +482,54 @@ function onSearch() {
     color: #bbb;
     font-size: 0.85rem;
   }
+  .row-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+  }
+
+  .batch-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+
+    .batch-count {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+
+    .btn-select-all {
+      font-size: 0.8rem;
+      padding: 0.2rem 0.75rem;
+      background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+      color: var(--color-primary);
+      border: 1.5px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+      border-radius: var(--radius-xl);
+      box-shadow: none;
+      &:hover {
+        background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+      }
+    }
+
+    .btn-batch-delete {
+      font-size: 0.8rem;
+      padding: 0.2rem 0.75rem;
+      background: var(--color-danger);
+      box-shadow: none;
+      border-radius: var(--radius-xl);
+      &:hover:not(:disabled) {
+        background: var(--color-danger-dark);
+      }
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
+
   .blind-badge {
     display: inline-block;
     padding: 0.1rem 0.45rem;

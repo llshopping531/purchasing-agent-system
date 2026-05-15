@@ -93,6 +93,18 @@ function onChangeSize(size: number) {
         </div>
       </div>
     </div>
+    <div class="cost-note">
+      <div class="cost-note-title">費用基準參考</div>
+      <ul class="cost-note-list">
+        <li>機票來回：上限 1萬2（含行李），行李加購可實報實銷</li>
+        <li>飯店：一晚 $2,000／晚（不計室友）</li>
+        <li>展場：實報實銷</li>
+        <li>咖啡廳：低消；若餐點特典有售出，可實報實銷</li>
+        <li>日境內交通：¥1,000／天</li>
+        <li>日額外交通：實報實銷</li>
+        <li>餐費：¥2,000／天</li>
+      </ul>
+    </div>
 
     <!-- 成本列表 -->
     <div v-if="selectedEvent" class="table-section">
@@ -216,6 +228,37 @@ h3 {
 .fee-value {
   font-weight: 600;
   color: var(--color-primary);
+}
+
+/* ── 費用基準參考 ── */
+.cost-note {
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+  border: 1.5px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
+  border-radius: var(--radius-lg);
+  padding: 0.85rem 1.1rem;
+}
+
+.cost-note-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.cost-note-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  li {
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+  }
 }
 
 /* ── 空狀態 ── */
