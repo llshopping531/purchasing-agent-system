@@ -30,6 +30,8 @@ const isVisible = ref(false)
 const modalMode = ref<2 | 3>(2)
 /** 目標商品 ID */
 const currentId = ref(0)
+/** 目標商品所屬通路 ID */
+const currentChannelId = ref(0)
 /** 刪除確認時顯示的商品名稱 */
 const currentName = ref('')
 
@@ -80,6 +82,7 @@ const isBlindBox = ref(false)
 function editProduct(data: ProductsResBase) {
   modalMode.value = 2
   currentId.value = data.id
+  currentChannelId.value = data.channelId
   resetForm({
     values: {
       name: data.name,
@@ -120,7 +123,7 @@ async function confirm() {
   if (modalMode.value === 2) {
     await productsApi.patchProducts(currentId.value, {
       eventId: Number(props.eventId),
-      channelId: Number(props.shopId),
+      channelId: currentChannelId.value,
       name: name.value ?? '',
       priceJpy: priceJpy.value ?? undefined,
       exchangeRate: exchangeRate.value ?? undefined,
@@ -139,6 +142,7 @@ async function confirm() {
  */
 function closeModal() {
   currentId.value = 0
+  currentChannelId.value = 0
   currentName.value = ''
   resetForm()
   image.value = ''
