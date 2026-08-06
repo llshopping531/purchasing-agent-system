@@ -26,6 +26,7 @@ import { useSearchStore } from '@/stores/search'
 import { isInactiveOrder } from '@/utils/order'
 import { orderApi } from '@/services/api/offline/order/order-api'
 import type { DrawsData } from '@/services/api/offline/order/order-api-interfaces'
+import { SOURCE_LABELS } from '@/constants/common.constant'
 
 const searchStore = useSearchStore()
 
@@ -283,6 +284,9 @@ async function selectCustomer(customer: PackingListCustomer) {
             :class="{ selected: selectedCustomer?.id === customer.id }"
             @click="selectCustomer(customer)"
           >
+            <span class="source-badge" :class="`source-badge--${customer.source}`">
+              {{ SOURCE_LABELS[customer.source] ?? customer.source }}
+            </span>
             <span class="customer-name">{{ customer.name }}</span>
             <button
               class="copy-link-btn"
@@ -303,7 +307,12 @@ async function selectCustomer(customer: PackingListCustomer) {
           {{ selectedCustomer ? selectedCustomer.name : '選擇客戶' }}
         </button>
         <template v-if="selectedCustomer">
-          <h4>{{ selectedCustomer.name }} 的訂單明細</h4>
+          <h4>
+            <span class="source-badge" :class="`source-badge--${selectedCustomer.source}`">
+              {{ SOURCE_LABELS[selectedCustomer.source] ?? selectedCustomer.source }}
+            </span>
+            {{ selectedCustomer.name }} 的訂單明細
+          </h4>
 
           <!-- 通路滿額狀態 -->
           <div v-if="channelBonusList.length > 0" class="bonus-section">
@@ -451,7 +460,7 @@ async function selectCustomer(customer: PackingListCustomer) {
 
 /* ── 客戶面板 ── */
 .customer-panel {
-  width: 180px;
+  width: 200px;
   flex-shrink: 0;
 
   @media (max-width: 768px) {

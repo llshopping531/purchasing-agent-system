@@ -9,6 +9,7 @@ import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { customersApi } from '@/services/api/offline/customers/customers-api'
 import type { CustomersResBase } from '@/services/api/offline/customers/customers-api-interfaces'
 import { orderApi } from '@/services/api/offline/order/order-api'
+import { SOURCE_LABELS } from '@/constants/common.constant'
 const props = withDefaults(
   defineProps<{
     /** 預設選取的顧客 Option */
@@ -87,6 +88,10 @@ async function getDistinctCustomers(enentId: number, chaanelId?: number) {
   customerList.value = props.isDisplayAll ? [allOption, ...list] : list
 }
 
+function sourceLabel(source: string | undefined): string {
+  return source ? (SOURCE_LABELS[source] ?? source) : ''
+}
+
 function selectOption($event: SelectOption<CustomersResBase | undefined>) {
   localDefault.value = $event
   emit('selectOption', $event)
@@ -106,5 +111,12 @@ function selectOptions($event: SelectOption<CustomersResBase | undefined>[]) {
     :multiple="multiple"
     @selectOption="selectOption($event)"
     @selectOptions="selectOptions($event)"
-  />
+  >
+    <template #option-item="{ option }">
+      <span class="source-badge" :class="`source-badge--${option.value?.source}`">
+        {{ sourceLabel(option.value?.source) }}
+      </span>
+      {{ option.name }}
+    </template>
+  </select-component>
 </template>

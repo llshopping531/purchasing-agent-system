@@ -177,7 +177,7 @@ function filter() {
         @mousedown.prevent="selectOption(option)"
       >
         <span v-if="pop.multiple" class="check-mark">{{ isSelected(option) ? '✓' : '' }}</span>
-        {{ option.name }}
+        <slot name="option-item" :option="option">{{ option.name }}</slot>
       </div>
     </div>
   </div>

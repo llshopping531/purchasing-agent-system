@@ -16,6 +16,7 @@ import type { CustomerRankingItem } from '@/services/api/offline/stats/stats-api
 import type { EventsResBase } from '@/services/api/offline/events/events-api-interfaces'
 import type { SelectOption } from '@/interfaces/common'
 import { customersApi } from '@/services/api/offline/customers/customers-api'
+import { SOURCE_LABELS } from '@/constants/common.constant'
 
 const PACKAGING_FEE = 10
 
@@ -47,16 +48,13 @@ function onSelectCustomer(opt: SelectOption<PackingListCustomer>) {
 const defaultTemplate = `您好 {{customerName}}，非常感謝參與本次連線代購❤️
 本次 {{eventName}} 代購消費金額共 {{totalWithFee}}（含 $10 元包材費）。
 
-➜ 匯款金額為 {{remittance}}（已扣除預留$20賣貨便金額，無需再自行扣除）
-➜ 匯款期限為 {{deadline}}
-❗️$760以下可直接填寫付款表單，勾選取付選項
-
 📍詳細購物清單請查看此連結🔗
 {{queryLink}}
-📍確認完畢後麻煩填寫付款表單（匯款資訊在表單內）
+
+📍確認沒問題之後，再麻煩下單
 {{formLink}}
 
-若有任何問題歡迎提問唷
+請勿在訂單上備註，若有任何問題請向官方詢問
 再次感謝本次的跟團（｡･ω･｡）`
 
 const textareaRef = ref<HTMLTextAreaElement>()
@@ -296,7 +294,7 @@ const settlementTableData = computed(() =>
         total === 0 ? '金額為 $0' :
         total > 10000 ? '金額超過萬元' :
         total > 8000 ? '金額超過 $8,000' : ''
-      return { name: c.name, totalTwd: formatTwd(total), grandTotal: formatTwd(total > 0 ? total + PACKAGING_FEE : 0), remark }
+      return { name: c.name, source: c.source, totalTwd: formatTwd(total), grandTotal: formatTwd(total > 0 ? total + PACKAGING_FEE : 0), remark }
     })
 )
 </script>
@@ -401,13 +399,27 @@ const settlementTableData = computed(() =>
             </span>
             <span v-if="isLoading" class="loading-hint">載入中…</span>
             <div v-else-if="customers.length > 0" class="customer-select-wrap">
+              <span
+                v-if="selectedCustomer?.source"
+                class="source-badge"
+                :class="`source-badge--${selectedCustomer.source}`"
+              >{{ SOURCE_LABELS[selectedCustomer.source] ?? selectedCustomer.source }}</span>
               <select-component
                 label="顧客"
                 :isDisplayLable="false"
                 :defaultValue="selectedCustomerOption"
                 :optionList="customerOptions"
                 @selectOption="onSelectCustomer"
-              />
+              >
+                <template #option-item="{ option }">
+                  <span
+                    v-if="option.value?.source"
+                    class="source-badge"
+                    :class="`source-badge--${option.value.source}`"
+                  >{{ SOURCE_LABELS[option.value.source] ?? option.value.source }}</span>
+                  {{ option.name }}
+                </template>
+              </select-component>
             </div>
             <button
               class="copy-btn"
@@ -459,6 +471,12 @@ const settlementTableData = computed(() =>
         :isEdit="false"
         :isDelete="false"
       >
+        <template #col-name="{ row }">
+          <span class="source-badge" :class="`source-badge--${row.source}`">
+            {{ SOURCE_LABELS[row.source] ?? row.source }}
+          </span>
+          {{ row.name }}
+        </template>
         <template #col-remark="{ row }">
           <span
             v-if="row.remark"
@@ -747,6 +765,9 @@ const settlementTableData = computed(() =>
 .customer-select-wrap {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .next-btn {
@@ -895,6 +916,7 @@ const settlementTableData = computed(() =>
   border: 1px solid color-mix(in srgb, #dc2626 40%, transparent);
   color: #dc2626;
 }
+
 
 /* ── 名單彈窗 ── */
 .settlement-modal-toolbar {

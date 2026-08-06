@@ -309,6 +309,7 @@ function displayValue(val: unknown): unknown {
     font-size: 0.875rem;
     display: flex;
     align-items: center;
+    gap: .3rem
   }
 
   .item-col.operate {

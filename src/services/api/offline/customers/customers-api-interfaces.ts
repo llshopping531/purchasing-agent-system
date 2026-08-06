@@ -96,6 +96,10 @@ export interface CustomersResBase {
   isDiscount: boolean
   /** 是否為老闆 */
   isBoss: boolean
+  /** 是否為黑單 */
+  isBlacklist: boolean
+  /** 是否排除分潤? */
+  excludeProfit: boolean
   /** 備註 */
   note: string
   /** 自定義欄位 */

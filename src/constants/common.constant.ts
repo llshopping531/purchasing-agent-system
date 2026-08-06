@@ -1,3 +1,17 @@
+/** 顧客來源 source 值對應的短標籤（用於小徽章顯示） */
+export const SOURCE_LABELS: Record<string, string> = {
+  '1': 'L',
+  '2': 'F',
+  '3': 'T',
+}
+
+/** 顧客來源 source 值對應的品牌顏色 */
+export const SOURCE_COLORS: Record<string, string> = {
+  '1': '#06c755',
+  '2': '#1877f2',
+  '3': '#000',
+}
+
 export const SOCIAL_DEFAULT_TEMPLATE = `#場販 #\${EventName} \${channelName}
 4/22-4/28連線
 

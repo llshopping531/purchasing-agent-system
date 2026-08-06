@@ -377,7 +377,7 @@ const hasAnySelection = computed(
 
 /* ── 客戶面板 ── */
 .customer-panel {
-  width: 180px;
+  width: 200px;
   flex-shrink: 0;
 
   @media (max-width: 768px) {

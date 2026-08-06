@@ -14,6 +14,7 @@ import type { CustomersResBase } from '@/services/api/offline/customers/customer
 import { eventApi } from '@/services/api/offline/events/events-api'
 import { packingListApi } from '@/services/api/offline/packing-list/packing-list-api'
 import type { SelectOption } from '@/interfaces/common'
+import { SOURCE_LABELS } from '@/constants/common.constant'
 
 /** CustomerFormModal 元件的 ref，用於呼叫其 createCustomer / editCustomer */
 const customerFormModalRef = ref<InstanceType<typeof CustomerFormModal>>()
@@ -217,6 +218,14 @@ async function updateCustomerField(
       @change-size="onChangeSize"
       @sort="onSort"
     >
+      <template #col-name="{ row }">
+        {{ row.name }}
+      </template>
+      <template #col-sourceName="{ row }">
+        <span class="source-badge" :class="`source-badge--${row.source}`">
+          {{ SOURCE_LABELS[row.source] ?? row.sourceName }}
+        </span>
+      </template>
       <template #col-hasMessagedOfficial="{ row }">
         <checkbox-input
           v-if="isQuickEdit"
