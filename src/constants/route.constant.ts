@@ -43,6 +43,11 @@ export const PATH = {
   /** 結帳單新增 */
   checkoutNew: `${BASE_ADMIN}/online/checkout/new`,
 
+  /** 出貨單列表 */
+  shippingOrder: `${BASE_ADMIN}/online/shipping-order`,
+  /** 出貨單新增 */
+  shippingOrderNew: `${BASE_ADMIN}/online/shipping-order/new`,
+
   /** 通販專區入口 */
   online: `${BASE_ADMIN}/online`,
   /** 通販－活動管理 */

@@ -171,6 +171,26 @@ const router = createRouter({
               name: 'OnlineCheckoutEdit',
               component: () => import('../views/admin/online/checkout/CheckoutFormView.vue'),
             },
+            {
+              path: 'shipping-order',
+              name: 'OnlineShippingOrderView',
+              component: () => import('../views/admin/online/shippingOrder/index.vue'),
+            },
+            {
+              path: 'shipping-order/new',
+              name: 'OnlineShippingOrderCreate',
+              component: () => import('../views/admin/online/shippingOrder/ShippingOrderFormView.vue'),
+            },
+            {
+              path: 'shipping-order/:id',
+              name: 'OnlineShippingOrderDetail',
+              component: () => import('../views/admin/online/shippingOrder/ShippingOrderDetailView.vue'),
+            },
+            {
+              path: 'shipping-order/:id/edit',
+              name: 'OnlineShippingOrderEdit',
+              component: () => import('../views/admin/online/shippingOrder/ShippingOrderFormView.vue'),
+            },
           ],
         },
         {
