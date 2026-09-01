@@ -38,6 +38,11 @@ export const PATH = {
   /** 場販－活動成本 */
   offlineEventCosts: `${BASE_ADMIN}/offline/eventCosts`,
 
+  /** 結帳單列表 */
+  checkout: `${BASE_ADMIN}/online/checkout`,
+  /** 結帳單新增 */
+  checkoutNew: `${BASE_ADMIN}/online/checkout/new`,
+
   /** 通販專區入口 */
   online: `${BASE_ADMIN}/online`,
   /** 通販－活動管理 */

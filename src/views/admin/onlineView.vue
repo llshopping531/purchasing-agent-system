@@ -18,6 +18,7 @@ const navItems = [
   { name: '訂單管理', path: PATH.onlineOrder, icon: IconReceipt },
   { name: '官方訂單', path: PATH.onlineOfficialOrder, icon: IconFlag },
   { name: '國際運費計算', path: PATH.onlineSecondSupplement, icon: IconMoneyBill },
+  { name: '結帳單', path: PATH.checkout, icon: IconReceipt },
 ]
 
 router.afterEach(() => {

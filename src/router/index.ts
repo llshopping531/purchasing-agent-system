@@ -151,6 +151,26 @@ const router = createRouter({
               name: 'OnlineSecondSupplementView',
               component: () => import('../views/admin/online/secondSupplement/index.vue'),
             },
+            {
+              path: 'checkout',
+              name: 'OnlineCheckoutView',
+              component: () => import('../views/admin/online/checkout/index.vue'),
+            },
+            {
+              path: 'checkout/new',
+              name: 'OnlineCheckoutCreate',
+              component: () => import('../views/admin/online/checkout/CheckoutFormView.vue'),
+            },
+            {
+              path: 'checkout/:id',
+              name: 'OnlineCheckoutDetail',
+              component: () => import('../views/admin/online/checkout/CheckoutDetailView.vue'),
+            },
+            {
+              path: 'checkout/:id/edit',
+              name: 'OnlineCheckoutEdit',
+              component: () => import('../views/admin/online/checkout/CheckoutFormView.vue'),
+            },
           ],
         },
         {
@@ -171,12 +191,6 @@ const router = createRouter({
           path: 'shipping',
           name: 'shipping',
           component: () => import('../views/admin/shippingView/index.vue'),
-        },
-        {
-          /** 結帳單 */
-          path: 'checkout',
-          name: 'checkout',
-          component: () => import('../views/admin/checkoutView.vue'),
         },
         {
           /** 系統專區 */
