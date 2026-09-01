@@ -146,6 +146,11 @@ const router = createRouter({
               name: 'OnlineOfficialOrderView',
               component: () => import('../views/admin/online/official-order/index.vue'),
             },
+            {
+              path: 'second-supplement',
+              name: 'OnlineSecondSupplementView',
+              component: () => import('../views/admin/online/secondSupplement/index.vue'),
+            },
           ],
         },
         {

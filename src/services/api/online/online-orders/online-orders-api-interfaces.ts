@@ -14,6 +14,8 @@ export interface QueryOnlineOrdersReq {
   sort?: string
   /** 排序 (ASC / DESC) */
   direction?: 'ASC' | 'DESC'
+  /** 官方訂單 ID */
+  officialOrderId?: number
 }
 
 /**

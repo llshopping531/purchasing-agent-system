@@ -48,6 +48,8 @@ export const PATH = {
   onlineOrder: `${BASE_ADMIN}/online/order`,
   /** 通販－官方訂單管理 */
   onlineOfficialOrder: `${BASE_ADMIN}/online/official-order`,
+  /** 通販－國際運費計算 */
+  onlineSecondSupplement: `${BASE_ADMIN}/online/second-supplement`,
 
   /** 包貨清單專區 */
   packing: `${BASE_ADMIN}/packing`,

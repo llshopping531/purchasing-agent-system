@@ -41,10 +41,11 @@ const isTableQueried = ref(false)
 
 const headerRow: HeaderRow[] = [
   { name: '商品名稱', value: 'name', sort: 0, mobileSpan: 2 },
-  { name: '日幣價格', value: 'priceJpy', sort: 0, width: '120px' },
-  { name: '匯率', value: 'exchangeRate', sort: 0, width: '100px' },
-  { name: '台幣價格', value: 'priceTwd', sort: 0, width: '120px' },
-  { name: '重量（kg）', value: 'weight', sort: 0, width: '120px' },
+  { name: '日幣價格', value: 'priceJpy', sort: 1, width: '120px' },
+  { name: '匯率', value: 'exchangeRate', sort: 2, width: '100px' },
+  { name: '台幣價格', value: 'priceTwd', sort: 3, width: '120px' },
+  { name: '重量（kg）', value: 'weight', sort: 4, width: '120px' },
+  { name: '國際運費', value: 'shippingFee', sort: 5, width: '110px' },
 ]
 
 onMounted(async () => {
