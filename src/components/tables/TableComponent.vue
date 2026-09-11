@@ -67,6 +67,8 @@ const emit = defineEmits<{
   (e: 'changeSize', data: number): void
   /** 點擊可排序欄位時觸發 */
   (e: 'sort', field: string, direction: 'ASC' | 'DESC'): void
+  /** 點擊列時觸發，帶出該列資料 */
+  (e: 'rowClick', data: T): void
 }>()
 
 /**
@@ -163,6 +165,7 @@ function displayValue(val: unknown): unknown {
           v-for="(dataRow, index) in pop.tableData"
           :key="index"
           :class="pop.rowClass?.(dataRow)"
+          @click="emit('rowClick', dataRow)"
         >
           <div
             class="item-col"
@@ -279,6 +282,10 @@ function displayValue(val: unknown): unknown {
       gap: 1px;
       margin-top: 1px;
       transition: filter 0.1s;
+
+      &.row-selected .item-col {
+        background: color-mix(in srgb, var(--color-primary) 10%, transparent) !important;
+      }
 
       &:nth-child(even) .item-col {
         background-color: #f8f6ff;

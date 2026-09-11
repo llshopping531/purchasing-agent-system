@@ -38,6 +38,16 @@ export const PATH = {
   /** 場販－活動成本 */
   offlineEventCosts: `${BASE_ADMIN}/offline/eventCosts`,
 
+  /** 結帳單列表 */
+  checkout: `${BASE_ADMIN}/online/checkout`,
+  /** 結帳單新增 */
+  checkoutNew: `${BASE_ADMIN}/online/checkout/new`,
+
+  /** 出貨單列表 */
+  shippingOrder: `${BASE_ADMIN}/online/shipping-order`,
+  /** 出貨單新增 */
+  shippingOrderNew: `${BASE_ADMIN}/online/shipping-order/new`,
+
   /** 通販專區入口 */
   online: `${BASE_ADMIN}/online`,
   /** 通販－活動管理 */
@@ -48,6 +58,10 @@ export const PATH = {
   onlineOrder: `${BASE_ADMIN}/online/order`,
   /** 通販－官方訂單管理 */
   onlineOfficialOrder: `${BASE_ADMIN}/online/official-order`,
+  /** 通販－國際運費計算 */
+  onlineSecondSupplement: `${BASE_ADMIN}/online/second-supplement`,
+  /** 通販－國際運費計算新增 */
+  onlineSecondSupplementNew: `${BASE_ADMIN}/online/second-supplement/new`,
 
   /** 包貨清單專區 */
   packing: `${BASE_ADMIN}/packing`,
@@ -56,4 +70,6 @@ export const PATH = {
   system: `${BASE_ADMIN}/system`,
   /** 系統－Threads 留言查詢 */
   systemThreads: `${BASE_ADMIN}/system/threads`,
+  /** 系統－顧客管理 */
+  systemCustomer: `${BASE_ADMIN}/system/customer`,
 }

@@ -75,11 +75,6 @@ const router = createRouter({
               component: () => import('../views/admin/offline/PurchaseListView/index.vue'),
             },
             {
-              path: 'customer',
-              name: 'CustomerView',
-              component: () => import('../views/admin/offline/customer/index.vue'),
-            },
-            {
               path: 'product',
               name: 'ProductView',
               component: () => import('../views/admin/offline/product/index.vue'),
@@ -146,6 +141,66 @@ const router = createRouter({
               name: 'OnlineOfficialOrderView',
               component: () => import('../views/admin/online/official-order/index.vue'),
             },
+            {
+              path: 'second-supplement',
+              name: 'OnlineSecondSupplementView',
+              component: () => import('../views/admin/online/secondSupplement/index.vue'),
+            },
+            {
+              path: 'second-supplement/new',
+              name: 'OnlineSecondSupplementCreate',
+              component: () => import('../views/admin/online/secondSupplement/SecondSupplementFormView.vue'),
+            },
+            {
+              path: 'second-supplement/:id',
+              name: 'OnlineSecondSupplementDetail',
+              component: () => import('../views/admin/online/secondSupplement/SecondSupplementDetailView.vue'),
+            },
+            {
+              path: 'second-supplement/:id/edit',
+              name: 'OnlineSecondSupplementEdit',
+              component: () => import('../views/admin/online/secondSupplement/SecondSupplementFormView.vue'),
+            },
+            {
+              path: 'checkout',
+              name: 'OnlineCheckoutView',
+              component: () => import('../views/admin/online/checkout/index.vue'),
+            },
+            {
+              path: 'checkout/new',
+              name: 'OnlineCheckoutCreate',
+              component: () => import('../views/admin/online/checkout/CheckoutFormView.vue'),
+            },
+            {
+              path: 'checkout/:id',
+              name: 'OnlineCheckoutDetail',
+              component: () => import('../views/admin/online/checkout/CheckoutDetailView.vue'),
+            },
+            {
+              path: 'checkout/:id/edit',
+              name: 'OnlineCheckoutEdit',
+              component: () => import('../views/admin/online/checkout/CheckoutFormView.vue'),
+            },
+            {
+              path: 'shipping-order',
+              name: 'OnlineShippingOrderView',
+              component: () => import('../views/admin/online/shippingOrder/index.vue'),
+            },
+            {
+              path: 'shipping-order/new',
+              name: 'OnlineShippingOrderCreate',
+              component: () => import('../views/admin/online/shippingOrder/ShippingOrderFormView.vue'),
+            },
+            {
+              path: 'shipping-order/:id',
+              name: 'OnlineShippingOrderDetail',
+              component: () => import('../views/admin/online/shippingOrder/ShippingOrderDetailView.vue'),
+            },
+            {
+              path: 'shipping-order/:id/edit',
+              name: 'OnlineShippingOrderEdit',
+              component: () => import('../views/admin/online/shippingOrder/ShippingOrderFormView.vue'),
+            },
           ],
         },
         {
@@ -168,12 +223,6 @@ const router = createRouter({
           component: () => import('../views/admin/shippingView/index.vue'),
         },
         {
-          /** 結帳單 */
-          path: 'checkout',
-          name: 'checkout',
-          component: () => import('../views/admin/checkoutView.vue'),
-        },
-        {
           /** 系統專區 */
           path: 'system',
           name: 'system',
@@ -186,7 +235,12 @@ const router = createRouter({
             {
               path: 'threads',
               name: 'ThreadsView',
-              component: () => import('../views/admin/offline/threads/index.vue'),
+              component: () => import('../views/admin/system/threads/index.vue'),
+            },
+            {
+              path: 'customer',
+              name: 'CustomerView',
+              component: () => import('../views/admin/system/customer/index.vue'),
             },
           ],
         },

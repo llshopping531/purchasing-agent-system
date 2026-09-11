@@ -7,6 +7,8 @@ import IconCalendarDays from '@/components/icons/IconCalendarDays.vue'
 import IconCartShopping from '@/components/icons/IconCartShopping.vue'
 import IconReceipt from '@/components/icons/IconReceipt.vue'
 import IconFlag from '@/components/icons/IconFlag.vue'
+import IconMoneyBill from '@/components/icons/IconMoneyBill.vue'
+import IconBox from '@/components/icons/IconBox.vue'
 
 const uiStore = useUiStore()
 const router = useRouter()
@@ -16,6 +18,9 @@ const navItems = [
   { name: '商品管理', path: PATH.onlineProduct, icon: IconCartShopping },
   { name: '訂單管理', path: PATH.onlineOrder, icon: IconReceipt },
   { name: '官方訂單', path: PATH.onlineOfficialOrder, icon: IconFlag },
+  { name: '國際運費計算', path: PATH.onlineSecondSupplement, icon: IconMoneyBill },
+  { name: '結帳單', path: PATH.checkout, icon: IconReceipt },
+  { name: '出貨單', path: PATH.shippingOrder, icon: IconBox },
 ]
 
 router.afterEach(() => {

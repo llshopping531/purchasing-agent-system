@@ -19,7 +19,6 @@ const router = useRouter()
 const orderItem        = { name: '訂單管理',   path: PATH.offlineOrder }
 const productItem      = { name: '商品管理',   path: PATH.offlineProduct }
 const eventItem        = { name: '活動管理',   path: PATH.offlineEvent }
-const customerItem     = { name: '顧客管理',   path: PATH.offlineCustomer }
 const purchaseListItem = { name: '採購清單',   path: PATH.offlinePurchaseList }
 const packingListItem    = { name: '包貨清單', path: PATH.offlinePackingList }
 const channelItem      = { name: '通路管理',   path: PATH.offlineChannel }
@@ -51,9 +50,6 @@ router.afterEach(() => {
           </router-link>
           <router-link :to="eventItem.path" class="nav-item" >
             <icon-calendar-days class="nav-icon" /><span class="nav-item-name" v-if="!isCollapsed">{{ eventItem.name }}</span>
-          </router-link>
-          <router-link :to="customerItem.path" class="nav-item">
-            <icon-users class="nav-icon" /><span class="nav-item-name" v-if="!isCollapsed">{{ customerItem.name }}</span>
           </router-link>
           <router-link :to="statsItem.path" class="nav-item" >
             <icon-chart-simple class="nav-icon" /><span class="nav-item-name" v-if="!isCollapsed">{{ statsItem.name }}</span>

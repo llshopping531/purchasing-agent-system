@@ -2,15 +2,19 @@
 /**
  * 通販訂單批次新增彈窗
  * 點擊「新增」立即送出 API（非同步，不需等待）
- * 關閉時若仍有送出中的項目，顯示等待畫面直到全部完成
+ * 支援新增不存在的顧客與商品
  */
 import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import MaskComponent from '@/components/MaskComponent.vue'
+import ModalComponent from '@/components/ModalComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
-import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import CustomerSelectComponent from '@/components/inputs/selects/CustomerSelectComponent.vue'
+import NewCustomerForm from '@/components/forms/NewCustomerForm.vue'
+import PriceRateInputComponent from '@/components/inputs/PriceRateInputComponent.vue'
+import SelectComponent from '@/components/inputs/SelectComponent.vue'
 import { onlineProductsApi } from '@/services/api/online/online-products/online-products-api'
 import { onlineOrdersApi } from '@/services/api/online/online-orders/online-orders-api'
+import { customersApi } from '@/services/api/offline/customers/customers-api'
 import type { OnlineProductsResBase } from '@/services/api/online/online-products/online-products-api-interfaces'
 import type { CustomersResBase } from '@/services/api/offline/customers/customers-api-interfaces'
 import type { SelectOption } from '@/interfaces/common'
@@ -69,16 +73,37 @@ const hasSuccess = computed(() => queue.value.some((i) => i.status === 'success'
 
 // ── 表單狀態 ──────────────────────────────────────────────────
 const form = reactive({
+  // 顧客
+  isNewCustomer: false,
   customerOption: undefined as SelectOption<CustomersResBase | undefined> | undefined,
+  newCustomerName: '',
+  newCustomerSource: '',
+  hasMessagedOfficial: false,
+  isDiscount: false,
+  isBoss: false,
+  newCustomerNote: '',
+  // 商品
+  isNewProduct: false,
   productOption: undefined as SelectOption<OnlineProductsResBase | null> | undefined,
-  quantity: null as number | null,
+  newProductName: '',
+  newProductPriceJpy: null as number | null,
+  newProductExchangeRate: null as number | null,
+  newProductPriceTwd: null as number | null,
+  // 訂單
+  quantity: 1 as number | null,
   officialOrderId: null as number | null,
-  domesticShipping: null as number | null,
-  internationalShipping: null as number | null,
   note: '',
 })
 
-const formErrors = ref({ customer: '', product: '', quantity: '' })
+const formErrors = ref({
+  customer: '',
+  newCustomerName: '',
+  newCustomerSource: '',
+  product: '',
+  newProductName: '',
+  quantity: '',
+})
+
 watch(() => form.customerOption, () => { formErrors.value.customer = '' })
 watch(() => form.productOption, () => { formErrors.value.product = '' })
 watch(() => form.quantity, () => { formErrors.value.quantity = '' })
@@ -87,42 +112,97 @@ function snapshotForm() {
   return { ...form }
 }
 
+function clickAddCustomer() {
+  form.isNewCustomer = true
+  form.customerOption = undefined
+}
+
+function clickAddProduct() {
+  form.isNewProduct = true
+  form.productOption = undefined
+}
+
+function clickBackToProduct() {
+  form.isNewProduct = false
+  loadProductOptions()
+}
+
 // ── 立即新增並送出 ────────────────────────────────────────────
 async function addAndSubmit() {
-  formErrors.value = { customer: '', product: '', quantity: '' }
+  formErrors.value = { customer: '', newCustomerName: '', newCustomerSource: '', product: '', newProductName: '', quantity: '' }
   let valid = true
 
-  if (!form.customerOption?.value) { formErrors.value.customer = '請選擇顧客'; valid = false }
-  if (!form.productOption?.value) { formErrors.value.product = '請選擇商品'; valid = false }
+  if (form.isNewCustomer) {
+    if (!form.newCustomerName.trim()) { formErrors.value.newCustomerName = '顧客名稱為必填'; valid = false }
+    if (!form.newCustomerSource.trim()) { formErrors.value.newCustomerSource = '來源為必填'; valid = false }
+  } else if (!form.customerOption?.value) {
+    formErrors.value.customer = '請選擇顧客'; valid = false
+  }
+
+  if (form.isNewProduct) {
+    if (!form.newProductName.trim()) { formErrors.value.newProductName = '商品名稱為必填'; valid = false }
+  } else if (!form.productOption?.value) {
+    formErrors.value.product = '請選擇商品'; valid = false
+  }
+
   if (form.quantity === null || form.quantity === undefined) {
     formErrors.value.quantity = '數量為必填'; valid = false
   } else if (form.quantity <= 0) {
     formErrors.value.quantity = '數量不得為 0'; valid = false
   }
+
   if (!valid) return
 
   const snap = snapshotForm()
+  const customerLabel = snap.isNewCustomer ? snap.newCustomerName : snap.customerOption!.name
+  const productLabel = snap.isNewProduct ? snap.newProductName : snap.productOption!.name
 
   const item: QueueItem = {
     id: `${Date.now()}-${Math.random()}`,
-    customerName: snap.customerOption!.name,
-    productName: snap.productOption!.name,
+    customerName: customerLabel,
+    productName: productLabel,
     quantity: snap.quantity!,
     status: 'submitting',
   }
   queue.value.unshift(item)
 
-  onlineOrdersApi
-    .postOnlineOrders({
+  const submit = async () => {
+    let customerId = snap.customerOption?.value?.id ?? 0
+    if (snap.isNewCustomer) {
+      const newCustomer = await customersApi.postCustomers({
+        name: snap.newCustomerName,
+        source: snap.newCustomerSource,
+        hasMessagedOfficial: snap.hasMessagedOfficial,
+        isDiscount: snap.isDiscount,
+        isBoss: snap.isBoss,
+        note: snap.newCustomerNote,
+      })
+      customerId = newCustomer.id
+    }
+
+    let productId = snap.productOption?.value?.id ?? 0
+    if (snap.isNewProduct) {
+      const newProduct = await onlineProductsApi.postOnlineProducts({
+        eventId: Number(props.eventId),
+        name: snap.newProductName,
+        priceJpy: snap.newProductPriceJpy ?? undefined,
+        exchangeRate: snap.newProductExchangeRate ?? undefined,
+        priceTwd: snap.newProductPriceTwd ?? undefined,
+      })
+      productId = newProduct.id
+    }
+
+    await onlineOrdersApi.postOnlineOrders({
       eventId: Number(props.eventId),
-      customerId: snap.customerOption!.value!.id,
-      productId: snap.productOption!.value!.id,
+      customerId,
+      productId,
       officialOrderId: snap.officialOrderId ?? undefined,
       quantity: snap.quantity!,
-      domesticShipping: snap.domesticShipping ?? undefined,
-      internationalShipping: snap.internationalShipping ?? undefined,
       note: snap.note || undefined,
     })
+  }
+
+  submit()
     .then(() => {
       const target = queue.value.find((i) => i.id === item.id)
       if (target) target.status = 'success'
@@ -137,7 +217,7 @@ async function addAndSubmit() {
 // ── 關閉處理 ──────────────────────────────────────────────────
 const isWaitingToClose = ref(false)
 const isShowCloseConfirm = ref(false)
-const isFormDirty = computed(() => !!form.customerOption || !!form.productOption)
+const isFormDirty = computed(() => !!form.customerOption || !!form.productOption || form.isNewCustomer || form.isNewProduct)
 
 function tryClose() {
   if (hasSubmitting.value) { isWaitingToClose.value = true; return }
@@ -170,40 +250,73 @@ const statusLabel: Record<QueueStatus, string> = {
       <!-- 表單區 -->
       <div class="form-area">
         <div class="form-row">
+          <!-- 顧客 -->
           <div class="field">
-            <customer-select-component
-              required
-              :defaultValue="form.customerOption"
-              @selectOption="form.customerOption = $event"
-            />
-            <span v-if="formErrors.customer" class="field-error">{{ formErrors.customer }}</span>
+            <template v-if="!form.isNewCustomer">
+              <customer-select-component
+                required
+                :defaultValue="form.customerOption"
+                @selectOption="form.customerOption = $event"
+              />
+              <span v-if="formErrors.customer" class="field-error">{{ formErrors.customer }}</span>
+              <div class="add-link" @click="clickAddCustomer">新增顧客</div>
+            </template>
+            <template v-else>
+              <div class="new-form">
+                <new-customer-form
+                  v-model:name="form.newCustomerName"
+                  v-model:source="form.newCustomerSource"
+                  v-model:hasMessagedOfficial="form.hasMessagedOfficial"
+                  v-model:isDiscount="form.isDiscount"
+                  v-model:isBoss="form.isBoss"
+                  v-model:note="form.newCustomerNote"
+                  :errors="{
+                    name: formErrors.newCustomerName || undefined,
+                    source: formErrors.newCustomerSource || undefined,
+                  }"
+                />
+                <div class="add-link" @click="form.isNewCustomer = false">返回選擇顧客</div>
+              </div>
+            </template>
           </div>
+
+          <!-- 商品 -->
           <div class="field">
-            <select-component
-              label="商品"
-              :optionList="productOptions"
-              :defaultValue="form.productOption ?? productOptions[0]"
-              :required="true"
-              @selectOption="form.productOption = $event"
-            />
-            <span v-if="formErrors.product" class="field-error">{{ formErrors.product }}</span>
+            <template v-if="!form.isNewProduct">
+              <select-component
+                label="商品"
+                :optionList="productOptions"
+                :defaultValue="form.productOption ?? productOptions[0]"
+                :required="true"
+                @selectOption="form.productOption = $event"
+              />
+              <span v-if="formErrors.product" class="field-error">{{ formErrors.product }}</span>
+              <div class="add-link" @click="clickAddProduct">找不到商品？新增商品</div>
+            </template>
+            <template v-else>
+              <div class="new-form">
+                <text-input
+                  label="商品名稱"
+                  v-model:value="form.newProductName"
+                  required
+                  :error-message="formErrors.newProductName"
+                />
+                <price-rate-input-component
+                  v-model:priceJpy="form.newProductPriceJpy"
+                  v-model:exchangeRate="form.newProductExchangeRate"
+                  v-model:priceTwd="form.newProductPriceTwd"
+                />
+                <div class="add-link" @click="clickBackToProduct">返回選擇商品</div>
+              </div>
+            </template>
           </div>
+
+          <!-- 訂單欄位 -->
           <div class="field">
-            <text-input
-              label="數量"
-              v-model:value="form.quantity"
-              required
-              :error-message="formErrors.quantity"
-            />
+            <text-input label="數量" v-model:value="form.quantity" required :error-message="formErrors.quantity" />
           </div>
           <div class="field">
             <text-input label="官方訂單 ID" v-model:value="form.officialOrderId" />
-          </div>
-          <div class="field">
-            <text-input label="日本境內運費" v-model:value="form.domesticShipping" />
-          </div>
-          <div class="field">
-            <text-input label="國際運費" v-model:value="form.internationalShipping" />
           </div>
           <div class="field">
             <text-input label="備註" v-model:value="form.note" />
@@ -238,17 +351,22 @@ const statusLabel: Record<QueueStatus, string> = {
       </div>
     </div>
 
-    <!-- 關閉確認提示 -->
-    <div v-if="isShowCloseConfirm" class="waiting-overlay">
-      <div class="close-confirm">
-        <p>您確定要關閉視窗嗎？</p>
-        <span>請確認是否尚有未送出的訂單</span>
-        <div class="close-confirm-btns">
-          <div class="btn" @click="confirmClose">確定關閉</div>
-          <div class="btn btn-outline" @click="isShowCloseConfirm = false">取消</div>
+    <!-- 關閉確認 -->
+    <modal-component
+      v-if="isShowCloseConfirm"
+      name="提醒"
+      width="360px"
+      :isShowCancelBtn="true"
+      @confirm="confirmClose"
+      @cancel="isShowCloseConfirm = false"
+    >
+      <template #content>
+        <div class="remind">
+          <p>您確定要關閉視窗嗎？</p>
+          <span>請確認是否尚有未送出的訂單</span>
         </div>
-      </div>
-    </div>
+      </template>
+    </modal-component>
 
     <!-- 等待關閉遮罩 -->
     <div v-if="isWaitingToClose" class="waiting-overlay">
@@ -266,7 +384,7 @@ const statusLabel: Record<QueueStatus, string> = {
   background: var(--color-surface);
   box-shadow: var(--shadow-lg);
   border-radius: var(--radius-lg);
-  width: 680px;
+  width: 720px;
   max-width: 92vw;
   max-height: 88vh;
   overflow: hidden;
@@ -316,6 +434,24 @@ const statusLabel: Record<QueueStatus, string> = {
       width: 100%;
     }
   }
+}
+
+.new-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+  padding: 0.65rem;
+  border-radius: 8px;
+}
+
+.add-link {
+  font-size: 0.82rem;
+  color: var(--color-primary);
+  cursor: pointer;
+  margin-top: 0.25rem;
+
+  &:hover { text-decoration: underline; }
 }
 
 .add-btn-row {
@@ -410,27 +546,18 @@ const statusLabel: Record<QueueStatus, string> = {
   border-radius: var(--radius-lg);
 }
 
-.close-confirm {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  text-align: center;
-
-  p { font-size: 1rem; font-weight: 600; color: #333; }
-  span { font-size: 0.82rem; color: var(--color-danger); }
-}
-
-.close-confirm-btns {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-}
-
 .waiting-text {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-primary);
+}
+
+.remind {
+  text-align: center;
+  padding: 1.5rem 0.5rem 0.5rem;
+
+  p { font-size: 1rem; color: #333; margin-bottom: 0.75rem; line-height: 1.7; }
+  span { font-size: 0.8rem; color: var(--color-danger); font-weight: 500; }
 }
 
 .field-error {
