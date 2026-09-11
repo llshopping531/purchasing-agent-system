@@ -19,8 +19,10 @@ export interface CheckoutRowData {
   eventList: CheckoutRowEvent[]
   total: string
   _totalAmount: number
-  /** 已匯款金額（台幣） */
-  remittedAmount: number
+  /** 剩餘金額 */
+  remainingAmount: number
+  /** 已匯款 */
+  remitted: boolean
   reconciled: boolean
   note: string
 }

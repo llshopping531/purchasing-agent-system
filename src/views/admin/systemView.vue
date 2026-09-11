@@ -4,11 +4,13 @@ import { PATH } from '@/constants/route.constant'
 import { useUiStore } from '@/stores/ui'
 import SidebarComponent from '@/components/SidebarComponent.vue'
 import IconCommunity from '@/components/icons/IconCommunity.vue'
+import IconUsers from '@/components/icons/IconUsers.vue'
 
 const uiStore = useUiStore()
 const router = useRouter()
 
 const threadsItem = { name: 'Threads 留言', path: PATH.systemThreads }
+const customerItem = { name: '顧客管理', path: PATH.systemCustomer }
 
 router.afterEach(() => {
   uiStore.closeSidebar()
@@ -23,6 +25,12 @@ router.afterEach(() => {
           <div class="nav-group-label">社群管理</div>
           <router-link :to="threadsItem.path" class="nav-item" :title="isCollapsed ? threadsItem.name : ''">
             <icon-community class="nav-icon" /><span class="nav-item-name">{{ threadsItem.name }}</span>
+          </router-link>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-label">會員管理</div>
+          <router-link :to="customerItem.path" class="nav-item" :title="isCollapsed ? customerItem.name : ''">
+            <icon-users class="nav-icon" /><span class="nav-item-name">{{ customerItem.name }}</span>
           </router-link>
         </div>
       </template>

@@ -2,8 +2,10 @@
 export interface SaveCheckoutRowReq {
   /** 顧客名稱 */
   customerName: string
-  /** 已匯款金額 */
-  remittedAmount: number
+  /** 剩餘金額 */
+  remainingAmount: number
+  /** 是否已匯款 */
+  remitted: boolean
   /** 是否已對帳 */
   reconciled: boolean
 }

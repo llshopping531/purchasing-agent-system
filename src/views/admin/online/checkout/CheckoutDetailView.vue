@@ -44,7 +44,8 @@ async function saveReconciliation() {
     await checkoutApi.saveReconciliation(bill.value.id, {
       rows: bill.value.rows.map((r) => ({
         customerName: r.customerName,
-        remittedAmount: r.remittedAmount,
+        remainingAmount: r.remainingAmount,
+        remitted: r.remitted,
         reconciled: r.reconciled,
       })),
     })

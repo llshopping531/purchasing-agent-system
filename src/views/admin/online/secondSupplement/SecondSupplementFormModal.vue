@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * 新增二補單彈窗
+ * 新增集運出貨單彈窗
  */
 import { ref } from 'vue'
 import { useForm } from 'vee-validate'
@@ -111,7 +111,7 @@ defineExpose({ open, edit })
 <template>
   <confirm-modal-component
     v-if="isVisible"
-    :name="isEditMode ? '編輯二補單' : '新增二補單'"
+    :name="isEditMode ? '編輯集運出貨單' : '新增集運出貨單'"
     :beforeConfirm="beforeConfirm"
     width="520px"
     @cancel="closeModal"

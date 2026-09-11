@@ -120,7 +120,8 @@ const previewRows = computed<CheckoutRowData[]>(() => {
       eventList,
       total: formatTwd(totalAmount),
       _totalAmount: totalAmount,
-      remittedAmount: 0,
+      remainingAmount: 0,
+      remitted: false,
       reconciled: false,
       note: '',
     } satisfies CheckoutRowData

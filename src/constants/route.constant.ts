@@ -60,6 +60,8 @@ export const PATH = {
   onlineOfficialOrder: `${BASE_ADMIN}/online/official-order`,
   /** 通販－國際運費計算 */
   onlineSecondSupplement: `${BASE_ADMIN}/online/second-supplement`,
+  /** 通販－國際運費計算新增 */
+  onlineSecondSupplementNew: `${BASE_ADMIN}/online/second-supplement/new`,
 
   /** 包貨清單專區 */
   packing: `${BASE_ADMIN}/packing`,
@@ -68,4 +70,6 @@ export const PATH = {
   system: `${BASE_ADMIN}/system`,
   /** 系統－Threads 留言查詢 */
   systemThreads: `${BASE_ADMIN}/system/threads`,
+  /** 系統－顧客管理 */
+  systemCustomer: `${BASE_ADMIN}/system/customer`,
 }

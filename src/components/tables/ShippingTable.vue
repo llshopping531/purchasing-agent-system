@@ -33,7 +33,7 @@ const columns: ColumnDef[] = [
   { key: 'eventName',                label: '團務名',       level: 'group' },
   { key: 'name',                     label: '品項',         level: 'item' },
   { key: 'quantity',                 label: '數量',         level: 'item',  align: 'center' },
-  { key: 'price',                    label: '商品剩餘金額', level: 'item',  align: 'center' },
+  { key: 'price',                    label: '商品未付金額', level: 'item',  align: 'center' },
   { key: 'japanShippingCost',        label: '日本運費',     level: 'item',  align: 'center' },
   { key: 'internationaShippingCost', label: '國際運費',     level: 'item',  align: 'center' },
   { key: 'shippingCostTotal',        label: '二補總和',     level: 'group', align: 'center' },

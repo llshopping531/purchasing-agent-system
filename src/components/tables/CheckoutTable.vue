@@ -18,19 +18,19 @@ const columns: ColumnDef[] = [
   { key: 'unitPrice', label: '單價(台幣)', level: 'item', align: 'center' },
   { key: 'itemTotal', label: '小計(台幣)', level: 'item', align: 'center' },
   { key: 'total', label: '合計', level: 'row', align: 'center' },
-  { key: 'remittedAmount', label: '已匯款', level: 'row', align: 'center' },
   { key: 'reconciled', label: '已對帳', level: 'row', align: 'center' },
+  { key: 'remainingAmount', label: '商品未付金額', level: 'row', align: 'center' },
   { key: 'note', label: '備註', level: 'row' },
 ]
 </script>
 
 <template>
   <merged-table-component :columns="columns" :rows="rows" groups-key="eventList" items-key="items">
-    <template #remittedAmount="{ row }">
+    <template #remainingAmount="{ row }">
       <text-input
         label=""
-        :value="row.remittedAmount === 0 ? '' : String(row.remittedAmount)"
-        @update:value="row.remittedAmount = Number($event) || 0"
+        :value="(row.remainingAmount ?? 0) === 0 ? '' : String(row.remainingAmount)"
+        @update:value="row.remainingAmount = Number($event) || 0"
       />
     </template>
     <template #reconciled="{ row }">
