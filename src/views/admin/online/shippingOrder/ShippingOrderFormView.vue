@@ -110,7 +110,7 @@ const previewRows = computed<ShippingOrderRowData[]>(() => {
     const totalAmount = orders.reduce((sum, o) => sum + o.subtotalTwd, 0)
 
     return {
-      customerName: orders[0].customerName,
+      customerName: orders[0]?.customerName ?? '',
       eventList,
       remainingAmount: totalAmount,
       domesticShipping: 0,

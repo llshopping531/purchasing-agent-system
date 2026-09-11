@@ -116,7 +116,7 @@ const previewRows = computed<CheckoutRowData[]>(() => {
     const totalAmount = orders.reduce((sum, o) => sum + o.subtotalTwd, 0)
 
     return {
-      customerName: orders[0].customerName,
+      customerName: orders[0]?.customerName ?? '',
       eventList,
       total: formatTwd(totalAmount),
       _totalAmount: totalAmount,

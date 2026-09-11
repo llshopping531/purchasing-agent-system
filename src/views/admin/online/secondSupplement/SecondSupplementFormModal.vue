@@ -112,6 +112,7 @@ defineExpose({ open, edit })
   <confirm-modal-component
     v-if="isVisible"
     :name="isEditMode ? '編輯集運出貨單' : '新增集運出貨單'"
+    confirmText="確認"
     :beforeConfirm="beforeConfirm"
     width="520px"
     @cancel="closeModal"
@@ -126,6 +127,7 @@ defineExpose({ open, edit })
           <select-component
             label="加入活動"
             :optionList="eventOptions"
+            :defaultValue="undefined"
             :multiple="true"
             :selectedValues="selectedEvents"
             @selectOptions="selectedEvents = $event; eventError = ''"

@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import EventSelectComponent from '@/components/inputs/selects/EventSelectComponent.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
-import CheckoutTable, { type CheckoutRow } from '@/components/tables/CheckoutTable.vue'
+import CheckoutTable, { type CheckoutRowData } from '@/components/tables/CheckoutTable.vue'
 import { packingListApi } from '@/services/api/offline/packing-list/packing-list-api'
 import type { EventsResBase } from '@/services/api/offline/events/events-api-interfaces'
 import type { SelectOption } from '@/interfaces/common'
@@ -10,7 +10,7 @@ import { formatTwd } from '@/utils/format'
 
 const selectedEvent = ref<EventsResBase | null>(null)
 const customerFilter = ref('')
-const tableData = ref<CheckoutRow[]>([])
+const tableData = ref<CheckoutRowData[]>([])
 const isLoading = ref(false)
 
 const filteredTableData = computed(() => {
@@ -56,11 +56,13 @@ async function onEventSelect(data: SelectOption<EventsResBase | null>) {
 
         const totalAmount = orders.reduce((sum, o) => sum + o.subtotalTwd, 0)
 
-        const row: CheckoutRow = {
+        const row: CheckoutRowData = {
           customerName: customer.name,
           eventList,
           total: formatTwd(totalAmount),
           _totalAmount: totalAmount,
+          remainingAmount: 0,
+          remitted: false,
           reconciled: false,
           note: '',
         }
