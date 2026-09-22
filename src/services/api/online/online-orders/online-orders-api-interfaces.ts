@@ -102,6 +102,10 @@ export interface OnlineOrdersResBase {
   quantity: number
   /** 小計 (TWD) */
   subtotalTwd: number
+  /** 已付款金額 (TWD) */
+  paidAmount: number | null
+  /** 收款狀態（尚未收款／收款中／收款完成／已收款，尚未完成，即時計算不落地） */
+  paymentStatus: string
   /** 日本境內運費 */
   domesticShipping: number
   /** 國際運費 */

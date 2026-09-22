@@ -29,6 +29,12 @@ const router = createRouter({
       component: () => import('../views/QueryView.vue'),
     },
     {
+      /** 公開結帳單查詢頁，透過 queryUuid 查詢結帳單明細，不需登入 */
+      path: '/checkout-query/:uuid',
+      name: 'checkoutQuery',
+      component: () => import('../views/CheckoutPublicView.vue'),
+    },
+    {
       /** 使用者前台，需登入才可進入子頁面 */
       path: '/user',
       name: 'user',

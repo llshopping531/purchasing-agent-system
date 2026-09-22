@@ -4,15 +4,14 @@
  */
 import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import CheckoutTable from '@/components/tables/CheckoutTable.vue'
-import { useCheckoutStore } from '@/stores/checkout'
+import CheckoutTable, { type CheckoutRowData } from '@/components/tables/CheckoutTable.vue'
 import { checkoutApi } from '@/services/api/online/checkout/checkout-api'
+import type { CheckoutBillRes, CheckoutRowRes } from '@/services/api/online/checkout/checkout-api-interfaces'
 import { formatTwd } from '@/utils/format'
 import { PATH } from '@/constants/route.constant'
 
 const router = useRouter()
 const route = useRoute()
-const checkoutStore = useCheckoutStore()
 
 const STATUS_STYLE: Record<string, { background: string; color: string }> = {
   '已收款': { background: '#dcfce7', color: '#16a34a' },
@@ -20,16 +19,44 @@ const STATUS_STYLE: Record<string, { background: string; color: string }> = {
   '未收款': { background: '#f1f5f9', color: '#94a3b8' },
 }
 
-const bill = computed(() => checkoutStore.getById(Number(route.params.id)))
-const grandTotal = computed(() =>
-  bill.value?.rows.reduce((sum, r) => sum + r._totalAmount, 0) ?? 0,
+const bill = ref<CheckoutBillRes | null>(null)
+const rows = ref<CheckoutRowData[]>([])
+const grandTotal = ref(0)
+
+const publicUrl = computed(() =>
+  bill.value ? `${window.location.origin}/checkout-query/${bill.value.queryUuid}` : '',
 )
+
+function openPublicPage() {
+  if (publicUrl.value) window.open(publicUrl.value, '_blank')
+}
+
+/** 將後端結帳單明細列轉為表格用資料（附上前端計算的數值合計） */
+function toRowData(row: CheckoutRowRes): CheckoutRowData {
+  const totalAmount = row.eventList.reduce(
+    (sum, ev) => sum + ev.items.reduce((s, item) => s + item.itemTotal, 0),
+    0,
+  )
+  return { ...row, _totalAmount: totalAmount }
+}
+
+async function loadBill() {
+  const data = await checkoutApi.getCheckoutBillById(Number(route.params.id))
+  bill.value = data
+  rows.value = (data.rows ?? []).map(toRowData)
+  grandTotal.value = rows.value.reduce((sum, r) => sum + r._totalAmount, 0)
+}
 
 const isSaving = ref(false)
 const isSaved = ref(false)
+const isCompletingPayment = ref(false)
 
-onMounted(() => {
-  if (!bill.value) router.replace(PATH.checkout)
+onMounted(async () => {
+  try {
+    await loadBill()
+  } catch {
+    router.replace(PATH.checkout)
+  }
 })
 
 function goEdit() {
@@ -42,17 +69,30 @@ async function saveReconciliation() {
   isSaved.value = false
   try {
     await checkoutApi.saveReconciliation(bill.value.id, {
-      rows: bill.value.rows.map((r) => ({
+      rows: rows.value.map((r) => ({
         customerName: r.customerName,
         remainingAmount: r.remainingAmount,
         remitted: r.remitted,
         reconciled: r.reconciled,
+        note: r.note,
       })),
     })
+    await loadBill()
     isSaved.value = true
     setTimeout(() => { isSaved.value = false }, 2000)
   } finally {
     isSaving.value = false
+  }
+}
+
+async function completePayment() {
+  if (!bill.value) return
+  isCompletingPayment.value = true
+  try {
+    await checkoutApi.completeCheckoutPayment(bill.value.id)
+    router.push(PATH.checkout)
+  } finally {
+    isCompletingPayment.value = false
   }
 }
 </script>
@@ -68,7 +108,8 @@ async function saveReconciliation() {
         <span class="created-at">截止 {{ bill.deadline }}</span>
         <span class="status-badge" :style="STATUS_STYLE[bill.status]">{{ bill.status }}</span>
       </div>
-      <button class="edit-btn" @click="goEdit">編輯</button>
+      <button class="public-btn" @click="openPublicPage">開啟公開頁面</button>
+      <button v-if="bill.status !== '已收款'" class="edit-btn" @click="goEdit">編輯</button>
     </div>
 
     <!-- 活動標籤 -->
@@ -81,7 +122,7 @@ async function saveReconciliation() {
     <!-- 摘要 -->
     <div class="summary-row">
       <div class="summary-item">
-        <span class="summary-num">{{ bill.rows.length }}</span>
+        <span class="summary-num">{{ rows.length }}</span>
         <span class="summary-desc">位顧客</span>
       </div>
       <div class="summary-sep">·</div>
@@ -94,11 +135,18 @@ async function saveReconciliation() {
     <!-- 結帳單表格 -->
     <div class="section-card">
       <div class="card-label">結帳明細</div>
-      <checkout-table :rows="bill.rows" />
+      <checkout-table :rows="rows" :interactive="bill.status !== '已收款'" />
     </div>
 
     <!-- 底部操作 -->
-    <div class="form-footer">
+    <div v-if="bill.status !== '已收款'" class="form-footer">
+      <button
+        class="complete-payment-btn"
+        :disabled="isCompletingPayment"
+        @click="completePayment"
+      >
+        {{ isCompletingPayment ? '處理中…' : '完成收款' }}
+      </button>
       <button
         class="confirm-btn"
         :class="{ 'confirm-btn--saved': isSaved }"
@@ -175,6 +223,24 @@ async function saveReconciliation() {
   }
 }
 
+.public-btn {
+  padding: 0.35rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
 .edit-btn {
   padding: 0.35rem 1rem;
   font-size: 0.82rem;
@@ -221,6 +287,28 @@ async function saveReconciliation() {
 
   &--saved {
     background: #16a34a;
+  }
+}
+
+.complete-payment-btn {
+  padding: 0.35rem 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1.5px solid var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  color: var(--color-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, opacity 0.15s;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
   }
 }
 

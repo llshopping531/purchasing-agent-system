@@ -58,12 +58,20 @@ const orderHeaderRow: HeaderRow[] = [
   { name: '商品名稱', value: 'productName', sort: 0 },
   { name: '數量', value: 'quantity', sort: 0, width: '70px' },
   { name: '小計（TWD）', value: 'subtotalTwd', sort: 0, width: '110px' },
+  { name: '收款狀態', value: 'paymentStatus', sort: 0, width: '110px' },
   { name: '重量（g）', value: 'productWeight', sort: 0, width: '90px' },
   { name: '境內運費', value: 'domesticShipping', sort: 0, width: '100px' },
   { name: '國際運費', value: 'internationalShipping', sort: 0, width: '100px' },
   { name: '備註', value: 'note', sort: 0 },
   { name: '官方訂單', value: 'officialOrderName', sort: 0 },
 ]
+
+const PAYMENT_STATUS_STYLE: Record<string, { background: string; color: string }> = {
+  '尚未收款': { background: '#f1f5f9', color: '#94a3b8' },
+  '收款中': { background: '#fef9c3', color: '#a16207' },
+  '收款完成': { background: '#dcfce7', color: '#16a34a' },
+  '已收款，尚未完成': { background: '#fee2e2', color: '#dc2626' },
+}
 
 onMounted(async () => {
   events.value = await menuStore.fetchOnlineEventsAll()
@@ -219,6 +227,9 @@ async function openStats() {
       >
         <template #col-subtotalTwd="{ row }">
           {{ formatTwd(row.subtotalTwd) }}
+        </template>
+        <template #col-paymentStatus="{ row }">
+          <span class="status-badge" :style="PAYMENT_STATUS_STYLE[row.paymentStatus]">{{ row.paymentStatus }}</span>
         </template>
         <template #col-domesticShipping="{ row }">
           {{ formatTwd(row.domesticShipping) }}

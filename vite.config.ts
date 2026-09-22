@@ -20,10 +20,10 @@ export default defineConfig({
     proxy: {
       // 當請求 /api 開頭的路徑時，轉發到後端
       '/api': {
-        target: 'http://203.161.58.130:3000', // 後端 API
+        target: 'http://localhost:3000', // 後端 API
         changeOrigin: true,
         headers: {
-          Origin: 'http://203.161.58.130:3000',
+          Origin: 'http://localhost:3000',
         },
       },
     },

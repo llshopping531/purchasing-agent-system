@@ -2,37 +2,42 @@
 /**
  * 通販結帳單 - 新增／編輯頁
  *
- * 上半：搜尋通販活動並勾選，勾選後即時載入該活動訂單
- * 下半：依勾選活動聚合訂單，以 CheckoutTable 顯示預覽
+ * 新增：搜尋通販活動並勾選，勾選後即時載入該活動訂單以預覽（實際明細由後端於建立時依活動即時彙整）
+ * 編輯：僅能修改名稱／截止日／狀態，活動範圍建立後無法變更，改為唯讀顯示既有明細
  */
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import CheckoutTable from '@/components/tables/CheckoutTable.vue'
+import CheckoutTable, { type CheckoutRowData } from '@/components/tables/CheckoutTable.vue'
 import TextInput from '@/components/inputs/TextInput.vue'
 import DateInput from '@/components/inputs/DateInput.vue'
-import { useCheckoutStore, type CheckoutRowData, type CheckoutBillStatus } from '@/stores/checkout'
 import CheckoutStatusSelectComponent from '@/components/inputs/selects/CheckoutStatusSelectComponent.vue'
 import { useMenuStore } from '@/stores/menu'
+import { checkoutApi } from '@/services/api/online/checkout/checkout-api'
 import { onlineOrdersApi } from '@/services/api/online/online-orders/online-orders-api'
 import type { OnlineEventsResBase } from '@/services/api/online/online-events/online-events-api-interfaces'
 import type { QueryOnlineOrdersContent } from '@/services/api/online/online-orders/online-orders-api-interfaces'
+import type { CheckoutBillStatus, CheckoutRowRes } from '@/services/api/online/checkout/checkout-api-interfaces'
 import { formatTwd } from '@/utils/format'
 import { PATH } from '@/constants/route.constant'
 
 const router = useRouter()
 const route = useRoute()
-const checkoutStore = useCheckoutStore()
 const menuStore = useMenuStore()
 
 const isEditMode = computed(() => route.name === 'OnlineCheckoutEdit')
 const editId = computed(() => Number(route.params.id))
+const isSubmitting = ref(false)
 
 // ── 基本資訊 ─────────────────────────────────────────────────
 const billName = ref('')
 const deadline = ref('')
 const status = ref<CheckoutBillStatus>('未收款')
 
-// ── 活動列表 ─────────────────────────────────────────────────
+// ── 編輯模式：既有活動與明細（唯讀，建立後無法變更） ──────────
+const existingEventNames = ref<string[]>([])
+const existingRows = ref<CheckoutRowData[]>([])
+
+// ── 新增模式：活動列表 ────────────────────────────────────────
 const allEvents = ref<OnlineEventsResBase[]>([])
 const searchKeyword = ref('')
 const selectedEventIds = ref<number[]>([])
@@ -76,7 +81,16 @@ function isLoading(id: number) {
   return loadingEventIds.value.has(id)
 }
 
-// ── 預覽資料（依勾選活動聚合訂單）────────────────────────────
+/** 將後端結帳單明細列轉為表格用資料（附上前端計算的數值合計） */
+function toRowData(row: CheckoutRowRes): CheckoutRowData {
+  const totalAmount = row.eventList.reduce(
+    (sum, ev) => sum + ev.items.reduce((s, item) => s + item.itemTotal, 0),
+    0,
+  )
+  return { ...row, _totalAmount: totalAmount }
+}
+
+// ── 預覽資料（新增模式：依勾選活動聚合訂單）──────────────────
 const previewRows = computed<CheckoutRowData[]>(() => {
   // 收集所有已選活動的訂單
   const allOrders: (QueryOnlineOrdersContent & { _eventName: string })[] = []
@@ -128,58 +142,61 @@ const previewRows = computed<CheckoutRowData[]>(() => {
   })
 })
 
-const grandTotal = computed(() =>
+const previewGrandTotal = computed(() =>
   previewRows.value.reduce((sum, r) => sum + r._totalAmount, 0),
 )
 
-const selectedEventNames = computed(() =>
-  selectedEventIds.value
-    .map((id) => allEvents.value.find((e) => e.id === id)?.name ?? '')
-    .filter(Boolean),
+const existingGrandTotal = computed(() =>
+  existingRows.value.reduce((sum, r) => sum + r._totalAmount, 0),
 )
 
-// ── 掛載：載入活動列表，編輯模式還原 ──────────────────────────
+// ── 掛載：新增模式載入活動列表；編輯模式載入既有結帳單 ────────
 onMounted(async () => {
-  const events = await menuStore.fetchOnlineEventsAll()
-  allEvents.value = events
-
   if (isEditMode.value) {
-    const bill = checkoutStore.getById(editId.value)
-    if (!bill) {
+    try {
+      const bill = await checkoutApi.getCheckoutBillById(editId.value)
+      if (bill.status === '已收款') {
+        // 已收款結帳單不可編輯，只能檢視
+        router.replace(`${PATH.checkout}/${editId.value}`)
+        return
+      }
+      billName.value = bill.name
+      deadline.value = bill.deadline
+      status.value = bill.status
+      existingEventNames.value = bill.eventNames
+      existingRows.value = (bill.rows ?? []).map(toRowData)
+    } catch {
       router.replace(PATH.checkout)
-      return
     }
-    // 還原已選活動並重新載入訂單
-    billName.value = bill.name
-    deadline.value = bill.deadline
-    status.value = bill.status
-    selectedEventIds.value = [...bill.eventIds]
-    await Promise.all(bill.eventIds.map(loadEventOrders))
+  } else {
+    allEvents.value = await menuStore.fetchOnlineEventsAll()
   }
 })
 
 // ── 存檔 ─────────────────────────────────────────────────────
-function submit() {
-  if (!billName.value.trim() || !deadline.value || selectedEventIds.value.length === 0) return
+async function submit() {
+  if (!billName.value.trim() || !deadline.value) return
+  if (!isEditMode.value && selectedEventIds.value.length === 0) return
 
-  const data = {
-    name: billName.value.trim(),
-    deadline: deadline.value,
-    status: status.value,
-    eventIds: [...selectedEventIds.value],
-    eventNames: selectedEventNames.value,
-    rows: previewRows.value,
-    total: grandTotal.value,
-    createdAt: new Date().toLocaleString('zh-TW'),
+  isSubmitting.value = true
+  try {
+    if (isEditMode.value) {
+      await checkoutApi.updateCheckoutBill(editId.value, {
+        name: billName.value.trim(),
+        deadline: deadline.value,
+        status: status.value,
+      })
+    } else {
+      await checkoutApi.createCheckoutBill({
+        name: billName.value.trim(),
+        deadline: deadline.value,
+        eventIds: [...selectedEventIds.value],
+      })
+    }
+    router.push(PATH.checkout)
+  } finally {
+    isSubmitting.value = false
   }
-
-  if (isEditMode.value) {
-    checkoutStore.update({ id: editId.value, ...data })
-  } else {
-    checkoutStore.create(data)
-  }
-
-  router.push(PATH.checkout)
 }
 
 function cancel() {
@@ -201,14 +218,24 @@ function cancel() {
       <text-input label="結帳單名稱" v-model:value="billName" placeholder="輸入名稱" required />
       <date-input label="截止日" v-model:value="deadline" required />
       <checkout-status-select-component
+        v-if="isEditMode"
         :defaultValue="status"
         required
         @selectOption="status = $event.value"
       />
     </div>
 
-    <!-- ── 上半：活動選取 ───────────────────────────────────── -->
-    <div class="section-card">
+    <!-- ── 編輯模式：既有活動（唯讀） ─────────────────────────── -->
+    <div class="section-card" v-if="isEditMode">
+      <div class="section-title">包含通販活動</div>
+      <div class="readonly-note">結帳單建立後無法變更活動範圍，如需調整請重新建立</div>
+      <div class="event-chips">
+        <span v-for="name in existingEventNames" :key="name" class="event-chip">{{ name }}</span>
+      </div>
+    </div>
+
+    <!-- ── 新增模式：活動選取 ───────────────────────────────── -->
+    <div class="section-card" v-else>
       <div class="section-title">選取通販活動</div>
 
       <!-- 搜尋框 -->
@@ -244,25 +271,34 @@ function cancel() {
       <div v-else class="event-empty">載入中…</div>
     </div>
 
-    <!-- ── 下半：預覽 ────────────────────────────────────────── -->
+    <!-- ── 預覽 ────────────────────────────────────────────── -->
     <div class="section-card">
       <div class="preview-header">
-        <span class="section-title">結帳單預覽</span>
-        <span v-if="previewRows.length > 0" class="preview-meta">
-          {{ previewRows.length }} 位顧客・合計 {{ formatTwd(grandTotal) }}
+        <span class="section-title">{{ isEditMode ? '結帳明細' : '結帳單預覽' }}</span>
+        <span v-if="isEditMode && existingRows.length > 0" class="preview-meta">
+          {{ existingRows.length }} 位顧客・合計 {{ formatTwd(existingGrandTotal) }}
+        </span>
+        <span v-else-if="!isEditMode && previewRows.length > 0" class="preview-meta">
+          {{ previewRows.length }} 位顧客・合計 {{ formatTwd(previewGrandTotal) }}
         </span>
       </div>
 
-      <div v-if="selectedEventIds.length === 0" class="preview-empty">
-        請先在上方勾選活動
-      </div>
-      <div v-else-if="loadingEventIds.size > 0" class="preview-empty">
-        載入訂單中…
-      </div>
-      <div v-else-if="previewRows.length === 0" class="preview-empty">
-        勾選的活動尚無訂單
-      </div>
-      <checkout-table v-else :rows="previewRows" />
+      <template v-if="isEditMode">
+        <div v-if="existingRows.length === 0" class="preview-empty">尚無明細資料</div>
+        <checkout-table v-else :rows="existingRows" :show-reconciliation="false" />
+      </template>
+      <template v-else>
+        <div v-if="selectedEventIds.length === 0" class="preview-empty">
+          請先在上方勾選活動
+        </div>
+        <div v-else-if="loadingEventIds.size > 0" class="preview-empty">
+          載入訂單中…
+        </div>
+        <div v-else-if="previewRows.length === 0" class="preview-empty">
+          勾選的活動尚無訂單
+        </div>
+        <checkout-table v-else :rows="previewRows" :show-reconciliation="false" />
+      </template>
     </div>
 
     <!-- 底部操作 -->
@@ -271,9 +307,14 @@ function cancel() {
       <button
         class="btn-submit"
         @click="submit"
-        :disabled="!billName.trim() || !deadline || selectedEventIds.length === 0 || previewRows.length === 0"
+        :disabled="
+          isSubmitting ||
+          !billName.trim() ||
+          !deadline ||
+          (!isEditMode && (selectedEventIds.length === 0 || previewRows.length === 0))
+        "
       >
-        {{ isEditMode ? '儲存' : '建立結帳單' }}
+        {{ isSubmitting ? '儲存中…' : isEditMode ? '儲存' : '建立結帳單' }}
       </button>
     </div>
 
@@ -335,6 +376,28 @@ function cancel() {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--color-text);
+}
+
+.readonly-note {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+/* ── 活動標籤（編輯模式唯讀） ── */
+.event-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.event-chip {
+  padding: 0.2rem 0.65rem;
+  border-radius: 99px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  color: var(--color-primary);
 }
 
 /* ── 搜尋框 ── */

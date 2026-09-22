@@ -69,7 +69,11 @@ function totalItemCount(row: TRow): number {
       <tbody v-if="rows.length > 0">
         <template v-for="(row, rowIndex) in rows" :key="rowIndex">
           <template v-for="(group, groupIndex) in getGroups(row)" :key="groupIndex">
-            <tr v-for="(item, itemIndex) in getItems(group)" :key="itemIndex">
+            <tr
+              v-for="(item, itemIndex) in getItems(group)"
+              :key="itemIndex"
+              :class="{ 'row-alt': rowIndex % 2 === 1 }"
+            >
               <template v-for="col in columns" :key="col.key">
 
                 <!-- row 層級：只在 groupIndex=0 && itemIndex=0 時渲染，rowspan 為所有品項總數 -->
@@ -166,6 +170,10 @@ function totalItemCount(row: TRow): number {
         padding: 2rem;
         font-size: 0.85rem;
       }
+    }
+
+    tr.row-alt td {
+      background-color: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
     }
   }
 }
